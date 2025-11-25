@@ -1,11 +1,27 @@
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from "recharts";
-import { fuelData } from "@/lib/mockData";
 
-export function FuelAnalyzer() {
+interface FuelData {
+  subject: string;
+  A: number;
+  fullMark: number;
+}
+
+interface FuelAnalyzerProps {
+  data?: FuelData[];
+}
+
+export function FuelAnalyzer({ data = [] }: FuelAnalyzerProps) {
+  const chartData = data.length > 0 ? data : [
+    { subject: 'Protein', A: 0, fullMark: 200 },
+    { subject: 'Carbs', A: 0, fullMark: 300 },
+    { subject: 'Fats', A: 0, fullMark: 100 },
+    { subject: 'Calories', A: 0, fullMark: 3000 },
+  ];
+
   return (
     <div className="h-full w-full min-h-[200px]">
       <ResponsiveContainer width="100%" height="100%">
-        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={fuelData}>
+        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
           <PolarGrid stroke="rgba(255,255,255,0.1)" />
           <PolarAngleAxis 
             dataKey="subject" 

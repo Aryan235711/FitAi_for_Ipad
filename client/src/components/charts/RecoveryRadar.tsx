@@ -1,13 +1,18 @@
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, Cell } from "recharts";
-import { mockData } from "@/lib/mockData";
 
-export function RecoveryRadar() {
-  const data = mockData.slice(-14).map(d => ({
-    x: d.workoutIntensity, // Workout Intensity
-    y: d.sleepScore,       // Sleep Quality
-    z: d.rhr,              // RHR (Bubble Size)
-    ...d
-  }));
+interface RecoveryDataPoint {
+  x: number;
+  y: number;
+  z: number;
+  name: string;
+}
+
+interface RecoveryRadarProps {
+  data?: RecoveryDataPoint[];
+}
+
+export function RecoveryRadar({ data = [] }: RecoveryRadarProps) {
+  const chartData = data.length > 0 ? data : [{ x: 0, y: 0, z: 60, name: 'No data' }];
 
   return (
     <div className="h-full w-full min-h-[200px]">
@@ -39,8 +44,8 @@ export function RecoveryRadar() {
             contentStyle={{ backgroundColor: '#0a0a0f', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
             itemStyle={{ color: '#fff' }}
           />
-          <Scatter name="Recovery" data={data} fill="#8884d8">
-            {data.map((entry, index) => (
+          <Scatter name="Recovery" data={chartData} fill="#8884d8">
+            {chartData.map((entry, index) => (
               <Cell 
                 key={`cell-${index}`} 
                 fill={entry.z > 60 ? 'var(--color-accent)' : 'var(--color-primary)'} 

@@ -1,9 +1,18 @@
-import { mockData } from "@/lib/mockData";
 import { cn } from "@/lib/utils";
 
-export function MindShield() {
-  // Create a 4x7 grid (28 days)
-  const data = mockData.slice(-28).reverse();
+interface MindShieldDataPoint {
+  day: string;
+  week: string;
+  value: number;
+}
+
+interface MindShieldProps {
+  data?: MindShieldDataPoint[];
+}
+
+export function MindShield({ data = [] }: MindShieldProps) {
+  // Use provided data or fallback to empty array  
+  const heatmapData = data.length > 0 ? data : Array(28).fill({ day: 'Mon', week: 'W1', value: 0 });
 
   const getColor = (score: number) => {
     if (score >= 90) return "bg-primary";
@@ -15,7 +24,7 @@ export function MindShield() {
   return (
     <div className="h-full w-full flex flex-col justify-center">
       <div className="grid grid-cols-7 gap-2 w-full">
-        {data.map((day, i) => (
+        {heatmapData.map((item, i) => (
           <div 
             key={i} 
             className="group relative aspect-square rounded-md overflow-hidden"
@@ -23,11 +32,11 @@ export function MindShield() {
             <div 
               className={cn(
                 "w-full h-full transition-all duration-300 group-hover:scale-110",
-                getColor(day.sleepScore)
+                getColor(item.value)
               )} 
             />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-               <span className="text-[10px] font-bold text-black">{day.sleepScore}</span>
+               <span className="text-[10px] font-bold text-black">{item.value}</span>
             </div>
           </div>
         ))}

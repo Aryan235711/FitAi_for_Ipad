@@ -1,10 +1,20 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Zap, Battery, Brain, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useFitnessData } from "@/hooks/useFitnessData";
+import { toast } from "sonner";
+import { useLocation } from "wouter";
+import {
+  transformRecoveryRadarData,
+  transformNerveCheckData,
+  transformFuelAnalyzerData,
+  transformLoadBalancerData,
+  transformMindShieldData,
+  calculateSyncIndexScores,
+} from "@/lib/chartData";
 
 // Lazy Load Heavy Chart Components
 const RecoveryRadar = React.lazy(() => import("@/components/charts/RecoveryRadar").then(module => ({ default: module.RecoveryRadar })));
@@ -24,6 +34,7 @@ const LoadingChart = () => (
 
 export default function FitnessDashboard() {
   const { user } = useAuth();
+  const [location] = useLocation();
   const { 
     metrics, 
     latestMetric, 
@@ -35,6 +46,26 @@ export default function FitnessDashboard() {
   } = useFitnessData();
 
   const userName = user?.firstName || user?.email?.split('@')[0] || 'User';
+
+  // Transform data for charts
+  const recoveryRadarData = transformRecoveryRadarData(metrics);
+  const nerveCheckData = transformNerveCheckData(metrics);
+  const fuelAnalyzerData = transformFuelAnalyzerData(metrics);
+  const loadBalancerData = transformLoadBalancerData(metrics);
+  const mindShieldData = transformMindShieldData(metrics);
+  const syncIndexScores = calculateSyncIndexScores(metrics);
+
+  // Handle Google Fit callback notifications
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('connected') === 'true') {
+      toast.success('Google Fit connected successfully!');
+      window.history.replaceState({}, '', '/');
+    } else if (params.get('error') === 'connection_failed') {
+      toast.error('Failed to connect Google Fit. Please try again.');
+      window.history.replaceState({}, '', '/');
+    }
+  }, [location]);
 
   return (
     <DashboardLayout>
@@ -69,7 +100,7 @@ export default function FitnessDashboard() {
             subtitle="Composite Physiological Score"
         >
             <Suspense fallback={<LoadingChart />}>
-                <SyncIndex />
+                <SyncIndex hrv={syncIndexScores.hrv} sleep={syncIndexScores.sleep} recovery={syncIndexScores.recovery} />
             </Suspense>
         </GlassCard>
 
@@ -120,7 +151,7 @@ export default function FitnessDashboard() {
             delay={0.2}
         >
             <Suspense fallback={<LoadingChart />}>
-                <RecoveryRadar />
+                <RecoveryRadar data={recoveryRadarData} />
             </Suspense>
         </GlassCard>
 
@@ -132,7 +163,7 @@ export default function FitnessDashboard() {
             delay={0.3}
         >
             <Suspense fallback={<LoadingChart />}>
-                <NerveCheck />
+                <NerveCheck data={nerveCheckData} />
             </Suspense>
         </GlassCard>
 
@@ -144,7 +175,7 @@ export default function FitnessDashboard() {
             delay={0.4}
         >
             <Suspense fallback={<LoadingChart />}>
-                <FuelAnalyzer />
+                <FuelAnalyzer data={fuelAnalyzerData} />
             </Suspense>
         </GlassCard>
 
@@ -156,7 +187,7 @@ export default function FitnessDashboard() {
             delay={0.5}
         >
              <Suspense fallback={<LoadingChart />}>
-                <MindShield />
+                <MindShield data={mindShieldData} />
             </Suspense>
         </GlassCard>
         
@@ -168,7 +199,7 @@ export default function FitnessDashboard() {
             delay={0.55}
         >
              <Suspense fallback={<LoadingChart />}>
-                <LoadBalancer />
+                <LoadBalancer data={loadBalancerData} />
             </Suspense>
         </GlassCard>
 

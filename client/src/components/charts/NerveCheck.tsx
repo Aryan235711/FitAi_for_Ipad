@@ -1,14 +1,25 @@
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
-import { mockData } from "@/lib/mockData";
 import { format, parseISO } from "date-fns";
 
-export function NerveCheck() {
-  const data = mockData.slice(-14);
+interface NerveCheckDataPoint {
+  date: string;
+  hrv: number;
+  sleepConsistency: number;
+}
+
+interface NerveCheckProps {
+  data?: NerveCheckDataPoint[];
+}
+
+export function NerveCheck({ data = [] }: NerveCheckProps) {
+  const chartData = data.length > 0 ? data : [
+    { date: new Date().toISOString(), hrv: 0, sleepConsistency: 0 }
+  ];
 
   return (
     <div className="h-full w-full min-h-[200px]">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+        <LineChart data={chartData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="colorHrv" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="var(--color-secondary)" stopOpacity={0.8}/>
