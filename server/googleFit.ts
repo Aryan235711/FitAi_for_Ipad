@@ -211,6 +211,9 @@ export function transformGoogleFitData(apiData: any, userId: string) {
       activityMinutes: 0,
     };
     
+    // Track HR readings for HRV calculation
+    const hrReadings: number[] = [];
+    
     // Extract data from buckets
     bucket.dataset?.forEach((dataset: any) => {
       dataset.point?.forEach((point: any) => {
@@ -232,9 +235,18 @@ export function transformGoogleFitData(apiData: any, userId: string) {
             break;
           case 'com.google.heart_rate.bpm':
           case 'com.google.heart_rate.summary':
-            // Google Fit heart rate uses mapVal with min/max/avg
-            // Extract minimum heart rate as RHR approximation
-            if (point.value[0]?.mapVal) {
+            // Zepp/Amazfit and third-party apps use fpVal directly
+            // Google's own data uses mapVal with min/max/avg
+            if (point.value[0]?.fpVal) {
+              // Direct fpVal (Zepp/Amazfit format) - collect all HR readings
+              const currentHr = Math.round(point.value[0].fpVal);
+              if (currentHr > 0 && currentHr < 200) { // Sanity check
+                hrReadings.push(currentHr);
+                // Track minimum (for RHR) across all readings for the day
+                metric.rhr = metric.rhr ? Math.min(metric.rhr, currentHr) : currentHr;
+              }
+            } else if (point.value[0]?.mapVal) {
+              // mapVal format (Google's aggregate data)
               const minHrEntry = point.value[0].mapVal.find((m: any) => m.key === 'min');
               const avgHrEntry = point.value[0].mapVal.find((m: any) => m.key === 'average');
               
@@ -245,13 +257,8 @@ export function transformGoogleFitData(apiData: any, userId: string) {
                 ? Math.round(avgHrEntry.value.fpVal)
                 : 0;
               
-              if (currentHr > 0) {
-                metric.rhr = metric.rhr ? Math.min(metric.rhr, currentHr) : currentHr;
-              }
-            } else if (point.value[0]?.fpVal) {
-              // Fallback for direct fpVal if available
-              const currentHr = Math.round(point.value[0].fpVal);
-              if (currentHr > 0) {
+              if (currentHr > 0 && currentHr < 200) {
+                hrReadings.push(currentHr);
                 metric.rhr = metric.rhr ? Math.min(metric.rhr, currentHr) : currentHr;
               }
             }
@@ -301,8 +308,17 @@ export function transformGoogleFitData(apiData: any, userId: string) {
       metric.workoutIntensity = Math.round(Math.max(stepIntensity, calorieIntensity));
     }
     
-    // Default HRV if not available (estimate from RHR)
-    if (!metric.hrv && metric.rhr) {
+    // Calculate HRV from heart rate variability (standard deviation of HR readings)
+    if (hrReadings.length > 10) {
+      const mean = hrReadings.reduce((a, b) => a + b, 0) / hrReadings.length;
+      const variance = hrReadings.reduce((sum, hr) => sum + Math.pow(hr - mean, 2), 0) / hrReadings.length;
+      const stdDev = Math.sqrt(variance);
+      
+      // Convert stdDev to a reasonable HRV metric (higher variability = healthier)
+      // Typical HRV ranges from 20-100ms
+      metric.hrv = Math.round(Math.min(100, Math.max(20, stdDev * 3)));
+    } else if (!metric.hrv && metric.rhr) {
+      // Fallback: estimate from RHR if we don't have enough readings
       metric.hrv = Math.max(20, Math.min(80, 60 - (metric.rhr - 60)));
     }
     
