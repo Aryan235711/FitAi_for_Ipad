@@ -283,6 +283,7 @@ export default function FitnessDashboard() {
             className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-gradient-to-br from-white/[0.08] to-transparent" 
             title="The Sync Index" 
             subtitle="Composite Physiological Score"
+            data-testid="card-sync-index"
         >
             <Suspense fallback={<LoadingChart />}>
                 <SyncIndex hrv={syncIndexScores.hrv} sleep={syncIndexScores.sleep} recovery={syncIndexScores.recovery} />
@@ -398,6 +399,7 @@ export default function FitnessDashboard() {
             title="Recovery Radar" 
             subtitle="Workout Intensity vs Sleep vs RHR"
             delay={0.2}
+            data-testid="card-recovery-radar"
         >
             <Suspense fallback={<LoadingChart />}>
                 <RecoveryRadar data={recoveryRadarData} />
@@ -410,6 +412,7 @@ export default function FitnessDashboard() {
             title="Nerve Check" 
             subtitle="HRV Trends & Sleep Consistency"
             delay={0.3}
+            data-testid="card-nerve-check"
         >
             <Suspense fallback={<LoadingChart />}>
                 <NerveCheck data={nerveCheckData} />
@@ -422,6 +425,7 @@ export default function FitnessDashboard() {
             title="Wellness Triangle" 
             subtitle="Holistic Health Dimensions"
             delay={0.4}
+            data-testid="card-wellness-triangle"
         >
             <Suspense fallback={<LoadingChart />}>
                 <WellnessTriangle data={wellnessTriangleData} />
@@ -434,6 +438,7 @@ export default function FitnessDashboard() {
             title="MindShield" 
             subtitle="Sleep Consistency Map"
             delay={0.5}
+            data-testid="card-mindshield"
         >
              <Suspense fallback={<LoadingChart />}>
                 <MindShield data={mindShieldData} />
@@ -446,6 +451,7 @@ export default function FitnessDashboard() {
             title="Load Balancer" 
             subtitle="Strain vs Recovery Trends"
             delay={0.55}
+            data-testid="card-load-balancer"
         >
              <Suspense fallback={<LoadingChart />}>
                 <LoadBalancer data={loadBalancerData} />
@@ -456,6 +462,7 @@ export default function FitnessDashboard() {
          <GlassCard 
             className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20" 
             delay={0.6}
+            data-testid="card-ai-insights"
         >
             <div className="flex items-start gap-6 h-full">
                 <motion.div 
@@ -512,6 +519,7 @@ export default function FitnessDashboard() {
         <GlassCard 
             className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-gradient-to-r from-black to-primary/5" 
             delay={0.7}
+            data-testid="card-vitality-orb"
         >
              <Suspense fallback={<LoadingChart />}>
                 <div className="flex items-center justify-between h-full pr-8">

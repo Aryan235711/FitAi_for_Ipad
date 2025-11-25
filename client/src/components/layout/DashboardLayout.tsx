@@ -44,8 +44,10 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <button 
           onClick={handleSync}
           disabled={isSyncing}
-          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-primary/50 transition-all duration-500 disabled:opacity-50"
+          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-primary/50 transition-all duration-500 disabled:opacity-50 min-h-[44px] min-w-[44px]"
           data-testid="button-sync-fit"
+          aria-label={isConnected ? "Sync fitness data" : "Connect Google Fit"}
+          aria-pressed={isSyncing}
         >
           {isSyncing ? (
             <Loader2 className="w-4 h-4 text-primary animate-spin" />
@@ -60,8 +62,9 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button 
-              className="p-1 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300"
+              className="p-1 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 min-h-[44px] min-w-[44px]"
               data-testid="button-profile"
+              aria-label="User profile menu"
             >
               {user?.profileImageUrl ? (
                 <img 

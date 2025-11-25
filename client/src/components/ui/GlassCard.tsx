@@ -9,9 +9,10 @@ interface GlassCardProps {
   subtitle?: string;
   delay?: number;
   disableFloating?: boolean;
+  "data-testid"?: string;
 }
 
-export function GlassCard({ children, className, title, subtitle, delay = 0, disableFloating = false }: GlassCardProps) {
+export function GlassCard({ children, className, title, subtitle, delay = 0, disableFloating = false, "data-testid": testId }: GlassCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
@@ -36,6 +37,9 @@ export function GlassCard({ children, className, title, subtitle, delay = 0, dis
         "glass rounded-3xl p-6 flex flex-col relative overflow-hidden group perspective-1000",
         className
       )}
+      data-testid={testId}
+      role="region"
+      aria-label={title || "Card"}
     >
       {/* Subtle Floating Animation (Breathing) */}
       {!disableFloating && (
