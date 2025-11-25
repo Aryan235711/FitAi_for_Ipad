@@ -3,6 +3,8 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { motion } from "framer-motion";
 import { ArrowUpRight, Zap, Battery, Brain, Loader2 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useFitnessData } from "@/hooks/useFitnessData";
 
 // Lazy Load Heavy Chart Components
 const RecoveryRadar = React.lazy(() => import("@/components/charts/RecoveryRadar").then(module => ({ default: module.RecoveryRadar })));
@@ -21,6 +23,19 @@ const LoadingChart = () => (
 );
 
 export default function FitnessDashboard() {
+  const { user } = useAuth();
+  const { 
+    metrics, 
+    latestMetric, 
+    insight, 
+    isLoading, 
+    readinessScore, 
+    readinessChange,
+    strainScore 
+  } = useFitnessData();
+
+  const userName = user?.firstName || user?.email?.split('@')[0] || 'User';
+
   return (
     <DashboardLayout>
       {/* Header Area - Simplified since nav is gone */}
@@ -31,7 +46,7 @@ export default function FitnessDashboard() {
             animate={{ opacity: 1, y: 0 }}
             className="flex items-center gap-2 mb-2"
           >
-             <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(132,204,22,0.8)]" />
+             <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(132,204,22,0.8)]" data-testid="indicator-live" />
              <span className="text-xs font-mono text-primary uppercase tracking-widest">Live Biometrics</span>
           </motion.div>
           <motion.h1 
@@ -39,7 +54,7 @@ export default function FitnessDashboard() {
             animate={{ opacity: 1, x: 0 }}
             className="text-5xl md:text-7xl font-display font-bold text-white tracking-tight"
           >
-            Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Alex</span>
+            Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary" data-testid="text-username">{userName}</span>
           </motion.h1>
         </div>
       </header>
@@ -67,10 +82,14 @@ export default function FitnessDashboard() {
                 <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Readiness</span>
             </div>
             <div>
-                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-primary transition-colors">92%</div>
+                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-primary transition-colors" data-testid="text-readiness">
+                  {readinessScore !== null ? `${readinessScore}%` : '--'}
+                </div>
                 <div className="flex items-center gap-1 text-primary text-xs font-medium">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span>+4% vs yesterday</span>
+                    {readinessChange !== null && readinessChange > 0 && <ArrowUpRight className="w-3 h-3" />}
+                    <span data-testid="text-readiness-change">
+                      {readinessChange !== null ? `${readinessChange > 0 ? '+' : ''}${readinessChange}% vs yesterday` : 'No data'}
+                    </span>
                 </div>
             </div>
         </GlassCard>
@@ -84,9 +103,11 @@ export default function FitnessDashboard() {
                 <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Strain</span>
             </div>
             <div>
-                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-accent transition-colors">14.5</div>
+                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-accent transition-colors" data-testid="text-strain">
+                  {strainScore !== null ? strainScore.toFixed(1) : '--'}
+                </div>
                 <div className="flex items-center gap-1 text-white/60 text-xs font-medium">
-                    <span>Optimal Zone</span>
+                    <span>{strainScore && strainScore > 10 ? 'Optimal Zone' : 'Low Activity'}</span>
                 </div>
             </div>
         </GlassCard>
@@ -162,8 +183,8 @@ export default function FitnessDashboard() {
                 </div>
                 <div>
                     <h4 className="text-xl font-medium text-white mb-1">Daily Insight</h4>
-                    <p className="text-base text-white/60 max-w-lg">
-                        Your high protein intake yesterday correlated with a <span className="text-primary font-bold">12% boost</span> in Deep Sleep duration.
+                    <p className="text-base text-white/60 max-w-lg" data-testid="text-daily-insight">
+                        {insight || 'Sync your Google Fit data to receive personalized AI insights about your health and performance trends.'}
                     </p>
                 </div>
             </div>
