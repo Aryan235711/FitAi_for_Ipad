@@ -1,14 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./googleAuth";
+import { setupSimpleAuth, isAuthenticated } from "./simpleAuth";
 import { getAuthUrl, exchangeCodeForTokens, fetchGoogleFitData, transformGoogleFitData } from "./googleFit";
 import { generateDailyInsight } from "./aiInsights";
 import { insertFitnessMetricSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup Google Auth
-  await setupAuth(app);
+  // Setup Simple Magic Link Auth
+  setupSimpleAuth(app);
 
   // ============== AUTH ROUTES ==============
   app.get('/api/auth/user', async (req: any, res) => {
