@@ -1,0 +1,49 @@
+WebSocket connection to 'wss://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/?token=DH-IEudqF_LB' failed: 
+createConnection @ client:745Understand this error
+1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/api/auth/user:1  Failed to load resource: the server responded with a status of 401 (Unauthorized)Understand this error
+api.ts:64 [API Error] /auth/user: [object Object]
+request @ api.ts:64Understand this error
+client:745 WebSocket connection to 'wss://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/?token=DH-IEudqF_LB' failed: 
+createConnection @ client:745Understand this error
+client:755 WebSocket connection to 'wss://localhost:5173/?token=DH-IEudqF_LB' failed: 
+createConnection @ client:755Understand this error
+client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:765Understand this error
+2chunk-KMU3Z7QX.js?v=da7f89b7:392 Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+resolveDispatcher @ chunk-KMU3Z7QX.js?v=da7f89b7:392Understand this error
+chunk-KMU3Z7QX.js?v=da7f89b7:923 Uncaught TypeError: Cannot read properties of null (reading 'useEffect')
+    at exports.useEffect (chunk-KMU3Z7QX.js?v=da7f89b7:923:35)
+    at QueryClientProvider (@tanstack_react-query.js?v=da7f89b7:2750:9)
+    at Object.react_stack_bottom_frame (react-dom_client.js?v=96b5f48c:18509:20)
+    at renderWithHooks (react-dom_client.js?v=96b5f48c:5654:24)
+    at updateFunctionComponent (react-dom_client.js?v=96b5f48c:7475:21)
+    at beginWork (react-dom_client.js?v=96b5f48c:8525:20)
+    at runWithFiberInDEV (react-dom_client.js?v=96b5f48c:997:72)
+    at performUnitOfWork (react-dom_client.js?v=96b5f48c:12561:98)
+    at workLoopSync (react-dom_client.js?v=96b5f48c:12424:43)
+    at renderRootSync (react-dom_client.js?v=96b5f48c:12408:13)Understand this error
+react-dom_client.js?v=96b5f48c:6966 An error occurred in the <QueryClientProvider> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+defaultOnUncaughtError @ react-dom_client.js?v=96b5f48c:6966Understand this warning
+client:809 [vite] TypeError: Cannot read properties of undefined (reading 'send')
+    at Object.send (client:449:7)
+    at Object.send (client:780:16)
+    at Object.send (client:318:23)
+    at Object.send (client:396:30)
+    at HMRClient.send (client:157:18)
+    at HMRContext.send (client:119:18)
+    at sendError (login:16:7)
+    at login:20:3
+    at defaultOnUncaughtError (react-dom_client.js?v=96b5f48c:6965:9)
+    at logUncaughtError (react-dom_client.js?v=96b5f48c:7020:13)
