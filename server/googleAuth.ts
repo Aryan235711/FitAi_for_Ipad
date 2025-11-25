@@ -80,12 +80,29 @@ export async function setupAuth(app: Express) {
     next();
   });
 
-  // Google OAuth Strategy - use dynamic callback URL
+  // Get the correct absolute redirect URI
+  function getCallbackUrl(): string {
+    // Try REPLIT_DOMAINS first (most reliable in Replit environment)
+    if (process.env.REPLIT_DOMAINS) {
+      return `https://${process.env.REPLIT_DOMAINS}/api/google-fit/callback`;
+    }
+    // Fallback to REPL_SLUG + REPL_OWNER (legacy)
+    if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
+      return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/api/google-fit/callback`;
+    }
+    // Final fallback
+    return "http://localhost:5000/api/google-fit/callback";
+  }
+
+  const absoluteCallbackUrl = getCallbackUrl();
+  console.log("[Google Auth] Absolute Callback URL for Passport:", absoluteCallbackUrl);
+
+  // Google OAuth Strategy - use ABSOLUTE callback URL
   const googleStrategy = new GoogleStrategy(
     {
       clientID: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-      callbackURL: "/api/google-fit/callback",
+      callbackURL: absoluteCallbackUrl,  // ABSOLUTE URL, not relative
       passReqToCallback: true,
       accessType: "offline",
       prompt: "select_account",  // Avoid "403: org_internal" by forcing account selection

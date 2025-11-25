@@ -9,11 +9,28 @@ const GOOGLE_FIT_SCOPES = [
   'https://www.googleapis.com/auth/fitness.body.read',
 ];
 
+// Get the correct redirect URI from environment or construct from REPLIT_DOMAINS
+function getDefaultRedirectUri(): string {
+  // Try REPLIT_DOMAINS first (most reliable in Replit environment)
+  if (process.env.REPLIT_DOMAINS) {
+    return `https://${process.env.REPLIT_DOMAINS}/api/google-fit/callback`;
+  }
+  // Fallback to REPL_SLUG + REPL_OWNER (legacy)
+  if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
+    return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/api/google-fit/callback`;
+  }
+  // Final fallback for localhost development
+  return "http://localhost:5000/api/google-fit/callback";
+}
+
+const DEFAULT_REDIRECT_URI = getDefaultRedirectUri();
+console.log("[GoogleFit] Default Redirect URI:", DEFAULT_REDIRECT_URI);
+
 export function getOAuth2Client(redirectUri?: string) {
   return new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
-    redirectUri || `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/api/google-fit/callback`
+    redirectUri || DEFAULT_REDIRECT_URI
   );
 }
 
