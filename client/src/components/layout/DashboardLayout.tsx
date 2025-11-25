@@ -52,7 +52,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           {isSyncing ? (
             <Loader2 className="w-4 h-4 text-primary animate-spin" />
           ) : (
-            <RefreshCw className="w-4 h-4 text-primary group-hover:rotate-180 transition-transform duration-700 ease-in-out" />
+            <RefreshCw className="w-4 h-4 text-primary group-hover:rotate-180 group-focus-within:rotate-180 transition-transform duration-700 ease-in-out" />
           )}
           <span className="text-xs font-medium text-white/80">
             {isConnected ? 'Sync Fit' : 'Connect Fit'}

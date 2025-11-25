@@ -297,13 +297,13 @@ export default function FitnessDashboard() {
         >
           <div {...readinessLongPress.handlers} data-testid="card-readiness-metric">
             <div className="flex justify-between items-start">
-                <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-black transition-colors duration-300 shadow-[0_0_15px_rgba(132,204,22,0.1)] group-hover:shadow-[0_0_20px_rgba(132,204,22,0.6)]">
+                <div className="p-3 rounded-2xl bg-primary/20 text-primary group-hover:bg-primary group-hover:text-black group-focus-within:bg-primary group-focus-within:text-black transition-colors duration-300 shadow-[0_0_15px_rgba(132,204,22,0.3)] group-hover:shadow-[0_0_20px_rgba(132,204,22,0.6)] group-focus-within:shadow-[0_0_20px_rgba(132,204,22,0.6)]">
                     <Zap className="w-6 h-6" />
                 </div>
                 <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Readiness</span>
             </div>
             <div>
-                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-primary transition-colors" data-testid="text-readiness">
+                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-primary group-focus-within:text-primary transition-colors" data-testid="text-readiness">
                   {readinessScore !== null ? (
                     <>
                       <AnimatedNumber value={readinessScore} duration={2} />%
@@ -355,13 +355,13 @@ export default function FitnessDashboard() {
          >
           <div {...strainLongPress.handlers} data-testid="card-strain-metric">
             <div className="flex justify-between items-start">
-                <div className="p-3 rounded-2xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors duration-300 shadow-[0_0_15px_rgba(255,0,153,0.1)] group-hover:shadow-[0_0_20px_rgba(255,0,153,0.6)]">
+                <div className="p-3 rounded-2xl bg-accent/20 text-accent group-hover:bg-accent group-hover:text-white group-focus-within:bg-accent group-focus-within:text-white transition-colors duration-300 shadow-[0_0_15px_rgba(255,0,153,0.3)] group-hover:shadow-[0_0_20px_rgba(255,0,153,0.6)] group-focus-within:shadow-[0_0_20px_rgba(255,0,153,0.6)]">
                     <Battery className="w-6 h-6" />
                 </div>
                 <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Strain</span>
             </div>
             <div>
-                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-accent transition-colors" data-testid="text-strain">
+                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-accent group-focus-within:text-accent transition-colors" data-testid="text-strain">
                   {strainScore !== null ? (
                     <AnimatedNumber value={strainScore} decimals={1} duration={2} />
                   ) : '--'}
