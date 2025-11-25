@@ -97,7 +97,10 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
         { dataTypeName: 'com.google.step_count.delta' },
         { dataTypeName: 'com.google.calories.expended' },
         { dataTypeName: 'com.google.heart_rate.bpm' },
+        { dataTypeName: 'com.google.heart_rate.summary' },
         { dataTypeName: 'com.google.sleep.segment' },
+        { dataTypeName: 'com.google.activity.segment' },
+        { dataTypeName: 'com.google.nutrition' },
       ],
       bucketByTime: { durationMillis: '86400000' }, // 1 day buckets (must be string)
       startTimeMillis: startTimeMillis.toString(),
@@ -134,12 +137,14 @@ export function transformGoogleFitData(apiData: any, userId: string) {
       sleepScore: null,
       sleepConsistency: null,
       workoutIntensity: null,
-      protein: null,
-      carbs: null,
-      fats: null,
+      protein: 0,
+      carbs: 0,
+      fats: 0,
       deepSleepMinutes: null,
       spo2: null,
       recoveryScore: null,
+      totalSleepMinutes: 0,
+      activityMinutes: 0,
     };
     
     // Extract data from buckets
@@ -155,23 +160,84 @@ export function transformGoogleFitData(apiData: any, userId: string) {
             metric.calories += Math.round(point.value[0]?.fpVal || 0);
             break;
           case 'com.google.heart_rate.bpm':
-            // Average heart rate (simplified)
-            metric.rhr = Math.round(point.value[0]?.fpVal || 0);
+            // Average heart rate (simplified - use minimum as RHR approximation)
+            const currentHr = Math.round(point.value[0]?.fpVal || 0);
+            if (currentHr > 0) {
+              metric.rhr = metric.rhr ? Math.min(metric.rhr, currentHr) : currentHr;
+            }
+            break;
+          case 'com.google.heart_rate.summary':
+            // Extract HRV if available (RMSSD or SDNN)
+            if (point.value[1]?.fpVal) {
+              metric.hrv = Math.round(point.value[1].fpVal);
+            }
             break;
           case 'com.google.sleep.segment':
-            // Calculate deep sleep minutes (simplified)
-            const duration = (point.endTimeNanos - point.startTimeNanos) / 1e9 / 60; // in minutes
-            if (point.value[0]?.intVal === 4) { // Deep sleep
-              metric.deepSleepMinutes = (metric.deepSleepMinutes || 0) + Math.round(duration);
+            const sleepDuration = (point.endTimeNanos - point.startTimeNanos) / 1e9 / 60;
+            const sleepType = point.value[0]?.intVal;
+            
+            metric.totalSleepMinutes += Math.round(sleepDuration);
+            
+            if (sleepType === 4) { // Deep sleep
+              metric.deepSleepMinutes = (metric.deepSleepMinutes || 0) + Math.round(sleepDuration);
             }
+            break;
+          case 'com.google.activity.segment':
+            const activityDuration = (point.endTimeNanos - point.startTimeNanos) / 1e9 / 60;
+            const activityType = point.value[0]?.intVal;
+            
+            // Activity types: 1=biking, 7=walking, 8=running, etc.
+            if ([1, 7, 8, 9, 10].includes(activityType)) {
+              metric.activityMinutes += Math.round(activityDuration);
+            }
+            break;
+          case 'com.google.nutrition':
+            // Extract macros if available
+            if (point.value[0]) metric.protein += Math.round(point.value[0].fpVal || 0);
+            if (point.value[1]) metric.carbs += Math.round(point.value[1].fpVal || 0);
+            if (point.value[2]) metric.fats += Math.round(point.value[2].fpVal || 0);
             break;
         }
       });
     });
     
-    // Calculate derived metrics (simplified)
-    metric.sleepScore = metric.deepSleepMinutes ? Math.min(100, Math.round((metric.deepSleepMinutes / 90) * 100)) : null;
-    metric.recoveryScore = metric.rhr && metric.rhr < 65 ? Math.round(100 - (metric.rhr - 45)) : null;
+    // Calculate derived metrics
+    // Sleep score based on total sleep (7-9 hours optimal)
+    if (metric.totalSleepMinutes > 0) {
+      const sleepHours = metric.totalSleepMinutes / 60;
+      const deepSleepRatio = metric.deepSleepMinutes ? (metric.deepSleepMinutes / metric.totalSleepMinutes) : 0.15;
+      
+      let sleepQuality = 100;
+      if (sleepHours < 7) sleepQuality = (sleepHours / 7) * 100;
+      else if (sleepHours > 9) sleepQuality = 100 - ((sleepHours - 9) * 10);
+      
+      metric.sleepScore = Math.min(100, Math.round(sleepQuality * 0.7 + deepSleepRatio * 100 * 0.3));
+    }
+    
+    // Recovery score based on RHR (lower is better)
+    if (metric.rhr) {
+      if (metric.rhr < 60) {
+        metric.recoveryScore = Math.min(100, 85 + (60 - metric.rhr));
+      } else {
+        metric.recoveryScore = Math.max(0, 85 - (metric.rhr - 60) * 1.5);
+      }
+      metric.recoveryScore = Math.round(metric.recoveryScore);
+    }
+    
+    // Workout intensity from activity minutes and calories
+    if (metric.activityMinutes > 0) {
+      const intensityFromTime = Math.min(100, (metric.activityMinutes / 60) * 100);
+      const intensityFromCalories = Math.min(100, (metric.calories / 2500) * 100);
+      metric.workoutIntensity = Math.round((intensityFromTime + intensityFromCalories) / 2);
+    } else if (metric.steps > 8000) {
+      // Light workout intensity from steps only
+      metric.workoutIntensity = Math.min(50, Math.round((metric.steps / 10000) * 50));
+    }
+    
+    // Default HRV if not available (will be calculated from historical RHR variation in storage layer)
+    if (!metric.hrv && metric.rhr) {
+      metric.hrv = Math.max(20, Math.min(80, 60 - (metric.rhr - 60)));
+    }
     
     return metric;
   });

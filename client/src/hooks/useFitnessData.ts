@@ -35,7 +35,7 @@ export function useFitnessData(days: number = 30) {
       ))
     : null;
 
-  const readinessChange = readinessScore && previousReadiness
+  const readinessChange = (readinessScore !== null && previousReadiness !== null)
     ? readinessScore - previousReadiness
     : null;
 

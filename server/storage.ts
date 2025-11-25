@@ -128,6 +128,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertFitnessMetric(metricData: InsertFitnessMetric): Promise<FitnessMetric> {
+    // Calculate sleep consistency from last 7 days
+    const recentMetrics = await this.getFitnessMetrics(metricData.userId, 7);
+    
+    let sleepConsistency = null;
+    if (recentMetrics.length >= 3 && metricData.sleepScore) {
+      const sleepScores = [...recentMetrics.map(m => m.sleepScore).filter(Boolean) as number[], metricData.sleepScore];
+      const avg = sleepScores.reduce((a, b) => a + b, 0) / sleepScores.length;
+      const variance = sleepScores.reduce((sum, score) => sum + Math.pow(score - avg, 2), 0) / sleepScores.length;
+      const stdDev = Math.sqrt(variance);
+      
+      // Lower std dev = higher consistency (inverted and scaled to 0-100)
+      sleepConsistency = Math.round(Math.max(0, 100 - (stdDev * 2)));
+    }
+    
+    const enrichedMetric = {
+      ...metricData,
+      sleepConsistency,
+    };
+    
     // First try to find existing metric
     const existing = await this.getFitnessMetricByDate(metricData.userId, metricData.date);
     
@@ -135,7 +154,7 @@ export class DatabaseStorage implements IStorage {
       // Update existing
       const [updated] = await db
         .update(fitnessMetrics)
-        .set({ ...metricData, updatedAt: new Date() })
+        .set({ ...enrichedMetric, updatedAt: new Date() })
         .where(and(
           eq(fitnessMetrics.userId, metricData.userId),
           eq(fitnessMetrics.date, metricData.date)
@@ -146,7 +165,7 @@ export class DatabaseStorage implements IStorage {
       // Insert new
       const [metric] = await db
         .insert(fitnessMetrics)
-        .values(metricData)
+        .values(enrichedMetric)
         .returning();
       return metric;
     }
