@@ -19,25 +19,31 @@ export function getSession() {
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    name: "fitsync.sid",
     cookie: {
       httpOnly: true,
       secure: true,
+      sameSite: "lax",
       maxAge: sessionTtl,
+      domain: undefined, // Let browser handle domain
     },
   });
 }
 
 export async function setupAuth(app: Express) {
+  // Important for OAuth with proxy/HTTPS
   app.set("trust proxy", 1);
+  
+  // Add security headers
+  app.use((req, res, next) => {
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    next();
+  });
+  
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
-
-  // Middleware to attach the current host to each request for OAuth callback construction
-  app.use((req, res, next) => {
-    req.baseUrl = req.get("host") || "localhost:5000";
-    next();
-  });
 
   // Middleware to dynamically set the passport strategy's callback URL per request
   app.use((req, res, next) => {
@@ -48,6 +54,14 @@ export async function setupAuth(app: Express) {
     
     // Store on request for access in routes
     req.fullCallbackUrl = fullCallbackUrl;
+    
+    console.log("[Auth] Request:", {
+      method: req.method,
+      path: req.path,
+      protocol: protocol,
+      host: host,
+      sessionID: req.sessionID,
+    });
     
     next();
   });
