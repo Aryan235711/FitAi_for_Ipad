@@ -41,7 +41,7 @@ export async function setupAuth(app: Express) {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         callbackURL: "/api/callback",
       },
-      async (accessToken, refreshToken, profile, done) => {
+      async (accessToken: string, refreshToken: string, profile: any, done: any) => {
         try {
           // Extract user info from Google profile
           const email = profile.emails?.[0]?.value;

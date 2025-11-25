@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import FitnessDashboard from "@/pages/FitnessDashboard";
+import LoginPage from "@/pages/login";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -14,6 +15,9 @@ function Router() {
         <ProtectedRoute>
           <FitnessDashboard />
         </ProtectedRoute>
+      </Route>
+      <Route path="/login">
+        <LoginPage />
       </Route>
       <Route path="/trends">
         <ProtectedRoute>

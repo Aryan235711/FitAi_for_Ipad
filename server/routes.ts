@@ -183,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Sync Google Fit data
   app.post('/api/google-fit/sync', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
       const { startDate, endDate } = req.body;
 
       // Default to last 30 days if not specified
@@ -238,7 +238,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's fitness metrics
   app.get('/api/metrics', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
       const days = parseInt(req.query.days as string) || 30;
       const metrics = await storage.getFitnessMetrics(userId, days);
       res.json(metrics);
@@ -251,7 +251,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add/update a single fitness metric
   app.post('/api/metrics', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
       const metricData = insertFitnessMetricSchema.parse({
         ...req.body,
         userId,
@@ -270,7 +270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get latest AI insight
   app.get('/api/insights/latest', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
       const insight = await storage.getLatestInsight(userId);
       res.json(insight || { content: "No insights yet. Sync your Google Fit data to get started!" });
     } catch (error: any) {
@@ -282,7 +282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Generate new AI insight
   app.post('/api/insights/generate', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
       const insight = await generateDailyInsight(userId);
       res.json({ content: insight });
     } catch (error: any) {
