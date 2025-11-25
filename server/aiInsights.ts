@@ -12,7 +12,7 @@ export async function generateDailyInsight(userId: string): Promise<string> {
   const metrics = await storage.getFitnessMetrics(userId, 7);
   
   if (metrics.length === 0) {
-    return "Start syncing your Google Fit data to receive personalized AI insights about your health and performance trends.";
+    return "• Sync your Google Fit data to get started\n• Receive personalized AI insights daily\n• Track health and performance trends";
   }
   
   // Prepare data summary for AI
@@ -24,25 +24,31 @@ export async function generateDailyInsight(userId: string): Promise<string> {
       messages: [
         {
           role: "system",
-          content: `You are an expert fitness and health analyst. Analyze the user's fitness data and provide a concise, actionable insight (2-3 sentences max). Focus on correlations between metrics like:
+          content: `You are an expert fitness and health analyst. Analyze the user's fitness data and provide 3 focused, scannable insights as bullet points. Each insight should be ONE short sentence (max 12 words).
+
+Format EXACTLY as:
+• [Insight 1]
+• [Insight 2]  
+• [Insight 3]
+
+Focus on:
 - Sleep quality vs. Recovery
-- Nutrition vs. Performance
 - Heart rate variability vs. Workout intensity
 - Energy trends and patterns
 
-Be specific, data-driven, and motivating. Highlight surprising correlations or important trends.`,
+Be specific, data-driven, and motivating. Use active language.`,
         },
         {
           role: "user",
-          content: `Analyze this week's fitness data and provide one key insight:\n\n${dataSummary}`,
+          content: `Analyze this week's fitness data and provide exactly 3 bullet points:\n\n${dataSummary}`,
         },
       ],
       temperature: 0.7,
-      max_tokens: 150,
+      max_tokens: 200,
     });
     
     const insight = completion.choices[0]?.message?.content || 
-      "Your biometric data shows consistent patterns. Keep monitoring your progress!";
+      "• Your biometric data shows consistent patterns\n• Recovery metrics are within normal range\n• Keep monitoring your progress for trends";
     
     // Save the insight to database
     await storage.saveInsight({
@@ -55,7 +61,7 @@ Be specific, data-driven, and motivating. Highlight surprising correlations or i
     return insight;
   } catch (error: any) {
     console.error("Error generating AI insight:", error.message);
-    return "Unable to generate insight at the moment. Your data trends look stable overall.";
+    return "• Unable to generate insights at the moment\n• Your data trends look stable overall\n• Try syncing more fitness data";
   }
 }
 

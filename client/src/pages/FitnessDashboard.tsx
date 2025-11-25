@@ -1,8 +1,9 @@
-import React, { Suspense, useEffect } from "react";
+import React, { Suspense, useEffect, useMemo } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { motion } from "framer-motion";
-import { ArrowUpRight, Zap, Battery, Brain, Loader2, TrendingUp, Target, Moon, Activity, BarChart3 } from "lucide-react";
+import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { ArrowUpRight, Zap, Battery, Brain, Loader2, TrendingUp, Target, Moon, Activity, BarChart3, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useFitnessData } from "@/hooks/useFitnessData";
 import { toast } from "sonner";
@@ -242,14 +243,31 @@ export default function FitnessDashboard() {
             </div>
             <div>
                 <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-primary transition-colors" data-testid="text-readiness">
-                  {readinessScore !== null ? `${readinessScore}%` : '--'}
+                  {readinessScore !== null ? (
+                    <>
+                      <AnimatedNumber value={readinessScore} duration={2} />%
+                    </>
+                  ) : '--'}
                 </div>
-                <div className="flex items-center gap-1 text-primary text-xs font-medium">
-                    {readinessChange !== null && readinessChange > 0 && <ArrowUpRight className="w-3 h-3" />}
+                <motion.div 
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 2.2 }}
+                  className="flex items-center gap-1 text-primary text-xs font-medium"
+                >
+                    {readinessChange !== null && readinessChange > 0 && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: 2.3, type: "spring" }}
+                      >
+                        <ArrowUpRight className="w-3 h-3" />
+                      </motion.div>
+                    )}
                     <span data-testid="text-readiness-change">
                       {readinessChange !== null ? `${readinessChange > 0 ? '+' : ''}${readinessChange}% vs yesterday` : 'No data'}
                     </span>
-                </div>
+                </motion.div>
             </div>
         </GlassCard>
 
@@ -263,11 +281,18 @@ export default function FitnessDashboard() {
             </div>
             <div>
                 <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-accent transition-colors" data-testid="text-strain">
-                  {strainScore !== null ? strainScore.toFixed(1) : '--'}
+                  {strainScore !== null ? (
+                    <AnimatedNumber value={strainScore} decimals={1} duration={2} />
+                  ) : '--'}
                 </div>
-                <div className="flex items-center gap-1 text-white/60 text-xs font-medium">
+                <motion.div 
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 2.2 }}
+                  className="flex items-center gap-1 text-white/60 text-xs font-medium"
+                >
                     <span>{strainScore && strainScore > 10 ? 'Optimal Zone' : 'Low Activity'}</span>
-                </div>
+                </motion.div>
             </div>
         </GlassCard>
 
@@ -333,18 +358,56 @@ export default function FitnessDashboard() {
 
          {/* 9. Context Card - Daily AI Insight */}
          <GlassCard 
-            className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-primary/5 border-primary/20" 
+            className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20" 
             delay={0.6}
         >
-            <div className="flex items-center gap-6 h-full">
-                <div className="p-5 rounded-full bg-primary/20 text-primary shadow-[0_0_20px_rgba(132,204,22,0.3)] animate-pulse">
-                    <Brain className="w-10 h-10" />
-                </div>
-                <div>
-                    <h4 className="text-xl font-medium text-white mb-1">Daily Insight</h4>
-                    <p className="text-base text-white/60 max-w-lg" data-testid="text-daily-insight">
-                        {insight || 'Sync your Google Fit data to receive personalized AI insights about your health and performance trends.'}
-                    </p>
+            <div className="flex items-start gap-6 h-full">
+                <motion.div 
+                  className="p-4 rounded-2xl bg-primary/20 text-primary shadow-[0_0_25px_rgba(132,204,22,0.4)]"
+                  animate={{ 
+                    scale: [1, 1.05, 1],
+                    boxShadow: [
+                      "0 0 25px rgba(132,204,22,0.4)",
+                      "0 0 35px rgba(132,204,22,0.6)",
+                      "0 0 25px rgba(132,204,22,0.4)"
+                    ]
+                  }}
+                  transition={{ 
+                    duration: 3, 
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                    <Sparkles className="w-9 h-9" />
+                </motion.div>
+                <div className="flex-1">
+                    <h4 className="text-xl font-display font-semibold text-white mb-3 flex items-center gap-2">
+                      AI Daily Insights
+                      <span className="text-xs font-mono text-primary/60 uppercase tracking-wider">GPT-4o</span>
+                    </h4>
+                    <div className="space-y-2" data-testid="text-daily-insight">
+                        {(insight || '• Sync your Google Fit data\n• Receive personalized AI insights\n• Track health and performance trends')
+                          .split('\n')
+                          .map((line, idx) => {
+                            const cleanLine = line.trim();
+                            if (!cleanLine) return null;
+                            
+                            return (
+                              <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.8 + idx * 0.15, duration: 0.5 }}
+                                className="flex items-start gap-3 group"
+                              >
+                                <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 group-hover:shadow-[0_0_8px_rgba(132,204,22,0.8)] transition-shadow" />
+                                <p className="text-sm text-white/80 leading-relaxed group-hover:text-white transition-colors flex-1">
+                                  {cleanLine.replace(/^[•\-\*]\s*/, '')}
+                                </p>
+                              </motion.div>
+                            );
+                          })}
+                    </div>
                 </div>
             </div>
         </GlassCard>

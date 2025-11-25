@@ -29,6 +29,7 @@ export function GlassCard({ children, className, title, subtitle, delay = 0, dis
       }}
       whileHover={{ 
         scale: 1.02,
+        y: -4,
         transition: { type: "spring", stiffness: 400, damping: 25 }
       }}
       className={cn(
@@ -52,6 +53,15 @@ export function GlassCard({ children, className, title, subtitle, delay = 0, dis
 
       {/* Liquid Hover Effect Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      
+      {/* Animated Glow Border on Hover */}
+      <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" 
+        style={{
+          background: "linear-gradient(90deg, transparent, rgba(132,204,22,0.3), transparent)",
+          backgroundSize: "200% 100%",
+          animation: "shimmer 3s linear infinite"
+        }}
+      />
       
       {/* Top Highlight Line */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-20 group-hover:opacity-50 transition-opacity duration-500" />
