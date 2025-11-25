@@ -1,19 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./googleAuth";
 import { getAuthUrl, exchangeCodeForTokens, fetchGoogleFitData, transformGoogleFitData } from "./googleFit";
 import { generateDailyInsight } from "./aiInsights";
 import { insertFitnessMetricSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Setup Replit Auth
+  // Setup Google Auth
   await setupAuth(app);
 
   // ============== AUTH ROUTES ==============
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -27,7 +27,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // DEBUG: List available Google Fit data sources
   app.get('/api/google-fit/datasources', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
       const { getValidAccessToken, getOAuth2Client } = await import('./googleFit');
       const { google } = await import('googleapis');
       
@@ -105,7 +105,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initiate Google Fit OAuth flow
   app.get('/api/google-fit/connect', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
       // Use req.get('host') instead of req.hostname to include port if needed
       const redirectUri = `https://${req.get('host')}/api/google-fit/callback`;
       const authUrl = getAuthUrl(userId, redirectUri);
@@ -159,7 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check Google Fit connection status
   app.get('/api/google-fit/status', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
       const token = await storage.getGoogleFitToken(userId);
       res.json({ connected: !!token, expiresAt: token?.expiresAt });
     } catch (error: any) {
@@ -171,7 +171,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Disconnect Google Fit
   app.delete('/api/google-fit/disconnect', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.id;
       await storage.deleteGoogleFitToken(userId);
       res.json({ success: true });
     } catch (error: any) {
