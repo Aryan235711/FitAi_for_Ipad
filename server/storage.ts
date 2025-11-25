@@ -128,24 +128,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async upsertFitnessMetric(metricData: InsertFitnessMetric): Promise<FitnessMetric> {
-    // Calculate sleep consistency from last 7 days
-    const recentMetrics = await this.getFitnessMetrics(metricData.userId, 7);
-    
-    let sleepConsistency = null;
-    if (recentMetrics.length >= 3 && metricData.sleepScore) {
-      const sleepScores = [...recentMetrics.map(m => m.sleepScore).filter(Boolean) as number[], metricData.sleepScore];
-      const avg = sleepScores.reduce((a, b) => a + b, 0) / sleepScores.length;
-      const variance = sleepScores.reduce((sum, score) => sum + Math.pow(score - avg, 2), 0) / sleepScores.length;
-      const stdDev = Math.sqrt(variance);
-      
-      // Lower std dev = higher consistency (inverted and scaled to 0-100)
-      sleepConsistency = Math.round(Math.max(0, 100 - (stdDev * 2)));
-    }
-    
-    const enrichedMetric = {
-      ...metricData,
-      sleepConsistency,
-    };
+    const enrichedMetric = { ...metricData };
     
     // First try to find existing metric
     const existing = await this.getFitnessMetricByDate(metricData.userId, metricData.date);
@@ -160,6 +143,10 @@ export class DatabaseStorage implements IStorage {
           eq(fitnessMetrics.date, metricData.date)
         ))
         .returning();
+      
+      // Recalculate sleep consistency AFTER persisting
+      await this.updateSleepConsistency(metricData.userId);
+      
       return updated;
     } else {
       // Insert new
@@ -167,7 +154,43 @@ export class DatabaseStorage implements IStorage {
         .insert(fitnessMetrics)
         .values(enrichedMetric)
         .returning();
+      
+      // Recalculate sleep consistency AFTER persisting
+      await this.updateSleepConsistency(metricData.userId);
+      
       return metric;
+    }
+  }
+  
+  async updateSleepConsistency(userId: string): Promise<void> {
+    // Get last 7 days to calculate consistency
+    const recentMetrics = await this.getFitnessMetrics(userId, 8);
+    
+    if (recentMetrics.length < 3) return;
+    
+    // Calculate consistency for each day (using preceding days)
+    for (let i = 2; i < recentMetrics.length; i++) {
+      const metric = recentMetrics[i];
+      const precedingMetrics = recentMetrics.slice(Math.max(0, i - 7), i);
+      
+      if (metric.sleepScore && precedingMetrics.length >= 2) {
+        const sleepScores = precedingMetrics.map(m => m.sleepScore).filter(Boolean) as number[];
+        sleepScores.push(metric.sleepScore);
+        
+        const avg = sleepScores.reduce((a, b) => a + b, 0) / sleepScores.length;
+        const variance = sleepScores.reduce((sum, score) => sum + Math.pow(score - avg, 2), 0) / sleepScores.length;
+        const stdDev = Math.sqrt(variance);
+        
+        const sleepConsistency = Math.round(Math.max(0, 100 - (stdDev * 2)));
+        
+        await db
+          .update(fitnessMetrics)
+          .set({ sleepConsistency })
+          .where(and(
+            eq(fitnessMetrics.userId, userId),
+            eq(fitnessMetrics.date, metric.date)
+          ));
+      }
     }
   }
 

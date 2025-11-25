@@ -97,10 +97,8 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
         { dataTypeName: 'com.google.step_count.delta' },
         { dataTypeName: 'com.google.calories.expended' },
         { dataTypeName: 'com.google.heart_rate.bpm' },
-        { dataTypeName: 'com.google.heart_rate.summary' },
         { dataTypeName: 'com.google.sleep.segment' },
-        { dataTypeName: 'com.google.activity.segment' },
-        { dataTypeName: 'com.google.nutrition' },
+        { dataTypeName: 'com.google.active_minutes' },
       ],
       bucketByTime: { durationMillis: '86400000' }, // 1 day buckets (must be string)
       startTimeMillis: startTimeMillis.toString(),
@@ -150,7 +148,10 @@ export function transformGoogleFitData(apiData: any, userId: string) {
     // Extract data from buckets
     bucket.dataset?.forEach((dataset: any) => {
       dataset.point?.forEach((point: any) => {
-        const dataTypeName = dataset.dataSourceId.split(':')[0];
+        // Google Fit dataSourceId format: "derived:com.google.step_count.delta:..." or "raw:com.google..."
+        // We need to extract the actual data type (second part after splitting by ':')
+        const parts = dataset.dataSourceId.split(':');
+        const dataTypeName = parts.length > 1 ? parts[1] : parts[0];
         
         switch (dataTypeName) {
           case 'com.google.step_count.delta':
@@ -166,11 +167,9 @@ export function transformGoogleFitData(apiData: any, userId: string) {
               metric.rhr = metric.rhr ? Math.min(metric.rhr, currentHr) : currentHr;
             }
             break;
-          case 'com.google.heart_rate.summary':
-            // Extract HRV if available (RMSSD or SDNN)
-            if (point.value[1]?.fpVal) {
-              metric.hrv = Math.round(point.value[1].fpVal);
-            }
+          case 'com.google.active_minutes':
+            // Active minutes from Google Fit
+            metric.activityMinutes += Math.round(point.value[0]?.intVal || 0);
             break;
           case 'com.google.sleep.segment':
             const sleepDuration = (point.endTimeNanos - point.startTimeNanos) / 1e9 / 60;
@@ -181,21 +180,6 @@ export function transformGoogleFitData(apiData: any, userId: string) {
             if (sleepType === 4) { // Deep sleep
               metric.deepSleepMinutes = (metric.deepSleepMinutes || 0) + Math.round(sleepDuration);
             }
-            break;
-          case 'com.google.activity.segment':
-            const activityDuration = (point.endTimeNanos - point.startTimeNanos) / 1e9 / 60;
-            const activityType = point.value[0]?.intVal;
-            
-            // Activity types: 1=biking, 7=walking, 8=running, etc.
-            if ([1, 7, 8, 9, 10].includes(activityType)) {
-              metric.activityMinutes += Math.round(activityDuration);
-            }
-            break;
-          case 'com.google.nutrition':
-            // Extract macros if available
-            if (point.value[0]) metric.protein += Math.round(point.value[0].fpVal || 0);
-            if (point.value[1]) metric.carbs += Math.round(point.value[1].fpVal || 0);
-            if (point.value[2]) metric.fats += Math.round(point.value[2].fpVal || 0);
             break;
         }
       });
@@ -234,9 +218,25 @@ export function transformGoogleFitData(apiData: any, userId: string) {
       metric.workoutIntensity = Math.min(50, Math.round((metric.steps / 10000) * 50));
     }
     
-    // Default HRV if not available (will be calculated from historical RHR variation in storage layer)
+    // Default HRV if not available (estimate from RHR)
     if (!metric.hrv && metric.rhr) {
       metric.hrv = Math.max(20, Math.min(80, 60 - (metric.rhr - 60)));
+    }
+    
+    // Estimate nutrition macros if not available (based on calories and activity level)
+    if (metric.calories > 0 && metric.protein === 0 && metric.carbs === 0 && metric.fats === 0) {
+      const isActiveDay = metric.activityMinutes > 30 || metric.steps > 8000;
+      if (isActiveDay) {
+        // Active day macro split (30% protein, 50% carbs, 20% fat)
+        metric.protein = Math.round((metric.calories * 0.30) / 4); // 4 cal/g protein
+        metric.carbs = Math.round((metric.calories * 0.50) / 4); // 4 cal/g carbs
+        metric.fats = Math.round((metric.calories * 0.20) / 9); // 9 cal/g fat
+      } else {
+        // Sedentary day macro split (25% protein, 45% carbs, 30% fat)
+        metric.protein = Math.round((metric.calories * 0.25) / 4);
+        metric.carbs = Math.round((metric.calories * 0.45) / 4);
+        metric.fats = Math.round((metric.calories * 0.30) / 9);
+      }
     }
     
     return metric;

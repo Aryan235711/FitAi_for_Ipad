@@ -67,13 +67,13 @@ function prepareDataSummary(metrics: FitnessMetric[]): string {
   
   // Latest day summary
   summary += `Latest Day (${latest.date}):\n`;
-  if (latest.rhr) summary += `- Resting Heart Rate: ${latest.rhr} bpm\n`;
-  if (latest.hrv) summary += `- HRV: ${latest.hrv}\n`;
-  if (latest.sleepScore) summary += `- Sleep Score: ${latest.sleepScore}/100\n`;
-  if (latest.deepSleepMinutes) summary += `- Deep Sleep: ${latest.deepSleepMinutes} minutes\n`;
-  if (latest.steps) summary += `- Steps: ${latest.steps.toLocaleString()}\n`;
-  if (latest.calories) summary += `- Calories: ${latest.calories}\n`;
-  if (latest.recoveryScore) summary += `- Recovery Score: ${latest.recoveryScore}/100\n`;
+  if (latest.rhr !== null && latest.rhr !== undefined) summary += `- Resting Heart Rate: ${latest.rhr} bpm\n`;
+  if (latest.hrv !== null && latest.hrv !== undefined) summary += `- HRV: ${latest.hrv}\n`;
+  if (latest.sleepScore !== null && latest.sleepScore !== undefined) summary += `- Sleep Score: ${latest.sleepScore}/100\n`;
+  if (latest.deepSleepMinutes !== null && latest.deepSleepMinutes !== undefined) summary += `- Deep Sleep: ${latest.deepSleepMinutes} minutes\n`;
+  if (latest.steps !== null && latest.steps !== undefined) summary += `- Steps: ${latest.steps.toLocaleString()}\n`;
+  if (latest.calories !== null && latest.calories !== undefined) summary += `- Calories: ${latest.calories}\n`;
+  if (latest.recoveryScore !== null && latest.recoveryScore !== undefined) summary += `- Recovery Score: ${latest.recoveryScore}/100\n`;
   
   // Trends (if we have previous data)
   if (previous) {
