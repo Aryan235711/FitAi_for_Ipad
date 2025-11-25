@@ -11,7 +11,6 @@ import {
   boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
-import { z } from "zod";
 
 // Session storage table (Required for Replit Auth)
 export const sessions = pgTable(
@@ -35,6 +34,8 @@ export const users = pgTable("users", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const insertUserSchema = createInsertSchema(users);
+
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
 
@@ -50,12 +51,8 @@ export const googleFitTokens = pgTable("google_fit_tokens", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertGoogleFitTokenSchema = createInsertSchema(googleFitTokens).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertGoogleFitToken = z.infer<typeof insertGoogleFitTokenSchema>;
+export const insertGoogleFitTokenSchema = createInsertSchema(googleFitTokens);
+export type InsertGoogleFitToken = typeof googleFitTokens.$inferInsert;
 export type GoogleFitToken = typeof googleFitTokens.$inferSelect;
 
 // Daily fitness metrics from Google Fit
@@ -74,18 +71,16 @@ export const fitnessMetrics = pgTable("fitness_metrics", {
   fats: integer("fats"),
   steps: integer("steps"),
   deepSleepMinutes: integer("deep_sleep_minutes"),
+  totalSleepMinutes: integer("total_sleep_minutes"),
+  activityMinutes: integer("activity_minutes"),
   spo2: decimal("spo2", { precision: 4, scale: 1 }),
   recoveryScore: integer("recovery_score"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const insertFitnessMetricSchema = createInsertSchema(fitnessMetrics).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-export type InsertFitnessMetric = z.infer<typeof insertFitnessMetricSchema>;
+export const insertFitnessMetricSchema = createInsertSchema(fitnessMetrics);
+export type InsertFitnessMetric = typeof fitnessMetrics.$inferInsert;
 export type FitnessMetric = typeof fitnessMetrics.$inferSelect;
 
 // AI-generated insights
@@ -98,9 +93,6 @@ export const insights = pgTable("insights", {
   isRead: boolean("is_read").default(false).notNull(),
 });
 
-export const insertInsightSchema = createInsertSchema(insights).omit({
-  id: true,
-  generatedAt: true,
-});
-export type InsertInsight = z.infer<typeof insertInsightSchema>;
+export const insertInsightSchema = createInsertSchema(insights);
+export type InsertInsight = typeof insights.$inferInsert;
 export type Insight = typeof insights.$inferSelect;

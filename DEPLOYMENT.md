@@ -20,8 +20,9 @@ FitSync Pro is now PWA-ready and works great on Railway!
 
 ### Prerequisites
 - GitHub account
-- Vercel account (free tier works great)
+- Railway account (free tier works great)
 - Google Cloud Console project with OAuth credentials
+- OpenAI API key (for AI insights)
 
 ### Step 1: Push to GitHub
 
@@ -43,20 +44,21 @@ git push -u origin main
 5. Add a PostgreSQL database:
    - Click **"+ New"** → **"Database"** → **"Add PostgreSQL"**
    - Railway will automatically set `DATABASE_URL`
-6. Add environment variables in the Variables tab:
-   - `DATABASE_URL` - Your PostgreSQL database URL (use Neon or Vercel Postgres)
-   - `SESSION_SECRET` - Random string for session encryption
-   - `GOOGLE_CLIENT_ID` - From Google Cloud Console
-   - `GOOGLE_CLIENT_SECRET` - From Google Cloud Console
-   - `AI_INTEGRATIONS_OPENAI_API_KEY` - Your OpenAI API key
-   - `AI_INTEGRATIONS_OPENAI_BASE_URL` - OpenAI API base URL (optional)
-   - `ISSUER_URL` - Your Replit Auth issuer URL
-   - `REPL_ID` - Your Replit ID
+6. Add environment variables in the **Variables** tab:
 
-6. Click **"Deploy"**
+   | Variable | Required | Description |
+   | --- | --- | --- |
+   | `PUBLIC_URL` | ✅ | Base HTTPS URL for this deployment. Example: `https://your-app.up.railway.app`. Used for Google OAuth callbacks. |
+   | `DATABASE_URL` | ✅ | Set automatically when you add the Railway PostgreSQL database. |
+   | `SESSION_SECRET` | ✅ | Random string for Express session encryption. |
+   | `GOOGLE_CLIENT_ID` | ✅ | OAuth 2.0 Client ID from Google Cloud Console. |
+   | `GOOGLE_CLIENT_SECRET` | ✅ | OAuth 2.0 Client Secret from Google Cloud Console. |
+   | `AI_INTEGRATIONS_OPENAI_API_KEY` | ✅ | OpenAI key for AI insights. |
+   | `AI_INTEGRATIONS_OPENAI_BASE_URL` | Optional | Override if routing OpenAI requests through a proxy. |
+   | `SESSION_COOKIE_SECURE` / `SESSION_COOKIE_SAMESITE` | Optional | Override cookie behavior if your TLS terminates before Node. |
 
 7. Click **"Deploy"**
-8. Railway will provide a URL like `https://your-app.up.railway.app`
+8. Railway will provide a URL like `https://your-app.up.railway.app` — copy this back into `PUBLIC_URL` anytime it changes (custom domains included).
 
 ### Step 3: Update Google OAuth Redirect URI
 
@@ -64,6 +66,7 @@ After deployment, update your Google Cloud Console OAuth credentials:
 
 **Authorized redirect URIs:**
 ```
+https://your-app.up.railway.app/auth/google/callback
 https://your-app.up.railway.app/api/google-fit/callback
 ```
 
@@ -116,6 +119,7 @@ For production:
 - Service worker only works on HTTPS or localhost
 - Test the PWA installation on your iPad after deployment
 - For Android, use Chrome's "Add to Home screen" option
+- When running locally (`npm run dev`), cookies fall back to HTTP so you can test without HTTPS. In production the server automatically sets `secure` cookies; override with `SESSION_COOKIE_SECURE=false` only if TLS terminates before Node.js.
 
 ### Troubleshooting
 

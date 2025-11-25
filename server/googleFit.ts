@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import { storage } from './storage';
+import { resolveBaseUrl } from "./utils/baseUrl";
 
 const GOOGLE_FIT_SCOPES = [
   'https://www.googleapis.com/auth/fitness.activity.read',
@@ -9,18 +10,10 @@ const GOOGLE_FIT_SCOPES = [
   'https://www.googleapis.com/auth/fitness.body.read',
 ];
 
-// Get the correct redirect URI from environment or construct from REPLIT_DOMAINS
+// Get the correct redirect URI from environment
 function getDefaultRedirectUri(): string {
-  // Try REPLIT_DOMAINS first (most reliable in Replit environment)
-  if (process.env.REPLIT_DOMAINS) {
-    return `https://${process.env.REPLIT_DOMAINS}/api/google-fit/callback`;
-  }
-  // Fallback to REPL_SLUG + REPL_OWNER (legacy)
-  if (process.env.REPL_SLUG && process.env.REPL_OWNER) {
-    return `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/api/google-fit/callback`;
-  }
-  // Final fallback for localhost development
-  return "http://localhost:5000/api/google-fit/callback";
+  const baseUrl = resolveBaseUrl();
+  return `${baseUrl}/auth/google/callback`;
 }
 
 const DEFAULT_REDIRECT_URI = getDefaultRedirectUri();

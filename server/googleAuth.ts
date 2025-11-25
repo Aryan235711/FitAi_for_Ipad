@@ -4,11 +4,23 @@ import session from "express-session";
 import type { Express } from "express";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
+import { resolveBaseUrl } from "./utils/baseUrl";
 
 // Unified Google Auth (login + Fit access in one OAuth flow)
 export function setupAuth(app: Express) {
   // 1. Trust proxy (critical for HTTPS)
   app.set("trust proxy", 1);
+
+  const isProduction = process.env.NODE_ENV === "production";
+  const cookieSecure = process.env.SESSION_COOKIE_SECURE
+    ? process.env.SESSION_COOKIE_SECURE === "true"
+    : isProduction;
+  const cookieSameSite = (process.env.SESSION_COOKIE_SAMESITE as
+    | "lax"
+    | "strict"
+    | "none"
+    | undefined) || (cookieSecure ? "lax" : "lax");
+  const baseUrl = resolveBaseUrl();
 
   // 2. Session middleware
   const pgStore = connectPg(session);
@@ -27,8 +39,8 @@ export function setupAuth(app: Express) {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        secure: true,
-        sameSite: "lax",
+        secure: cookieSecure,
+        sameSite: cookieSameSite,
         maxAge: 7 * 24 * 60 * 60 * 1000,
       },
     })
@@ -39,17 +51,7 @@ export function setupAuth(app: Express) {
   app.use(passport.session());
 
   // 4. Determine callback URL for current environment
-  function getCallbackUrl(): string {
-    if (process.env.REPLIT_DOMAINS) {
-      return `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`;
-    }
-    if (process.env.NODE_ENV === "development") {
-      return "http://localhost:5000/auth/google/callback";
-    }
-    return "http://localhost:5000/auth/google/callback";
-  }
-
-  const callbackUrl = getCallbackUrl();
+  const callbackUrl = `${baseUrl}/auth/google/callback`;
   console.log("[Google Auth] Callback URL:", callbackUrl);
 
   // 5. Google OAuth Strategy - request both profile + Fit scopes in ONE flow

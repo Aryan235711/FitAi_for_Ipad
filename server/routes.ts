@@ -2,9 +2,10 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./googleAuth";
-import { getAuthUrl, exchangeCodeForTokens, fetchGoogleFitData, transformGoogleFitData } from "./googleFit";
+import { getAuthUrl, fetchGoogleFitData, transformGoogleFitData } from "./googleFit";
 import { generateDailyInsight } from "./aiInsights";
-import { insertFitnessMetricSchema } from "@shared/schema";
+import { insertFitnessMetricSchema, type InsertFitnessMetric } from "@shared/schema";
+import { resolveBaseUrl } from "./utils/baseUrl";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth Auth (unified for login + Fit access)
@@ -28,95 +29,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ============== GOOGLE FIT ROUTES ==============
   
-  // DEBUG: List available Google Fit data sources
-  app.get('/api/google-fit/datasources', isAuthenticated, async (req: any, res) => {
-    try {
-      const userId = req.user?.id;
-      const { getValidAccessToken, getOAuth2Client } = await import('./googleFit');
-      const { google } = await import('googleapis');
-      
-      const accessToken = await getValidAccessToken(userId);
-      
-      // Create OAuth2 client and set credentials
-      const oauth2Client = getOAuth2Client();
-      oauth2Client.setCredentials({ access_token: accessToken });
-      
-      const fitness = google.fitness({ version: 'v1', auth: oauth2Client });
-      
-      const response = await fitness.users.dataSources.list({ userId: 'me' });
-      
-      res.json({
-        message: "Available Google Fit Data Sources",
-        dataSources: response.data.dataSource?.map((ds: any) => ({
-          dataStreamId: ds.dataStreamId,
-          dataType: ds.dataType?.name,
-          device: ds.device?.model || 'Unknown',
-          application: ds.application?.name || 'Unknown',
-        })) || [],
-        totalSources: response.data.dataSource?.length || 0,
-      });
-    } catch (error: any) {
-      console.error("Error listing data sources:", error);
-      res.status(500).json({ message: error.message });
-    }
-  });
-  
-  // DEBUG: Show OAuth configuration (PUBLIC - no auth required for debugging)
-  app.get('/api/google-fit/debug', async (req: any, res) => {
-    const replyDomains = process.env.REPLIT_DOMAINS || "unknown";
-    const replId = process.env.REPL_ID || "unknown";
-    const replOwner = process.env.REPL_OWNER || "unknown";
-    
-    // The ONLY redirect URI that matters for THIS deployment
-    const correctRedirectUri = `https://${replyDomains}/api/google-fit/callback`;
-    
-    res.json({
-      message: "CRITICAL: Google OAuth Redirect URI Verification",
-      urgent: "IF YOU'RE GETTING 403 ERRORS, YOU MUST DO THIS NOW:",
-      
-      correctRedirectUri: correctRedirectUri,
-      currentlyUsing: correctRedirectUri,
-      
-      instructions: {
-        step1: "Go to https://console.cloud.google.com/apis/credentials",
-        step2: "Find your OAuth 2.0 Client ID (NOT the secret)",
-        step3: "Click on it to open the details",
-        step4: "Look for 'Authorized redirect URIs' section",
-        step5: "Make sure this URI is EXACTLY registered:",
-        requiredUri: correctRedirectUri,
-        step6: "If not there, click 'ADD URI' and paste:",
-        step7: "Click SAVE",
-        step8: "Wait 5-10 minutes for changes to propagate to Google servers",
-      },
-      
-      debug: {
-        REPLIT_DOMAINS: replyDomains,
-        REPL_ID: replId,
-        REPL_OWNER: replOwner,
-        hasClientId: !!process.env.GOOGLE_CLIENT_ID,
-        hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
-        redirectUriBeingSent: correctRedirectUri,
-      },
-      
-      troubleshooting: {
-        issue: "Still getting 403 error?",
-        check1: "Verify redirect URI is EXACTLY as shown above (case-sensitive, no extra slashes)",
-        check2: "Make sure it's registered in Google Cloud Console for your Client ID",
-        check3: "Wait 10 minutes after saving - Google takes time to propagate",
-        check4: "Try incognito/private browser window",
-        check5: "Clear browser cookies and cache",
-        check6: "Make sure OAuth consent screen is set to 'External'",
-        check7: "Make sure your Gmail is added as a test user",
-      }
-    });
-  });
-  
   // Initiate Google Fit OAuth flow
   app.get('/api/google-fit/connect', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user?.id;
-      // Use req.get('host') instead of req.hostname to include port if needed
-      const redirectUri = `https://${req.get('host')}/api/google-fit/callback`;
+      const redirectUri = `${resolveBaseUrl()}/auth/google/callback`;
       const authUrl = getAuthUrl(userId, redirectUri);
       
       console.log('[Google Fit Connect] Redirect URI:', redirectUri);
@@ -228,7 +145,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const metricData = insertFitnessMetricSchema.parse({
         ...req.body,
         userId,
-      });
+      }) as InsertFitnessMetric;
       
       const metric = await storage.upsertFitnessMetric(metricData);
       res.json(metric);

@@ -56,7 +56,7 @@ export function transformWellnessTriangleData(metrics: FitnessMetric[]) {
     { subject: 'Recovery', A: latest.recoveryScore || 0, fullMark: 100 },
     { subject: 'HRV', A: latest.hrv || 0, fullMark: 100 },
     { subject: 'Sleep', A: latest.sleepScore || 0, fullMark: 100 },
-    { subject: 'RHR', A: normalizeRHR(latest.rhr), fullMark: 100 },
+    { subject: 'RHR', A: normalizeRHR(latest.rhr ?? null), fullMark: 100 },
   ];
 }
 

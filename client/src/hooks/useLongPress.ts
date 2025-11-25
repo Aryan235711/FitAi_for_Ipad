@@ -11,7 +11,7 @@ export function useLongPress({
   duration = 500,
   enabled = true,
 }: UseLongPressOptions) {
-  const timerRef = useRef<NodeJS.Timeout>();
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isLongPressRef = useRef(false);
 
   const start = useCallback((e: React.TouchEvent | React.MouseEvent) => {
@@ -26,8 +26,9 @@ export function useLongPress({
   }, [enabled, duration, onLongPress]);
 
   const cancel = useCallback(() => {
-    if (timerRef.current) {
+    if (timerRef.current !== null) {
       clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
     isLongPressRef.current = false;
   }, []);
