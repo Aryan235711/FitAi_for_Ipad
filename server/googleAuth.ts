@@ -88,30 +88,145 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: any, cb) => cb(null, user));
   passport.deserializeUser((user: any, cb) => cb(null, user));
 
-  // Google OAuth routes
+  // Error handling middleware for OAuth
+  app.use((err: any, req: any, res: any, next: any) => {
+    if (err && req.path.includes("/api/login")) {
+      console.error("[Google OAuth ERROR] Login error:", {
+        message: err.message,
+        name: err.name,
+        status: err.status,
+        statusCode: err.statusCode,
+        stack: err.stack,
+        path: req.path,
+        method: req.method,
+      });
+    }
+    if (err && req.path.includes("/api/google-fit/callback")) {
+      console.error("[Google OAuth ERROR] Callback error:", {
+        message: err.message,
+        name: err.name,
+        status: err.status,
+        statusCode: err.statusCode,
+        stack: err.stack,
+        query: req.query,
+      });
+    }
+    next(err);
+  });
+
+  // Google OAuth routes with detailed logging
   app.get("/api/login", (req, res, next) => {
-    console.log("[Google OAuth] Login initiated from:", req.get("host"));
-    const authenticator = passport.authenticate("google", {
-      scope: ["profile", "email"],
-      accessType: "offline",
-    });
-    authenticator(req, res, next);
+    try {
+      console.log("[Google OAuth] ===== LOGIN ROUTE CALLED =====");
+      console.log("[Google OAuth] Host:", req.get("host"));
+      console.log("[Google OAuth] URL:", req.originalUrl);
+      console.log("[Google OAuth] Client ID present:", !!process.env.GOOGLE_CLIENT_ID);
+      console.log("[Google OAuth] Client Secret present:", !!process.env.GOOGLE_CLIENT_SECRET);
+      
+      const authenticator = passport.authenticate("google", {
+        scope: ["profile", "email"],
+        accessType: "offline",
+        prompt: "consent",
+      });
+      
+      console.log("[Google OAuth] Calling passport.authenticate...");
+      authenticator(req, res, (err: any) => {
+        if (err) {
+          console.error("[Google OAuth] ERROR in authenticator:", {
+            message: err.message,
+            name: err.name,
+            stack: err.stack,
+          });
+          return res.status(500).json({ 
+            error: "OAuth Error", 
+            message: err.message,
+            details: err.stack 
+          });
+        }
+        console.log("[Google OAuth] Authenticator completed without error");
+      });
+    } catch (error: any) {
+      console.error("[Google OAuth] CATCH ERROR in /api/login:", {
+        message: error.message,
+        name: error.name,
+        stack: error.stack,
+      });
+      res.status(500).json({ 
+        error: "Server Error", 
+        message: error.message,
+        details: error.stack 
+      });
+    }
   });
 
   app.get(
     "/api/google-fit/callback",
     (req, res, next) => {
-      console.log("[Google OAuth] Callback received with query:", req.query);
-      const authenticator = passport.authenticate("google", {
-        failureRedirect: "/login?error=google_auth_failed",
-        failureMessage: true,
-      });
-      authenticator(req, res, next);
+      try {
+        console.log("[Google OAuth] ===== CALLBACK ROUTE CALLED =====");
+        console.log("[Google OAuth] Query params:", req.query);
+        console.log("[Google OAuth] Full URL:", req.originalUrl);
+        
+        if (req.query.error) {
+          console.error("[Google OAuth] Google returned error:", req.query.error);
+          console.error("[Google OAuth] Error description:", req.query.error_description);
+          return res.status(400).json({
+            error: req.query.error,
+            description: req.query.error_description,
+          });
+        }
+        
+        if (!req.query.code) {
+          console.error("[Google OAuth] No authorization code received!");
+          return res.status(400).json({ error: "No authorization code" });
+        }
+        
+        console.log("[Google OAuth] Valid code received, authenticating...");
+        
+        const authenticator = passport.authenticate("google", {
+          failureRedirect: "/login?error=google_auth_failed",
+          failureMessage: true,
+        });
+        
+        authenticator(req, res, (err: any) => {
+          if (err) {
+            console.error("[Google OAuth] ERROR in callback authenticator:", {
+              message: err.message,
+              name: err.name,
+              stack: err.stack,
+            });
+            return res.status(500).json({ 
+              error: "OAuth Error", 
+              message: err.message,
+              details: err.stack 
+            });
+          }
+          console.log("[Google OAuth] Callback authenticator completed");
+        });
+      } catch (error: any) {
+        console.error("[Google OAuth] CATCH ERROR in /api/google-fit/callback:", {
+          message: error.message,
+          name: error.name,
+          stack: error.stack,
+        });
+        res.status(500).json({ 
+          error: "Server Error", 
+          message: error.message,
+          details: error.stack 
+        });
+      }
     },
     (req, res) => {
       // Successful authentication
-      console.log("[Google OAuth] Callback successful, redirecting to /");
-      res.redirect("/");
+      try {
+        console.log("[Google OAuth] ===== CALLBACK SUCCESS =====");
+        console.log("[Google OAuth] User:", req.user);
+        console.log("[Google OAuth] Redirecting to /");
+        res.redirect("/");
+      } catch (error: any) {
+        console.error("[Google OAuth] ERROR during redirect:", error.message);
+        res.status(500).json({ error: "Redirect failed", message: error.message });
+      }
     }
   );
 
