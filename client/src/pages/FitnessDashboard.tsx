@@ -60,21 +60,96 @@ export default function FitnessDashboard() {
     ? Math.round((syncIndexScores.recovery + syncIndexScores.hrv + syncIndexScores.sleep) / 3)
     : 0;
   
-  // Use AI insight for vitality description, fallback to dynamic description
-  const getVitalityDescription = () => {
-    // If we have AI insight, use it for vitality description too
-    if (insight && insight !== 'No insights yet. Sync your Google Fit data to get started!') {
-      return insight;
+  // Algorithmic Biometric Signature Analyzer - Pattern-based insights (not AI)
+  const getBiometricSignature = () => {
+    if (!latestMetric || metrics.length < 3) {
+      return 'Sync more data to unlock your unique biometric signature pattern analysis.';
     }
     
-    // Fallback to dynamic description based on metrics
-    if (!latestMetric) return 'Sync your Google Fit data to unlock personalized insights about your overall energy and readiness.';
-    const hasHighHRV = syncIndexScores.hrv >= 70;
-    const hasGoodSleep = syncIndexScores.sleep >= 70;
-    if (hasHighHRV && hasGoodSleep) {
-      return `Your combination of ${hasHighHRV ? 'high HRV' : 'moderate HRV'} and ${hasGoodSleep ? 'consistent sleep' : 'variable sleep'} indicates excellent recovery capacity.`;
-    }
-    return 'Continue tracking your metrics to optimize your vitality score over time.';
+    // Calculate 7-day metrics for trend analysis - keep data aligned!
+    const recent7Days = metrics.slice(-7);
+    
+    // Build aligned arrays: only include days where BOTH metrics exist
+    const alignedPairs = recent7Days.reduce((acc, m) => {
+      if (m.rhr && m.sleepScore) {
+        acc.rhrSleep.rhr.push(m.rhr);
+        acc.rhrSleep.sleep.push(m.sleepScore);
+      }
+      if (m.hrv) acc.hrvValues.push(m.hrv);
+      if (m.sleepScore) acc.sleepValues.push(m.sleepScore);
+      return acc;
+    }, {
+      rhrSleep: { rhr: [] as number[], sleep: [] as number[] },
+      hrvValues: [] as number[],
+      sleepValues: [] as number[],
+    });
+    
+    // Calculate Pearson correlation between RHR and Sleep Quality
+    const calculateCorrelation = (x: number[], y: number[]) => {
+      if (x.length !== y.length || x.length < 3) return 0; // Need at least 3 points
+      const n = x.length;
+      const sumX = x.reduce((a, b) => a + b, 0);
+      const sumY = y.reduce((a, b) => a + b, 0);
+      const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+      const sumX2 = x.reduce((sum, xi) => sum + xi * xi, 0);
+      const sumY2 = y.reduce((sum, yi) => sum + yi * yi, 0);
+      
+      const numerator = n * sumXY - sumX * sumY;
+      const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
+      return denominator === 0 ? 0 : numerator / denominator;
+    };
+    
+    // Detect trend direction (last 3 days vs previous days)
+    const getTrend = (values: number[]) => {
+      if (values.length < 5) return 'stable';
+      const recent = values.slice(-3).reduce((a, b) => a + b, 0) / 3;
+      const prevCount = values.length - 3;
+      const previous = values.slice(0, -3).reduce((a, b) => a + b, 0) / prevCount;
+      if (previous === 0) return 'stable'; // Avoid division by zero
+      const change = ((recent - previous) / previous) * 100;
+      if (change > 5) return 'improving';
+      if (change < -5) return 'declining';
+      return 'stable';
+    };
+    
+    const rhrSleepCorr = calculateCorrelation(alignedPairs.rhrSleep.rhr, alignedPairs.rhrSleep.sleep);
+    const hrvTrend = getTrend(alignedPairs.hrvValues);
+    const hrvValues = alignedPairs.hrvValues;
+    const sleepValues = alignedPairs.sleepValues;
+    
+    // Generate signature pattern
+    const signatures = [
+      // Strong negative RHR-Sleep correlation (good: lower RHR = better sleep)
+      rhrSleepCorr < -0.5 && `⚡ Strong sleep-recovery coupling detected (r=${rhrSleepCorr.toFixed(2)})`,
+      
+      // HRV trend analysis
+      hrvTrend === 'improving' && latestMetric.hrv && latestMetric.hrv > 60 && hrvValues.length >= 2 && hrvValues[0] > 0 &&
+        `📈 Nervous system resilience trending upward (+${((hrvValues[hrvValues.length-1] / hrvValues[0] - 1) * 100).toFixed(1)}% in 7d)`,
+      
+      // Optimal zone detection
+      latestMetric.rhr && latestMetric.rhr < 55 && latestMetric.sleepScore && latestMetric.sleepScore > 85 &&
+        `🎯 Elite recovery zone: RHR ${latestMetric.rhr}bpm + sleep ${latestMetric.sleepScore}/100`,
+      
+      // Circadian stability pattern
+      sleepValues.length >= 5 && sleepValues.length > 0 &&
+        Math.max(...sleepValues) - Math.min(...sleepValues) < 20 &&
+        `🌙 Circadian rhythm locked: ±${(Math.max(...sleepValues) - Math.min(...sleepValues)).toFixed(0)} variance`,
+      
+      // Recovery acceleration pattern
+      latestMetric.recoveryScore && latestMetric.recoveryScore > 90 && 
+        latestMetric.hrv && latestMetric.rhr && latestMetric.rhr > 0 && latestMetric.hrv > latestMetric.rhr * 0.8 &&
+        `⚙️ Peak adaptation state: Recovery ${latestMetric.recoveryScore}/100, HRV:RHR ratio ${(latestMetric.hrv / latestMetric.rhr).toFixed(2)}`,
+    ].filter(Boolean);
+    
+    // Fallback with safe array access
+    const rhrVariance = alignedPairs.rhrSleep.rhr.length > 0 
+      ? Math.round(Math.max(...alignedPairs.rhrSleep.rhr) - Math.min(...alignedPairs.rhrSleep.rhr))
+      : 0;
+    const sleepConsistency = sleepValues.length > 0 
+      ? (100 - (Math.max(...sleepValues) - Math.min(...sleepValues))).toFixed(0)
+      : 0;
+    
+    return signatures[0] || `Biometric variance: RHR ±${rhrVariance}bpm, Sleep consistency ${sleepConsistency}%`;
   };
 
   // Handle Google Fit callback notifications
@@ -112,12 +187,12 @@ export default function FitnessDashboard() {
         </div>
       </header>
 
-      {/* Bento Grid Layout - Refined for full width */}
-      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-6 auto-rows-[minmax(180px,auto)] pb-8">
+      {/* Bento Grid Layout - iPad Optimized */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)] pb-8">
         
         {/* 1. Sync Index (Score Tiles) */}
         <GlassCard 
-            className="col-span-1 md:col-span-2 row-span-1 bg-gradient-to-br from-white/[0.08] to-transparent" 
+            className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-gradient-to-br from-white/[0.08] to-transparent" 
             title="The Sync Index" 
             subtitle="Composite Physiological Score"
         >
@@ -167,7 +242,7 @@ export default function FitnessDashboard() {
 
         {/* 4. Recovery Radar (3D Bubble) */}
         <GlassCard 
-            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-2" 
+            className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-2" 
             title="Recovery Radar" 
             subtitle="Workout Intensity vs Sleep vs RHR"
             delay={0.2}
@@ -179,7 +254,7 @@ export default function FitnessDashboard() {
 
         {/* 5. Nerve Check (Dual Line) */}
         <GlassCard 
-            className="col-span-1 md:col-span-2 row-span-2" 
+            className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-2" 
             title="Nerve Check" 
             subtitle="HRV Trends & Sleep Consistency"
             delay={0.3}
@@ -191,7 +266,7 @@ export default function FitnessDashboard() {
 
         {/* 6. Wellness Triangle (Radar) - Multi-dimensional Health Score */}
         <GlassCard 
-            className="col-span-1 md:col-span-1 row-span-2" 
+            className="col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-1 row-span-2" 
             title="Wellness Triangle" 
             subtitle="Holistic Health Dimensions"
             delay={0.4}
@@ -203,7 +278,7 @@ export default function FitnessDashboard() {
 
         {/* 7. MindShield (Heatmap) */}
         <GlassCard 
-            className="col-span-1 md:col-span-1 row-span-1 md:row-span-2" 
+            className="col-span-1 sm:col-span-2 md:col-span-1 lg:col-span-1 row-span-1 md:row-span-2" 
             title="MindShield" 
             subtitle="Sleep Consistency Map"
             delay={0.5}
@@ -215,7 +290,7 @@ export default function FitnessDashboard() {
         
         {/* 8. Load Balancer (Bar + Line) */}
         <GlassCard 
-            className="col-span-1 md:col-span-2 row-span-2" 
+            className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-2" 
             title="Load Balancer" 
             subtitle="Strain vs Recovery Trends"
             delay={0.55}
@@ -225,9 +300,9 @@ export default function FitnessDashboard() {
             </Suspense>
         </GlassCard>
 
-         {/* 9. Context Card - Adjusted to fill space better */}
+         {/* 9. Context Card - Daily AI Insight */}
          <GlassCard 
-            className="col-span-1 md:col-span-2 row-span-1 bg-primary/5 border-primary/20" 
+            className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-primary/5 border-primary/20" 
             delay={0.6}
         >
             <div className="flex items-center gap-6 h-full">
@@ -243,9 +318,9 @@ export default function FitnessDashboard() {
             </div>
         </GlassCard>
 
-        {/* 10. NEW SURPRISE COMPONENT: Vitality Orb */}
+        {/* 10. Vitality Orb with Biometric Signature */}
         <GlassCard 
-            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 bg-gradient-to-r from-black to-primary/5" 
+            className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-gradient-to-r from-black to-primary/5" 
             delay={0.7}
         >
              <Suspense fallback={<LoadingChart />}>
@@ -255,8 +330,8 @@ export default function FitnessDashboard() {
                    </div>
                    <div className="w-2/3 text-right">
                       <h2 className="text-3xl font-display font-bold text-white">Vitality Score</h2>
-                      <p className="text-white/40 mt-2 text-sm">
-                        {getVitalityDescription()}
+                      <p className="text-white/60 mt-2 text-sm font-mono">
+                        {getBiometricSignature()}
                       </p>
                    </div>
                 </div>
