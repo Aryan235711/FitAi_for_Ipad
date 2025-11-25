@@ -1,0 +1,360 @@
+[vite] failed to connect to websocket.
+your current setup:
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ VM220 client:765
+await in connect
+connect @ VM220 client:289
+connect @ VM220 client:373
+(anonymous) @ VM220 client:823Understand this error
+api.ts:6  GET https://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/api/auth/user 401 (Unauthorized)
+request @ VM268 api.ts:6
+getUser @ VM268 api.ts:29
+queryFn @ VM245 useAuth.ts:6
+fetchFn @ VM232 @tanstack_react-query.js:812
+run @ VM232 @tanstack_react-query.js:477
+start @ VM232 @tanstack_react-query.js:518
+fetch @ VM232 @tanstack_react-query.js:893
+#executeFetch @ VM232 @tanstack_react-query.js:1963
+onSubscribe @ VM232 @tanstack_react-query.js:1840
+subscribe @ VM232 @tanstack_react-query.js:19
+(anonymous) @ VM232 @tanstack_react-query.js:2962
+subscribeToStore @ VM224 react-dom_client.js:6089
+react_stack_bottom_frame @ VM224 react-dom_client.js:18567
+runWithFiberInDEV @ VM224 react-dom_client.js:997
+commitHookEffectListMount @ VM224 react-dom_client.js:9411
+commitHookPassiveMountEffects @ VM224 react-dom_client.js:9465
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11040
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11066
+flushPassiveEffects @ VM224 react-dom_client.js:13150
+flushPendingEffects @ VM224 react-dom_client.js:13088
+performSyncWorkOnRoot @ VM224 react-dom_client.js:13514
+flushSyncWorkAcrossRoots_impl @ VM224 react-dom_client.js:13414
+flushSpawnedWork @ VM224 react-dom_client.js:13067
+commitRoot @ VM224 react-dom_client.js:12804
+commitRootWhenReady @ VM224 react-dom_client.js:12016
+performWorkOnRoot @ VM224 react-dom_client.js:11950
+performWorkOnRootViaSchedulerTask @ VM224 react-dom_client.js:13505
+performWorkUntilDeadline @ VM224 react-dom_client.js:36
+<ProtectedRoute>
+exports.jsxDEV @ VM223 react_jsx-dev-runtime.js:247
+Router @ VM228 App.tsx:12
+react_stack_bottom_frame @ VM224 react-dom_client.js:18509
+renderWithHooks @ VM224 react-dom_client.js:5654
+updateFunctionComponent @ VM224 react-dom_client.js:7475
+beginWork @ VM224 react-dom_client.js:8525
+runWithFiberInDEV @ VM224 react-dom_client.js:997
+performUnitOfWork @ VM224 react-dom_client.js:12561
+workLoopSync @ VM224 react-dom_client.js:12424
+renderRootSync @ VM224 react-dom_client.js:12408
+performWorkOnRoot @ VM224 react-dom_client.js:11766
+performWorkOnRootViaSchedulerTask @ VM224 react-dom_client.js:13505
+performWorkUntilDeadline @ VM224 react-dom_client.js:36
+<Router>
+exports.jsxDEV @ VM223 react_jsx-dev-runtime.js:247
+App @ VM228 App.tsx:83
+react_stack_bottom_frame @ VM224 react-dom_client.js:18509
+renderWithHooks @ VM224 react-dom_client.js:5654
+updateFunctionComponent @ VM224 react-dom_client.js:7475
+beginWork @ VM224 react-dom_client.js:8525
+runWithFiberInDEV @ VM224 react-dom_client.js:997
+performUnitOfWork @ VM224 react-dom_client.js:12561
+workLoopSync @ VM224 react-dom_client.js:12424
+renderRootSync @ VM224 react-dom_client.js:12408
+performWorkOnRoot @ VM224 react-dom_client.js:11766
+performWorkOnRootViaSchedulerTask @ VM224 react-dom_client.js:13505
+performWorkUntilDeadline @ VM224 react-dom_client.js:36
+<App>
+exports.jsxDEV @ VM223 react_jsx-dev-runtime.js:247
+(anonymous) @ VM222 main.tsx:14Understand this error
+api.ts:16 [API Error] /auth/user: {status: 401, statusText: 'Unauthorized', message: 'Unauthorized', errorType: undefined, details: undefined}
+request @ VM268 api.ts:16
+await in request
+getUser @ VM268 api.ts:29
+queryFn @ VM245 useAuth.ts:6
+fetchFn @ VM232 @tanstack_react-query.js:812
+run @ VM232 @tanstack_react-query.js:477
+start @ VM232 @tanstack_react-query.js:518
+fetch @ VM232 @tanstack_react-query.js:893
+#executeFetch @ VM232 @tanstack_react-query.js:1963
+onSubscribe @ VM232 @tanstack_react-query.js:1840
+subscribe @ VM232 @tanstack_react-query.js:19
+(anonymous) @ VM232 @tanstack_react-query.js:2962
+subscribeToStore @ VM224 react-dom_client.js:6089
+react_stack_bottom_frame @ VM224 react-dom_client.js:18567
+runWithFiberInDEV @ VM224 react-dom_client.js:997
+commitHookEffectListMount @ VM224 react-dom_client.js:9411
+commitHookPassiveMountEffects @ VM224 react-dom_client.js:9465
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11040
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM224 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM224 react-dom_client.js:11066
+flushPassiveEffects @ VM224 react-dom_client.js:13150
+flushPendingEffects @ VM224 react-dom_client.js:13088
+performSyncWorkOnRoot @ VM224 react-dom_client.js:13514
+flushSyncWorkAcrossRoots_impl @ VM224 react-dom_client.js:13414
+flushSpawnedWork @ VM224 react-dom_client.js:13067
+commitRoot @ VM224 react-dom_client.js:12804
+commitRootWhenReady @ VM224 react-dom_client.js:12016
+performWorkOnRoot @ VM224 react-dom_client.js:11950
+performWorkOnRootViaSchedulerTask @ VM224 react-dom_client.js:13505
+performWorkUntilDeadline @ VM224 react-dom_client.js:36
+<ProtectedRoute>
+exports.jsxDEV @ VM223 react_jsx-dev-runtime.js:247
+Router @ VM228 App.tsx:12
+react_stack_bottom_frame @ VM224 react-dom_client.js:18509
+renderWithHooks @ VM224 react-dom_client.js:5654
+updateFunctionComponent @ VM224 react-dom_client.js:7475
+beginWork @ VM224 react-dom_client.js:8525
+runWithFiberInDEV @ VM224 react-dom_client.js:997
+performUnitOfWork @ VM224 react-dom_client.js:12561
+workLoopSync @ VM224 react-dom_client.js:12424
+renderRootSync @ VM224 react-dom_client.js:12408
+performWorkOnRoot @ VM224 react-dom_client.js:11766
+performWorkOnRootViaSchedulerTask @ VM224 react-dom_client.js:13505
+performWorkUntilDeadline @ VM224 react-dom_client.js:36
+<Router>
+exports.jsxDEV @ VM223 react_jsx-dev-runtime.js:247
+App @ VM228 App.tsx:83
+react_stack_bottom_frame @ VM224 react-dom_client.js:18509
+renderWithHooks @ VM224 react-dom_client.js:5654
+updateFunctionComponent @ VM224 react-dom_client.js:7475
+beginWork @ VM224 react-dom_client.js:8525
+runWithFiberInDEV @ VM224 react-dom_client.js:997
+performUnitOfWork @ VM224 react-dom_client.js:12561
+workLoopSync @ VM224 react-dom_client.js:12424
+renderRootSync @ VM224 react-dom_client.js:12408
+performWorkOnRoot @ VM224 react-dom_client.js:11766
+performWorkOnRootViaSchedulerTask @ VM224 react-dom_client.js:13505
+performWorkUntilDeadline @ VM224 react-dom_client.js:36
+<App>
+exports.jsxDEV @ VM223 react_jsx-dev-runtime.js:247
+(anonymous) @ VM222 main.tsx:14Understand this error
+accounts.google.com/v3/signin/accountchooser?access_type=offline&client_id=1087323428569-77urllchgl8cannu6rvleohh2llepvc4.apps.googleusercontent.com&redirect_uri=https%3A%2F%2F1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev%2Fapi%2Fgoogle-fit%2Fcallback&response_type=code&scope=profile+email&dsh=S-1239508815%3A1764086464672818&o2v=2&service=lso&flowName=GeneralOAuthFlow&opparams=%253F&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAM9WuW7WbOxBSIW2VwNBBf-ZvX7BbMuyFkcqQSWodiMLbRFk-M5-E9LrsB4511FCDr90QHt6Ow1NEZ6vTGG9GsD8DegsN8koxwK5v6kCGRDJigVQ0sKsqQ19dZssN-9hyBdYH-t6WQxlvs6tKgmf76tTyfECSc9ePYXPKWmRHbiZCE2YhVPD11HH2hPKa8zB3B1woJvhKnVd4CVNFHHE99XrpQzrjqoHQSeOcj4833EEv4CmCQqR_doj9pav1GnVxAOmayy4ol_KHIo10gxgV4mq7L4HzCW9misQ0wBcoW5mK1El1UnUyOvpgT_9muazm2etKQAeFQAPamPCIT_alcWdih-PTznNlD2_l63eWJTBaB9biObDPjvVaid470wNipXuGfGKSpG0IZCreZzpDMRmyVa6mj3fYhjhcE52TeLtiaD9kCA7Co3v2VwevXoaV5rdKyIswUNbRnaEUyMnvtUmoX7zUev5-IKsE9ePMzMLHUhxJ62ioH8lOeJg67J4mty--mITSisVlRiROTmgX5obAHniqMuHZlQvm-w8elzDyFEdZQ%26flowName%3DGeneralOAuthFlow%26as%3DS-1239508815%253A1764086464672818%26client_id%3D1087323428569-77urllchgl8cannu6rvleohh2llepvc4.apps.googleusercontent.com%26requestPath%3D%252Fsignin%252Foauth%252Fconsent%23&app_domain=https%3A%2F%2F1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev:1  Failed to load resource: the server responded with a status of 403 ()Understand this error
+VM279 main.tsx:8 SW registered:  ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/', …}
+VM277 client:745 WebSocket connection to 'wss://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/?token=DH-IEudqF_LB' failed: 
+createConnection @ VM277 client:745
+connect @ VM277 client:411
+connect @ VM277 client:751
+connect @ VM277 client:289
+connect @ VM277 client:373
+(anonymous) @ VM277 client:823Understand this error
+VM277 client:755 WebSocket connection to 'wss://localhost:5173/?token=DH-IEudqF_LB' failed: 
+createConnection @ VM277 client:755
+connect @ VM277 client:411
+connect @ VM277 client:759Understand this error
+VM277 client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ VM277 client:765
+await in connect
+connect @ VM277 client:289
+connect @ VM277 client:373
+(anonymous) @ VM277 client:823Understand this error
+VM326 api.ts:6  GET https://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/api/auth/user 401 (Unauthorized)
+request @ VM326 api.ts:6
+getUser @ VM326 api.ts:29
+queryFn @ VM306 useAuth.ts:6
+fetchFn @ VM289 @tanstack_react-query.js:812
+run @ VM289 @tanstack_react-query.js:477
+start @ VM289 @tanstack_react-query.js:518
+fetch @ VM289 @tanstack_react-query.js:893
+#executeFetch @ VM289 @tanstack_react-query.js:1963
+onSubscribe @ VM289 @tanstack_react-query.js:1840
+subscribe @ VM289 @tanstack_react-query.js:19
+(anonymous) @ VM289 @tanstack_react-query.js:2962
+subscribeToStore @ VM281 react-dom_client.js:6089
+react_stack_bottom_frame @ VM281 react-dom_client.js:18567
+runWithFiberInDEV @ VM281 react-dom_client.js:997
+commitHookEffectListMount @ VM281 react-dom_client.js:9411
+commitHookPassiveMountEffects @ VM281 react-dom_client.js:9465
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11040
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11066
+flushPassiveEffects @ VM281 react-dom_client.js:13150
+flushPendingEffects @ VM281 react-dom_client.js:13088
+performSyncWorkOnRoot @ VM281 react-dom_client.js:13514
+flushSyncWorkAcrossRoots_impl @ VM281 react-dom_client.js:13414
+flushSpawnedWork @ VM281 react-dom_client.js:13067
+commitRoot @ VM281 react-dom_client.js:12804
+commitRootWhenReady @ VM281 react-dom_client.js:12016
+performWorkOnRoot @ VM281 react-dom_client.js:11950
+performWorkOnRootViaSchedulerTask @ VM281 react-dom_client.js:13505
+performWorkUntilDeadline @ VM281 react-dom_client.js:36
+<ProtectedRoute>
+exports.jsxDEV @ VM280 react_jsx-dev-runtime.js:247
+Router @ VM284 App.tsx:12
+react_stack_bottom_frame @ VM281 react-dom_client.js:18509
+renderWithHooks @ VM281 react-dom_client.js:5654
+updateFunctionComponent @ VM281 react-dom_client.js:7475
+beginWork @ VM281 react-dom_client.js:8525
+runWithFiberInDEV @ VM281 react-dom_client.js:997
+performUnitOfWork @ VM281 react-dom_client.js:12561
+workLoopSync @ VM281 react-dom_client.js:12424
+renderRootSync @ VM281 react-dom_client.js:12408
+performWorkOnRoot @ VM281 react-dom_client.js:11766
+performWorkOnRootViaSchedulerTask @ VM281 react-dom_client.js:13505
+performWorkUntilDeadline @ VM281 react-dom_client.js:36
+<Router>
+exports.jsxDEV @ VM280 react_jsx-dev-runtime.js:247
+App @ VM284 App.tsx:83
+react_stack_bottom_frame @ VM281 react-dom_client.js:18509
+renderWithHooks @ VM281 react-dom_client.js:5654
+updateFunctionComponent @ VM281 react-dom_client.js:7475
+beginWork @ VM281 react-dom_client.js:8525
+runWithFiberInDEV @ VM281 react-dom_client.js:997
+performUnitOfWork @ VM281 react-dom_client.js:12561
+workLoopSync @ VM281 react-dom_client.js:12424
+renderRootSync @ VM281 react-dom_client.js:12408
+performWorkOnRoot @ VM281 react-dom_client.js:11766
+performWorkOnRootViaSchedulerTask @ VM281 react-dom_client.js:13505
+performWorkUntilDeadline @ VM281 react-dom_client.js:36
+<App>
+exports.jsxDEV @ VM280 react_jsx-dev-runtime.js:247
+(anonymous) @ VM279 main.tsx:14Understand this error
+VM326 api.ts:16 [API Error] /auth/user: {status: 401, statusText: 'Unauthorized', message: 'Unauthorized', errorType: undefined, details: undefined}
+request @ VM326 api.ts:16
+await in request
+getUser @ VM326 api.ts:29
+queryFn @ VM306 useAuth.ts:6
+fetchFn @ VM289 @tanstack_react-query.js:812
+run @ VM289 @tanstack_react-query.js:477
+start @ VM289 @tanstack_react-query.js:518
+fetch @ VM289 @tanstack_react-query.js:893
+#executeFetch @ VM289 @tanstack_react-query.js:1963
+onSubscribe @ VM289 @tanstack_react-query.js:1840
+subscribe @ VM289 @tanstack_react-query.js:19
+(anonymous) @ VM289 @tanstack_react-query.js:2962
+subscribeToStore @ VM281 react-dom_client.js:6089
+react_stack_bottom_frame @ VM281 react-dom_client.js:18567
+runWithFiberInDEV @ VM281 react-dom_client.js:997
+commitHookEffectListMount @ VM281 react-dom_client.js:9411
+commitHookPassiveMountEffects @ VM281 react-dom_client.js:9465
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11040
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11201
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11033
+recursivelyTraversePassiveMountEffects @ VM281 react-dom_client.js:11010
+commitPassiveMountOnFiber @ VM281 react-dom_client.js:11066
+flushPassiveEffects @ VM281 react-dom_client.js:13150
+flushPendingEffects @ VM281 react-dom_client.js:13088
+performSyncWorkOnRoot @ VM281 react-dom_client.js:13514
+flushSyncWorkAcrossRoots_impl @ VM281 react-dom_client.js:13414
+flushSpawnedWork @ VM281 react-dom_client.js:13067
+commitRoot @ VM281 react-dom_client.js:12804
+commitRootWhenReady @ VM281 react-dom_client.js:12016
+performWorkOnRoot @ VM281 react-dom_client.js:11950
+performWorkOnRootViaSchedulerTask @ VM281 react-dom_client.js:13505
+performWorkUntilDeadline @ VM281 react-dom_client.js:36
+<ProtectedRoute>
+exports.jsxDEV @ VM280 react_jsx-dev-runtime.js:247
+Router @ VM284 App.tsx:12
+react_stack_bottom_frame @ VM281 react-dom_client.js:18509
+renderWithHooks @ VM281 react-dom_client.js:5654
+updateFunctionComponent @ VM281 react-dom_client.js:7475
+beginWork @ VM281 react-dom_client.js:8525
+runWithFiberInDEV @ VM281 react-dom_client.js:997
+performUnitOfWork @ VM281 react-dom_client.js:12561
+workLoopSync @ VM281 react-dom_client.js:12424
+renderRootSync @ VM281 react-dom_client.js:12408
+performWorkOnRoot @ VM281 react-dom_client.js:11766
+performWorkOnRootViaSchedulerTask @ VM281 react-dom_client.js:13505
+performWorkUntilDeadline @ VM281 react-dom_client.js:36
+<Router>
+exports.jsxDEV @ VM280 react_jsx-dev-runtime.js:247
+App @ VM284 App.tsx:83
+react_stack_bottom_frame @ VM281 react-dom_client.js:18509
+renderWithHooks @ VM281 react-dom_client.js:5654
+updateFunctionComponent @ VM281 react-dom_client.js:7475
+beginWork @ VM281 react-dom_client.js:8525
+runWithFiberInDEV @ VM281 react-dom_client.js:997
+performUnitOfWork @ VM281 react-dom_client.js:12561
+workLoopSync @ VM281 react-dom_client.js:12424
+renderRootSync @ VM281 react-dom_client.js:12408
+performWorkOnRoot @ VM281 react-dom_client.js:11766
+performWorkOnRootViaSchedulerTask @ VM281 react-dom_client.js:13505
+performWorkUntilDeadline @ VM281 react-dom_client.js:36
+<App>
+exports.jsxDEV @ VM280 react_jsx-dev-runtime.js:247
+(anonymous) @ VM279 main.tsx:14Understand this error
+accounts.google.com/v3/signin/accountchooser?access_type=offline&client_id=1087323428569-77urllchgl8cannu6rvleohh2llepvc4.apps.googleusercontent.com&prompt=consent&redirect_uri=https%3A%2F%2F1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev%2Fapi%2Fgoogle-fit%2Fcallback&response_type=code&scope=profile+email&dsh=S-117307127%3A1764086627831096&o2v=2&service=lso&flowName=GeneralOAuthFlow&opparams=%253F&continue=https%3A%2F%2Faccounts.google.com%2Fsignin%2Foauth%2Fconsent%3Fauthuser%3Dunknown%26part%3DAJi8hAOlx-vJpy9PCr2cSgz7XUY2HcVVuWpAO6ACVylo95WkAajCi5KRZ9En1RV3rhSN6KDZiMSn1avzRUiG8itYXrJSDBwpJpoGR-br8MXNO6JAZdXMqkiG7wfieAyIpXPZnWdMcR21mZveJllMZe-7nL9iRzHmQnIivHMRYB75BRTdlzN1sfR9q5bx2vXM7Y9FI2shZ5WHAeowFEhxPaFtNTk1VMk96I_Rrq-a63YQ8GAK4hO3PKVQimfwBv9h9vSUmMbDSNJ_daIvbvYiBQ5LoISm0pbDihba55llY9f1Y8-J_7zM_d7ZzKRlpbKWzIs-qrg33-pJtu4Nft8eHY58lZeWvp9J5tm35kOSNWaapZEzjqdlU-_WhorPVOvBLEKjhzTzHx-X0EsNNUjVXJrz1xtELZ6RGmgqAhvagMBhzxro_DaTtUCf-SQREJxE0EjLQimDCppSj4MTkGSoYeyR5KbIhIWnGt6WObgUmFhjt4ve3TRqg23lY2CyxxmYVtnnYMcGWOUYVdObYiYgIhO9-iTO_c1Oc3TqeGtwGaohotcox_Yj9fU%26flowName%3DGeneralOAuthFlow%26as%3DS-117307127%253A1764086627831096%26client_id%3D1087323428569-77urllchgl8cannu6rvleohh2llepvc4.apps.googleusercontent.com%26requestPath%3D%252Fsignin%252Foauth%252Fconsent%23&app_domain=https%3A%2F%2F1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev:1  Failed to load resource: the server responded with a status of 403 ()

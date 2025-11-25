@@ -33,57 +33,82 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Google OAuth Strategy
-  passport.use(
-    new GoogleStrategy(
-      {
-        clientID: process.env.GOOGLE_CLIENT_ID!,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        callbackURL: "/api/google-fit/callback",
-        passReqToCallback: false,
-        accessType: "offline",
-        prompt: "consent",
-      },
-      async (accessToken: string, refreshToken: string, profile: any, done: any) => {
-        try {
-          // Extract user info from Google profile
-          const email = profile.emails?.[0]?.value;
-          const firstName = profile.name?.givenName;
-          const lastName = profile.name?.familyName;
-          const profileImageUrl = profile.photos?.[0]?.value;
-          const userId = profile.id;
+  // Middleware to attach the current host to each request for OAuth callback construction
+  app.use((req, res, next) => {
+    req.baseUrl = req.get("host") || "localhost:5000";
+    next();
+  });
 
-          console.log("[Google OAuth] Authenticated user:", { userId, email });
+  // Middleware to dynamically set the passport strategy's callback URL per request
+  app.use((req, res, next) => {
+    // Extract the full callback URL from request
+    const protocol = req.get("x-forwarded-proto") || req.protocol || "https";
+    const host = req.get("x-forwarded-host") || req.get("host") || "localhost:5000";
+    const fullCallbackUrl = `${protocol}://${host}/api/google-fit/callback`;
+    
+    // Store on request for access in routes
+    req.fullCallbackUrl = fullCallbackUrl;
+    
+    next();
+  });
 
-          // Upsert user into database
-          await storage.upsertUser({
-            id: userId,
-            email: email || "",
-            firstName: firstName || "",
-            lastName: lastName || "",
-            profileImageUrl: profileImageUrl || "",
-          });
+  // Google OAuth Strategy - use dynamic callback URL
+  const googleStrategy = new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      callbackURL: "/api/google-fit/callback",
+      passReqToCallback: true,
+      accessType: "offline",
+      prompt: "consent",
+    },
+      (req: any, accessToken: string, refreshToken: string, profile: any, done: any) => {
+        (async () => {
+          try {
+            // Extract user info from Google profile
+            const email = profile.emails?.[0]?.value;
+            const firstName = profile.name?.givenName;
+            const lastName = profile.name?.familyName;
+            const profileImageUrl = profile.photos?.[0]?.value;
+            const userId = profile.id;
 
-          // Create user object for session
-          const user = {
-            id: userId,
-            email,
-            firstName,
-            lastName,
-            profileImageUrl,
-            accessToken,
-            refreshToken,
-          };
+            console.log("[Google OAuth] ===== VERIFY CALLBACK =====", { userId, email, accessTokenLength: accessToken?.length });
 
-          console.log("[Google OAuth] User session created for:", userId);
-          return done(null, user);
-        } catch (error) {
-          console.error("[Google OAuth] Error:", error);
-          return done(error);
-        }
+            // Upsert user into database
+            await storage.upsertUser({
+              id: userId,
+              email: email || "",
+              firstName: firstName || "",
+              lastName: lastName || "",
+              profileImageUrl: profileImageUrl || "",
+            });
+
+            // Create user object for session
+            const user = {
+              id: userId,
+              email,
+              firstName,
+              lastName,
+              profileImageUrl,
+              accessToken,
+              refreshToken,
+            };
+
+            console.log("[Google OAuth] User session created for:", userId);
+            return done(null, user);
+          } catch (error: any) {
+            console.error("[Google OAuth] Verify callback error:", {
+              message: error.message,
+              stack: error.stack?.split('\n')[0],
+              profile: profile?.id
+            });
+            return done(error);
+          }
+        })();
       }
-    )
   );
+
+  passport.use(googleStrategy);
 
   passport.serializeUser((user: any, cb) => cb(null, user));
   passport.deserializeUser((user: any, cb) => cb(null, user));
@@ -114,48 +139,20 @@ export async function setupAuth(app: Express) {
     next(err);
   });
 
-  // Google OAuth routes with detailed logging
+  // Google Login route
   app.get("/api/login", (req, res, next) => {
     try {
-      console.log("[Google OAuth] ===== LOGIN ROUTE CALLED =====");
+      console.log("[Google OAuth] ===== LOGIN CALLED =====");
+      console.log("[Google OAuth] Full Callback URL:", req.fullCallbackUrl);
       console.log("[Google OAuth] Host:", req.get("host"));
-      console.log("[Google OAuth] URL:", req.originalUrl);
-      console.log("[Google OAuth] Client ID present:", !!process.env.GOOGLE_CLIENT_ID);
-      console.log("[Google OAuth] Client Secret present:", !!process.env.GOOGLE_CLIENT_SECRET);
+      console.log("[Google OAuth] Protocol:", req.get("x-forwarded-proto") || req.protocol);
       
-      const authenticator = passport.authenticate("google", {
+      passport.authenticate("google", {
         scope: ["profile", "email"],
-        accessType: "offline",
-        prompt: "consent",
-      });
-      
-      console.log("[Google OAuth] Calling passport.authenticate...");
-      authenticator(req, res, (err: any) => {
-        if (err) {
-          console.error("[Google OAuth] ERROR in authenticator:", {
-            message: err.message,
-            name: err.name,
-            stack: err.stack,
-          });
-          return res.status(500).json({ 
-            error: "OAuth Error", 
-            message: err.message,
-            details: err.stack 
-          });
-        }
-        console.log("[Google OAuth] Authenticator completed without error");
-      });
+      })(req, res, next);
     } catch (error: any) {
-      console.error("[Google OAuth] CATCH ERROR in /api/login:", {
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-      });
-      res.status(500).json({ 
-        error: "Server Error", 
-        message: error.message,
-        details: error.stack 
-      });
+      console.error("[Google OAuth] Login error:", error.message);
+      res.status(500).json({ error: error.message });
     }
   });
 
