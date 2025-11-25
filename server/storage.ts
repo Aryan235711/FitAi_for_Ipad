@@ -13,7 +13,7 @@ import {
   type InsertInsight,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, asc } from "drizzle-orm";
 import { sql } from "drizzle-orm";
 
 // Interface for storage operations
@@ -163,15 +163,19 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateSleepConsistency(userId: string): Promise<void> {
-    // Get last 30 days to ensure comprehensive consistency calculation
-    const recentMetrics = await this.getFitnessMetrics(userId, 30);
+    // Get ALL metrics to ensure complete historical consistency calculation
+    const allMetrics = await db
+      .select()
+      .from(fitnessMetrics)
+      .where(eq(fitnessMetrics.userId, userId))
+      .orderBy(asc(fitnessMetrics.date));
     
-    if (recentMetrics.length < 3) return;
+    if (allMetrics.length < 3) return;
     
     // Calculate consistency for each day (using preceding days)
-    for (let i = 2; i < recentMetrics.length; i++) {
-      const metric = recentMetrics[i];
-      const precedingMetrics = recentMetrics.slice(Math.max(0, i - 7), i);
+    for (let i = 2; i < allMetrics.length; i++) {
+      const metric = allMetrics[i];
+      const precedingMetrics = allMetrics.slice(Math.max(0, i - 7), i);
       
       if (metric.sleepScore !== null && metric.sleepScore !== undefined && precedingMetrics.length >= 2) {
         const sleepScores = precedingMetrics

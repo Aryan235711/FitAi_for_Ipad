@@ -97,7 +97,7 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
       aggregateBy: [
         { dataTypeName: 'com.google.step_count.delta' },
         { dataTypeName: 'com.google.calories.expended' },
-        { dataTypeName: 'com.google.heart_rate.bpm' },
+        { dataTypeName: 'com.google.heart_rate.summary' }, // Use summary for aggregate API
         { dataTypeName: 'com.google.sleep.segment' },
       ],
       bucketByTime: { durationMillis: '86400000' }, // 1 day buckets (must be string)
@@ -148,10 +148,14 @@ export function transformGoogleFitData(apiData: any, userId: string) {
     // Extract data from buckets
     bucket.dataset?.forEach((dataset: any) => {
       dataset.point?.forEach((point: any) => {
-        // Google Fit dataSourceId format: "derived:com.google.step_count.delta:..." or "raw:com.google..."
-        // We need to extract the actual data type (second part after splitting by ':')
-        const parts = dataset.dataSourceId.split(':');
-        const dataTypeName = parts.length > 1 ? parts[1] : parts[0];
+        // Google Fit provides data type in multiple ways:
+        // 1. dataset.dataType.name (e.g., "com.google.heart_rate.summary")
+        // 2. dataset.dataSourceId split format "derived:com.google.step_count.delta:..."
+        const dataTypeName = dataset.dataType?.name || 
+          (() => {
+            const parts = dataset.dataSourceId?.split(':') || [];
+            return parts.length > 1 ? parts[1] : parts[0];
+          })();
         
         switch (dataTypeName) {
           case 'com.google.step_count.delta':
