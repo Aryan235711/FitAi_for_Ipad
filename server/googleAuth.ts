@@ -39,7 +39,7 @@ export async function setupAuth(app: Express) {
       {
         clientID: process.env.GOOGLE_CLIENT_ID!,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        callbackURL: "/api/callback",
+        callbackURL: "/api/google-fit/callback",
         passReqToCallback: false,
       },
       async (accessToken: string, refreshToken: string, profile: any, done: any) => {
@@ -82,34 +82,14 @@ export async function setupAuth(app: Express) {
   passport.serializeUser((user: any, cb) => cb(null, user));
   passport.deserializeUser((user: any, cb) => cb(null, user));
 
-  // Middleware to set proper callback URL with full domain
-  app.use((req, res, next) => {
-    // Update passport strategy with absolute callback URL
-    const strategy = passport._strategies["google"] as any;
-    if (strategy) {
-      strategy._callbackURL = `https://${req.get("host")}/api/callback`;
-    }
-    next();
-  });
-
   // Google OAuth routes
   app.get("/api/login", (req, res, next) => {
-    // Ensure strategy has the correct callback URL for this request
-    const strategy = passport._strategies["google"] as any;
-    if (strategy) {
-      strategy._callbackURL = `https://${req.get("host")}/api/callback`;
-    }
     passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
   });
 
   app.get(
-    "/api/callback",
+    "/api/google-fit/callback",
     (req, res, next) => {
-      // Ensure strategy has the correct callback URL
-      const strategy = passport._strategies["google"] as any;
-      if (strategy) {
-        strategy._callbackURL = `https://${req.get("host")}/api/callback`;
-      }
       passport.authenticate("google", { failureRedirect: "/login?error=google_auth_failed" })(req, res, next);
     },
     (req, res) => {
