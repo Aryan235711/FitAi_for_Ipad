@@ -161,10 +161,28 @@ export function transformGoogleFitData(apiData: any, userId: string) {
             metric.calories += Math.round(point.value[0]?.fpVal || 0);
             break;
           case 'com.google.heart_rate.bpm':
-            // Average heart rate (simplified - use minimum as RHR approximation)
-            const currentHr = Math.round(point.value[0]?.fpVal || 0);
-            if (currentHr > 0) {
-              metric.rhr = metric.rhr ? Math.min(metric.rhr, currentHr) : currentHr;
+            // Google Fit heart rate uses mapVal with min/max/avg
+            // Extract minimum heart rate as RHR approximation
+            if (point.value[0]?.mapVal) {
+              const minHrEntry = point.value[0].mapVal.find((m: any) => m.key === 'min');
+              const avgHrEntry = point.value[0].mapVal.find((m: any) => m.key === 'average');
+              
+              // Use min if available, otherwise average
+              const currentHr = minHrEntry 
+                ? Math.round(minHrEntry.value.fpVal)
+                : avgHrEntry
+                ? Math.round(avgHrEntry.value.fpVal)
+                : 0;
+              
+              if (currentHr > 0) {
+                metric.rhr = metric.rhr ? Math.min(metric.rhr, currentHr) : currentHr;
+              }
+            } else if (point.value[0]?.fpVal) {
+              // Fallback for direct fpVal if available
+              const currentHr = Math.round(point.value[0].fpVal);
+              if (currentHr > 0) {
+                metric.rhr = metric.rhr ? Math.min(metric.rhr, currentHr) : currentHr;
+              }
             }
             break;
           case 'com.google.sleep.segment':

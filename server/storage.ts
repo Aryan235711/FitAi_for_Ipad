@@ -163,8 +163,8 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateSleepConsistency(userId: string): Promise<void> {
-    // Get last 7 days to calculate consistency
-    const recentMetrics = await this.getFitnessMetrics(userId, 8);
+    // Get last 30 days to ensure comprehensive consistency calculation
+    const recentMetrics = await this.getFitnessMetrics(userId, 30);
     
     if (recentMetrics.length < 3) return;
     
