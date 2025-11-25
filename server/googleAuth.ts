@@ -1,11 +1,11 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import session from "express-session";
-import type { Express, Request } from "express";
+import type { Express } from "express";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-// Simplified Google Auth Setup
+// Unified Google Auth (login + Fit access in one OAuth flow)
 export function setupAuth(app: Express) {
   // 1. Trust proxy (critical for HTTPS)
   app.set("trust proxy", 1);
@@ -38,14 +38,35 @@ export function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // 4. Google OAuth Strategy with absolute callback URL
-  const callbackUrl = `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`;
+  // 4. Determine callback URL for current environment
+  function getCallbackUrl(): string {
+    if (process.env.REPLIT_DOMAINS) {
+      return `https://${process.env.REPLIT_DOMAINS}/auth/google/callback`;
+    }
+    if (process.env.NODE_ENV === "development") {
+      return "http://localhost:5000/auth/google/callback";
+    }
+    return "http://localhost:5000/auth/google/callback";
+  }
+
+  const callbackUrl = getCallbackUrl();
   console.log("[Google Auth] Callback URL:", callbackUrl);
+
+  // 5. Google OAuth Strategy - request both profile + Fit scopes in ONE flow
+  const SCOPES = [
+    "profile",
+    "email",
+    "https://www.googleapis.com/auth/fitness.activity.read",
+    "https://www.googleapis.com/auth/fitness.heart_rate.read",
+    "https://www.googleapis.com/auth/fitness.sleep.read",
+    "https://www.googleapis.com/auth/fitness.nutrition.read",
+    "https://www.googleapis.com/auth/fitness.body.read",
+  ];
 
   const googleStrategy = new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientID: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       callbackURL: callbackUrl,
     },
     async (accessToken: string, refreshToken: string, profile: any, done: any) => {
@@ -67,14 +88,23 @@ export function setupAuth(app: Express) {
           profileImageUrl,
         });
 
+        // Save the Google Fit tokens from login for Fit API access
+        if (refreshToken || accessToken) {
+          await storage.saveGoogleFitToken({
+            userId,
+            accessToken,
+            refreshToken: refreshToken || undefined,
+            expiresAt: new Date(Date.now() + 3600 * 1000),
+            scope: SCOPES.join(" "),
+          });
+        }
+
         const user = {
           id: userId,
           email,
           firstName,
           lastName,
           profileImageUrl,
-          accessToken,
-          refreshToken,
         };
 
         return done(null, user);
@@ -87,20 +117,24 @@ export function setupAuth(app: Express) {
 
   passport.use(googleStrategy);
 
-  // 5. Serialization
+  // 6. Serialization
   passport.serializeUser((user: any, done) => done(null, user));
   passport.deserializeUser((user: any, done) => done(null, user));
 
-  // 6. Authentication routes
+  // 7. Authentication routes
   app.get(
     "/auth/google",
-    passport.authenticate("google", { scope: ["profile", "email"] })
+    passport.authenticate("google", { 
+      scope: SCOPES,
+      accessType: "offline",
+      prompt: "consent"
+    })
   );
 
   app.get(
     "/auth/google/callback",
     passport.authenticate("google", { failureRedirect: "/" }),
-    (req, res) => {
+    (req: any, res) => {
       console.log("[Google Auth] Callback success, redirecting to /");
       res.redirect("/");
     }
@@ -108,6 +142,7 @@ export function setupAuth(app: Express) {
 
   app.get("/auth/logout", (req: any, res) => {
     req.logout((err: any) => {
+      if (err) console.error("[Google Auth] Logout error:", err);
       console.log("[Google Auth] Logout");
       res.redirect("/");
     });
