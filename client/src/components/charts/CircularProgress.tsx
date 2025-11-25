@@ -32,11 +32,11 @@ export function CircularProgress({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="rgba(255,255,255,0.08)"
+          stroke="rgba(255,255,255,0.05)"
           strokeWidth={strokeWidth}
         />
         
-        {/* Main Fluid Filling Stroke */}
+        {/* Fluid Filling Stroke */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}
@@ -45,20 +45,18 @@ export function CircularProgress({
           stroke={color}
           strokeWidth={strokeWidth}
           strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference, opacity: 0 }}
-          animate={{ 
-            strokeDashoffset: targetOffset,
-            opacity: 1,
-          }}
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: targetOffset }}
           transition={{ 
-            strokeDashoffset: { duration: 2.5, ease: [0.34, 1.56, 0.64, 1] },
-            opacity: { duration: 0.5, delay: delay + 0.1 }
+            duration: 2, 
+            ease: [0.22, 1, 0.36, 1], // Custom cubic bezier for "liquid" feel
+            delay: delay + 0.2 
           }}
           strokeLinecap="round"
-          className="drop-shadow-lg"
+          className="drop-shadow-[0_0_10px_rgba(0,0,0,0.5)]"
         />
         
-        {/* Subtle Glow Behind - Spilling Effect */}
+        {/* Optional: Glow Effect Layer behind */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}
@@ -68,13 +66,11 @@ export function CircularProgress({
           strokeWidth={strokeWidth + 4}
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference, opacity: 0 }}
-          animate={{ 
-            strokeDashoffset: targetOffset, 
-            opacity: 0.25,
-          }}
+          animate={{ strokeDashoffset: targetOffset, opacity: 0.2 }}
           transition={{ 
-            strokeDashoffset: { duration: 2.5, ease: [0.34, 1.56, 0.64, 1], delay: delay + 0.1 },
-            opacity: { duration: 0.5, delay: delay + 0.2 }
+            duration: 2, 
+            ease: [0.22, 1, 0.36, 1], 
+            delay: delay + 0.2 
           }}
           strokeLinecap="round"
           className="blur-md"

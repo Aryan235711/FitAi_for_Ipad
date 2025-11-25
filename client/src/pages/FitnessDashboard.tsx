@@ -525,13 +525,13 @@ export default function FitnessDashboard() {
             delay={0.7}
         >
              <Suspense fallback={<LoadingChart />}>
-                <div className="flex flex-col md:flex-row items-center md:items-center gap-6 md:gap-8 h-full">
-                   <div className="w-full md:w-2/5 h-[180px] flex-shrink-0">
+                <div className="flex items-center justify-between h-full pr-8">
+                   <div className="w-1/3 h-full">
                       <VitalityOrb score={vitalityScore} hrv={syncIndexScores.hrv} sleep={syncIndexScores.sleep} />
                    </div>
-                   <div className="w-full md:w-3/5 md:border-l border-white/10 md:pl-8">
-                      <h2 className="text-3xl font-display font-bold text-white mb-2">Vitality Score</h2>
-                      <p className="text-white/60 text-sm font-mono leading-relaxed">
+                   <div className="w-2/3 text-right">
+                      <h2 className="text-3xl font-display font-bold text-white">Vitality Score</h2>
+                      <p className="text-white/60 mt-2 text-sm font-mono">
                         {getBiometricSignature()}
                       </p>
                    </div>
