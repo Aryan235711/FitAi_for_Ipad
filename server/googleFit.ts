@@ -259,5 +259,11 @@ export function transformGoogleFitData(apiData: any, userId: string) {
     return metric;
   });
   
-  return metrics.filter((m: any) => m.steps > 0 || m.calories > 0); // Filter out empty days
+  // Keep days with any meaningful data (steps, calories, sleep, OR heart rate)
+  return metrics.filter((m: any) => 
+    m.steps > 0 || 
+    m.calories > 0 || 
+    m.totalSleepMinutes > 0 || 
+    m.rhr !== null
+  );
 }
