@@ -109,62 +109,70 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
       requestBody: aggregateRequest as any,
     });
     
-    // Try to fetch heart rate data from all available sources
+    // Try to fetch heart rate data from available data sources
+    // Amazfit/Zepp and other third-party apps don't work with aggregate API
+    // so we fetch directly from data streams
     try {
-      // First, try the summary endpoint
-      try {
-        const heartRateRequest = {
-          aggregateBy: [
-            { dataTypeName: 'com.google.heart_rate.summary' },
-          ],
-          bucketByTime: { durationMillis: '86400000' },
-          startTimeMillis: startTimeMillis.toString(),
-          endTimeMillis: endTimeMillis.toString(),
-        };
+      console.log('[Google Fit] Attempting to fetch heart rate data...');
+      
+      // Get all available heart rate data sources
+      const dataSources = await fitness.users.dataSources.list({ userId: 'me' });
+      const heartRateSource = dataSources.data.dataSource?.find((ds: any) => 
+        ds.dataType?.name === 'com.google.heart_rate.bpm'
+      );
+      
+      if (heartRateSource) {
+        console.log('[Google Fit] Found heart rate data source:', heartRateSource.dataStreamId);
         
-        const heartRateResponse = await fitness.users.dataset.aggregate({
+        // Fetch heart rate data directly from the data stream
+        const datasetId = `${startTimeMillis * 1000000}-${endTimeMillis * 1000000}`;
+        const hrData = await fitness.users.dataSources.datasets.get({
           userId: 'me',
-          requestBody: heartRateRequest as any,
+          dataSourceId: heartRateSource.dataStreamId!,
+          datasetId: datasetId,
         });
         
-        // Merge heart rate data into main response
-        if (heartRateResponse.data.bucket) {
-          response.data.bucket?.forEach((bucket: any, index: number) => {
-            if (heartRateResponse.data.bucket[index]?.dataset) {
-              bucket.dataset = [...(bucket.dataset || []), ...heartRateResponse.data.bucket[index].dataset];
+        // Create buckets for heart rate data
+        if (hrData.data.point && hrData.data.point.length > 0) {
+          console.log(`[Google Fit] Found ${hrData.data.point.length} heart rate data points`);
+          
+          // Group heart rate points by day
+          const hrByDay = new Map<string, any[]>();
+          hrData.data.point.forEach((point: any) => {
+            const pointDate = new Date(parseInt(point.startTimeNanos) / 1000000);
+            const dateKey = pointDate.toISOString().split('T')[0];
+            
+            if (!hrByDay.has(dateKey)) {
+              hrByDay.set(dateKey, []);
+            }
+            hrByDay.get(dateKey)!.push(point);
+          });
+          
+          // Add heart rate data to corresponding buckets
+          response.data.bucket?.forEach((bucket: any) => {
+            const bucketDate = new Date(parseInt(bucket.startTimeMillis)).toISOString().split('T')[0];
+            const hrPoints = hrByDay.get(bucketDate);
+            
+            if (hrPoints && hrPoints.length > 0) {
+              // Create a synthetic dataset for this bucket
+              const hrDataset = {
+                dataSourceId: heartRateSource.dataStreamId,
+                point: hrPoints,
+              };
+              
+              bucket.dataset = [...(bucket.dataset || []), hrDataset];
             }
           });
+          
+          console.log('[Google Fit] Successfully integrated heart rate data into buckets');
+        } else {
+          console.log('[Google Fit] No heart rate data points found in date range');
         }
-        console.log('[Google Fit] Successfully fetched heart rate data from summary endpoint');
-      } catch (summaryError: any) {
-        console.log('[Google Fit] Summary endpoint failed, trying BPM endpoint...', summaryError.message);
-        
-        // Try the BPM endpoint as alternative
-        const heartRateBpmRequest = {
-          aggregateBy: [
-            { dataTypeName: 'com.google.heart_rate.bpm' },
-          ],
-          bucketByTime: { durationMillis: '86400000' },
-          startTimeMillis: startTimeMillis.toString(),
-          endTimeMillis: endTimeMillis.toString(),
-        };
-        
-        const bpmResponse = await fitness.users.dataset.aggregate({
-          userId: 'me',
-          requestBody: heartRateBpmRequest as any,
-        });
-        
-        if (bpmResponse.data.bucket) {
-          response.data.bucket?.forEach((bucket: any, index: number) => {
-            if (bpmResponse.data.bucket[index]?.dataset) {
-              bucket.dataset = [...(bucket.dataset || []), ...bpmResponse.data.bucket[index].dataset];
-            }
-          });
-        }
-        console.log('[Google Fit] Successfully fetched heart rate data from BPM endpoint');
+      } else {
+        console.log('[Google Fit] No heart rate data source found - this is normal if you haven\'t synced your Amazfit/Zepp data');
       }
     } catch (hrError: any) {
-      console.log('[Google Fit] Heart rate data not available:', hrError.message);
+      console.log('[Google Fit] Error fetching heart rate data:', hrError.message);
       // Continue without heart rate data
     }
     
