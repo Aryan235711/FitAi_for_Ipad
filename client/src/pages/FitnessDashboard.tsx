@@ -54,6 +54,22 @@ export default function FitnessDashboard() {
   const loadBalancerData = transformLoadBalancerData(metrics);
   const mindShieldData = transformMindShieldData(metrics);
   const syncIndexScores = calculateSyncIndexScores(metrics);
+  
+  // Calculate vitality score (combination of readiness and recovery)
+  const vitalityScore = latestMetric 
+    ? Math.round((syncIndexScores.recovery + syncIndexScores.hrv + syncIndexScores.sleep) / 3)
+    : 0;
+  
+  // Dynamic description based on actual data
+  const getVitalityDescription = () => {
+    if (!latestMetric) return 'Sync your Google Fit data to unlock personalized insights about your overall energy and readiness.';
+    const hasHighHRV = syncIndexScores.hrv >= 70;
+    const hasGoodSleep = syncIndexScores.sleep >= 70;
+    if (hasHighHRV && hasGoodSleep) {
+      return `Your combination of ${hasHighHRV ? 'high HRV' : 'moderate HRV'} and ${hasGoodSleep ? 'consistent sleep' : 'variable sleep'} indicates excellent recovery capacity.`;
+    }
+    return 'Continue tracking your metrics to optimize your vitality score over time.';
+  };
 
   // Handle Google Fit callback notifications
   useEffect(() => {
@@ -229,12 +245,12 @@ export default function FitnessDashboard() {
              <Suspense fallback={<LoadingChart />}>
                 <div className="flex items-center justify-between h-full pr-8">
                    <div className="w-1/3 h-full">
-                      <VitalityOrb />
+                      <VitalityOrb score={vitalityScore} hrv={syncIndexScores.hrv} sleep={syncIndexScores.sleep} />
                    </div>
                    <div className="w-2/3 text-right">
                       <h2 className="text-3xl font-display font-bold text-white">Vitality Score</h2>
                       <p className="text-white/40 mt-2 text-sm">
-                        Your overall energy field is expanding. The combination of <span className="text-secondary">high HRV</span> and <span className="text-accent">consistent sleep</span> has unlocked a new performance tier.
+                        {getVitalityDescription()}
                       </p>
                    </div>
                 </div>

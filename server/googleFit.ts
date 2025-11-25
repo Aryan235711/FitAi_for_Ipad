@@ -99,14 +99,14 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
         { dataTypeName: 'com.google.heart_rate.bpm' },
         { dataTypeName: 'com.google.sleep.segment' },
       ],
-      bucketByTime: { durationMillis: 86400000 }, // 1 day buckets
-      startTimeMillis,
-      endTimeMillis,
+      bucketByTime: { durationMillis: '86400000' }, // 1 day buckets (must be string)
+      startTimeMillis: startTimeMillis.toString(),
+      endTimeMillis: endTimeMillis.toString(),
     };
     
     const response = await fitness.users.dataset.aggregate({
       userId: 'me',
-      requestBody: aggregateRequest,
+      requestBody: aggregateRequest as any,
     });
     
     return response.data;
