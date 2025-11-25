@@ -25,25 +25,7 @@ export function CircularProgress({
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      {/* Animated Fluid Spill Background */}
-      <motion.div
-        className="absolute inset-0 rounded-full"
-        animate={{
-          boxShadow: [
-            `inset 0 0 0 0 ${color}22, 0 0 15px 0 ${color}33`,
-            `inset 0 0 20px 0 ${color}33, 0 0 25px 0 ${color}22`,
-            `inset 0 0 0 0 ${color}22, 0 0 15px 0 ${color}33`,
-          ]
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: delay
-        }}
-      />
-      
-      <svg width={size} height={size} className="transform -rotate-90 overflow-visible drop-shadow-lg">
+      <svg width={size} height={size} className="transform -rotate-90 overflow-visible">
         {/* Background Track */}
         <circle
           cx={size / 2}
@@ -54,7 +36,7 @@ export function CircularProgress({
           strokeWidth={strokeWidth}
         />
         
-        {/* Main Fluid Filling Stroke with Wave Effect */}
+        {/* Main Fluid Filling Stroke */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}
@@ -67,56 +49,32 @@ export function CircularProgress({
           animate={{ 
             strokeDashoffset: targetOffset,
             opacity: 1,
-            filter: ['drop-shadow(0 0 5px rgba(0,0,0,0.3))', 'drop-shadow(0 0 15px rgba(0,0,0,0.5))', 'drop-shadow(0 0 5px rgba(0,0,0,0.3))']
           }}
           transition={{ 
             strokeDashoffset: { duration: 2.5, ease: [0.34, 1.56, 0.64, 1] },
-            opacity: { duration: 0.5, delay: delay + 0.1 },
-            filter: { duration: 2, repeat: Infinity, ease: "easeInOut", delay: delay + 0.5 }
+            opacity: { duration: 0.5, delay: delay + 0.1 }
           }}
           strokeLinecap="round"
-          style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.4))' }}
+          className="drop-shadow-lg"
         />
         
-        {/* Outer Glow/Aura Layer - Spilling Effect */}
+        {/* Subtle Glow Behind - Spilling Effect */}
         <motion.circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
           fill="none"
           stroke={color}
-          strokeWidth={strokeWidth + 6}
+          strokeWidth={strokeWidth + 4}
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference, opacity: 0 }}
           animate={{ 
             strokeDashoffset: targetOffset, 
-            opacity: [0, 0.4, 0.2, 0.4, 0],
+            opacity: 0.25,
           }}
           transition={{ 
-            strokeDashoffset: { duration: 2.5, ease: [0.34, 1.56, 0.64, 1], delay: delay + 0.15 },
-            opacity: { duration: 2.5, ease: "easeInOut", delay: delay + 0.15 }
-          }}
-          strokeLinecap="round"
-          className="blur-sm"
-        />
-
-        {/* Ripple/Wave Effect - Spilling illusion */}
-        <motion.circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius + 4}
-          fill="none"
-          stroke={color}
-          strokeWidth={2}
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference, opacity: 0 }}
-          animate={{ 
-            strokeDashoffset: targetOffset,
-            opacity: [0, 0.6, 0],
-          }}
-          transition={{ 
-            strokeDashoffset: { duration: 2.5, ease: [0.34, 1.56, 0.64, 1], delay: delay + 0.3 },
-            opacity: { duration: 2.5, ease: "easeInOut", delay: delay + 0.3 }
+            strokeDashoffset: { duration: 2.5, ease: [0.34, 1.56, 0.64, 1], delay: delay + 0.1 },
+            opacity: { duration: 0.5, delay: delay + 0.2 }
           }}
           strokeLinecap="round"
           className="blur-md"
