@@ -161,6 +161,7 @@ export function transformGoogleFitData(apiData: any, userId: string) {
             metric.calories += Math.round(point.value[0]?.fpVal || 0);
             break;
           case 'com.google.heart_rate.bpm':
+          case 'com.google.heart_rate.summary':
             // Google Fit heart rate uses mapVal with min/max/avg
             // Extract minimum heart rate as RHR approximation
             if (point.value[0]?.mapVal) {
