@@ -44,13 +44,13 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <button 
           onClick={handleSync}
           disabled={isSyncing}
-          className="flex items-center gap-2 px-4 py-3 rounded-full bg-white/5 backdrop-blur-md border border-white/10 active:bg-white/10 active:border-primary/50 transition-all duration-300 disabled:opacity-50 min-h-[44px] min-w-[44px]"
+          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-primary/50 transition-all duration-500 disabled:opacity-50"
           data-testid="button-sync-fit"
         >
           {isSyncing ? (
             <Loader2 className="w-4 h-4 text-primary animate-spin" />
           ) : (
-            <RefreshCw className="w-4 h-4 text-primary" />
+            <RefreshCw className="w-4 h-4 text-primary group-hover:rotate-180 transition-transform duration-700 ease-in-out" />
           )}
           <span className="text-xs font-medium text-white/80">
             {isConnected ? 'Sync Fit' : 'Connect Fit'}
@@ -60,7 +60,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button 
-              className="p-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 active:bg-white/10 active:border-white/30 transition-all duration-300 min-h-[44px] min-w-[44px]"
+              className="p-1 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300"
               data-testid="button-profile"
             >
               {user?.profileImageUrl ? (
@@ -85,7 +85,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
             <DropdownMenuSeparator className="bg-white/10" />
             <DropdownMenuItem 
               onClick={() => window.location.href = '/api/logout'}
-              className="text-white active:bg-white/10 cursor-pointer"
+              className="text-white hover:bg-white/10 cursor-pointer"
               data-testid="menu-item-logout"
             >
               <LogOut className="w-4 h-4 mr-2" />
@@ -95,8 +95,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         </DropdownMenu>
       </div>
 
-      {/* Main Content - Optimized for landscape */}
-      <main className="relative z-10 h-screen overflow-y-auto scrollbar-hide p-3 md:p-6 lg:p-8 landscape:p-4 landscape:overflow-x-auto landscape:overflow-y-hidden">
+      {/* Main Content */}
+      <main className="relative z-10 h-screen overflow-y-auto scrollbar-hide p-4 md:p-8 lg:p-12">
         <div className="max-w-[1600px] mx-auto h-full flex flex-col">
             {children}
         </div>
