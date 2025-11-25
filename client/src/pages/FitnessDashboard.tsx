@@ -6,6 +6,11 @@ import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { ArrowUpRight, Zap, Battery, Brain, Loader2, TrendingUp, Target, Moon, Activity, BarChart3, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useFitnessData } from "@/hooks/useFitnessData";
+import { useGoogleFit } from "@/hooks/useGoogleFit";
+import { usePullToRefresh } from "@/hooks/usePullToRefresh";
+import { useLongPress } from "@/hooks/useLongPress";
+import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
+import { MetricTooltip } from "@/components/ui/MetricTooltip";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
 import {
@@ -45,8 +50,50 @@ export default function FitnessDashboard() {
     readinessChange,
     strainScore 
   } = useFitnessData();
+  
+  const { sync, isSyncing, isConnected } = useGoogleFit();
 
   const userName = user?.firstName || user?.email?.split('@')[0] || 'User';
+
+  // Pull-to-refresh functionality
+  const handleRefresh = async () => {
+    if (!isConnected) {
+      toast.error('Please connect Google Fit first');
+      return;
+    }
+    
+    try {
+      await new Promise<void>((resolve, reject) => {
+        sync(undefined, {
+          onSuccess: () => resolve(),
+          onError: (error) => reject(error),
+        });
+      });
+    } catch (error) {
+      // Error already handled by sync mutation
+      throw error;
+    }
+  };
+
+  const { containerRef, pullDistance, isRefreshing, isThresholdMet } = usePullToRefresh({
+    onRefresh: handleRefresh,
+    threshold: 80,
+    enabled: isConnected,
+  });
+
+  // Long-press tooltips for key metrics
+  const [readinessTooltipOpen, setReadinessTooltipOpen] = React.useState(false);
+  const [strainTooltipOpen, setStrainTooltipOpen] = React.useState(false);
+
+  const readinessLongPress = useLongPress({
+    onLongPress: () => setReadinessTooltipOpen(true),
+    duration: 400,
+  });
+
+  const strainLongPress = useLongPress({
+    onLongPress: () => setStrainTooltipOpen(true),
+    duration: 400,
+  });
 
   // Transform data for charts
   const recoveryRadarData = transformRecoveryRadarData(metrics);
@@ -198,6 +245,15 @@ export default function FitnessDashboard() {
 
   return (
     <DashboardLayout>
+      {/* Pull-to-Refresh Indicator */}
+      <PullToRefreshIndicator
+        pullDistance={pullDistance}
+        isRefreshing={isRefreshing}
+        threshold={80}
+      />
+      
+      {/* Main Content Container with Pull-to-Refresh */}
+      <div ref={containerRef}>
       {/* Header Area - Simplified since nav is gone */}
       <header className="flex justify-between items-end mb-8 pt-4">
         <div>
@@ -234,7 +290,11 @@ export default function FitnessDashboard() {
         </GlassCard>
 
         {/* 2. Key Metric - Readiness */}
-        <GlassCard className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" delay={0.1}>
+        <GlassCard 
+          className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" 
+          delay={0.1}
+        >
+          <div {...readinessLongPress.handlers} data-testid="card-readiness-metric">
             <div className="flex justify-between items-start">
                 <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-black transition-colors duration-300 shadow-[0_0_15px_rgba(132,204,22,0.1)] group-hover:shadow-[0_0_20px_rgba(132,204,22,0.6)]">
                     <Zap className="w-6 h-6" />
@@ -269,10 +329,30 @@ export default function FitnessDashboard() {
                     </span>
                 </motion.div>
             </div>
+          </div>
         </GlassCard>
 
+        {/* Readiness Tooltip */}
+        <MetricTooltip
+          isOpen={readinessTooltipOpen}
+          onClose={() => setReadinessTooltipOpen(false)}
+          title="Readiness Score"
+          value={readinessScore !== null ? `${readinessScore}%` : '--'}
+          description="Your readiness score indicates how prepared your body is for physical and mental challenges today. It combines sleep quality, recovery metrics, and heart rate variability."
+          trend={readinessChange !== null ? `${readinessChange > 0 ? '+' : ''}${readinessChange}% from yesterday` : undefined}
+          details={latestMetric ? [
+            { label: 'Sleep Score', value: latestMetric.sleepScore ? `${latestMetric.sleepScore}/100` : 'N/A' },
+            { label: 'Recovery Score', value: latestMetric.recoveryScore ? `${latestMetric.recoveryScore}/100` : 'N/A' },
+            { label: 'HRV', value: latestMetric.hrv ? `${latestMetric.hrv} ms` : 'N/A' },
+          ] : undefined}
+        />
+
          {/* 3. Key Metric - Strain */}
-         <GlassCard className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" delay={0.15}>
+         <GlassCard 
+           className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" 
+           delay={0.15}
+         >
+          <div {...strainLongPress.handlers} data-testid="card-strain-metric">
             <div className="flex justify-between items-start">
                 <div className="p-3 rounded-2xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors duration-300 shadow-[0_0_15px_rgba(255,0,153,0.1)] group-hover:shadow-[0_0_20px_rgba(255,0,153,0.6)]">
                     <Battery className="w-6 h-6" />
@@ -294,7 +374,23 @@ export default function FitnessDashboard() {
                     <span>{strainScore && strainScore > 10 ? 'Optimal Zone' : 'Low Activity'}</span>
                 </motion.div>
             </div>
+          </div>
         </GlassCard>
+
+        {/* Strain Tooltip */}
+        <MetricTooltip
+          isOpen={strainTooltipOpen}
+          onClose={() => setStrainTooltipOpen(false)}
+          title="Strain Score"
+          value={strainScore !== null ? strainScore.toFixed(1) : '--'}
+          description="Strain measures the physical and cardiovascular load your body has experienced based on workout intensity and daily activity levels."
+          trend={strainScore && strainScore > 10 ? 'Optimal training zone' : 'Low activity detected'}
+          details={latestMetric ? [
+            { label: 'Workout Intensity', value: latestMetric.workoutIntensity ? `${latestMetric.workoutIntensity}/10` : 'N/A' },
+            { label: 'Steps Today', value: latestMetric.steps ? latestMetric.steps.toLocaleString() : 'N/A' },
+            { label: 'Calories Burned', value: latestMetric.calories ? `${latestMetric.calories} kcal` : 'N/A' },
+          ] : undefined}
+        />
 
         {/* 4. Recovery Radar (3D Bubble) */}
         <GlassCard 
@@ -433,6 +529,7 @@ export default function FitnessDashboard() {
         </GlassCard>
 
       </div>
+      </div> {/* End of pull-to-refresh container */}
     </DashboardLayout>
   );
 }
