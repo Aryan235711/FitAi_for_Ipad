@@ -10,7 +10,7 @@ import { useLocation } from "wouter";
 import {
   transformRecoveryRadarData,
   transformNerveCheckData,
-  transformFuelAnalyzerData,
+  transformWellnessTriangleData,
   transformLoadBalancerData,
   transformMindShieldData,
   calculateSyncIndexScores,
@@ -20,7 +20,7 @@ import {
 const RecoveryRadar = React.lazy(() => import("@/components/charts/RecoveryRadar").then(module => ({ default: module.RecoveryRadar })));
 const NerveCheck = React.lazy(() => import("@/components/charts/NerveCheck").then(module => ({ default: module.NerveCheck })));
 const MindShield = React.lazy(() => import("@/components/charts/MindShield").then(module => ({ default: module.MindShield })));
-const FuelAnalyzer = React.lazy(() => import("@/components/charts/FuelAnalyzer").then(module => ({ default: module.FuelAnalyzer })));
+const WellnessTriangle = React.lazy(() => import("@/components/charts/WellnessTriangle").then(module => ({ default: module.WellnessTriangle })));
 const SyncIndex = React.lazy(() => import("@/components/charts/SyncIndex").then(module => ({ default: module.SyncIndex })));
 const LoadBalancer = React.lazy(() => import("@/components/charts/LoadBalancer").then(module => ({ default: module.LoadBalancer })));
 const VitalityOrb = React.lazy(() => import("@/components/charts/VitalityOrb").then(module => ({ default: module.VitalityOrb })));
@@ -50,7 +50,7 @@ export default function FitnessDashboard() {
   // Transform data for charts
   const recoveryRadarData = transformRecoveryRadarData(metrics);
   const nerveCheckData = transformNerveCheckData(metrics);
-  const fuelAnalyzerData = transformFuelAnalyzerData(metrics);
+  const wellnessTriangleData = transformWellnessTriangleData(metrics);
   const loadBalancerData = transformLoadBalancerData(metrics);
   const mindShieldData = transformMindShieldData(metrics);
   const syncIndexScores = calculateSyncIndexScores(metrics);
@@ -60,8 +60,14 @@ export default function FitnessDashboard() {
     ? Math.round((syncIndexScores.recovery + syncIndexScores.hrv + syncIndexScores.sleep) / 3)
     : 0;
   
-  // Dynamic description based on actual data
+  // Use AI insight for vitality description, fallback to dynamic description
   const getVitalityDescription = () => {
+    // If we have AI insight, use it for vitality description too
+    if (insight && insight !== 'No insights yet. Sync your Google Fit data to get started!') {
+      return insight;
+    }
+    
+    // Fallback to dynamic description based on metrics
     if (!latestMetric) return 'Sync your Google Fit data to unlock personalized insights about your overall energy and readiness.';
     const hasHighHRV = syncIndexScores.hrv >= 70;
     const hasGoodSleep = syncIndexScores.sleep >= 70;
@@ -183,15 +189,15 @@ export default function FitnessDashboard() {
             </Suspense>
         </GlassCard>
 
-        {/* 6. Fuel Analyzer (Radar) */}
+        {/* 6. Wellness Triangle (Radar) - Multi-dimensional Health Score */}
         <GlassCard 
             className="col-span-1 md:col-span-1 row-span-2" 
-            title="Fuel Analyzer" 
-            subtitle="Nutrient Balance"
+            title="Wellness Triangle" 
+            subtitle="Holistic Health Dimensions"
             delay={0.4}
         >
             <Suspense fallback={<LoadingChart />}>
-                <FuelAnalyzer data={fuelAnalyzerData} />
+                <WellnessTriangle data={wellnessTriangleData} />
             </Suspense>
         </GlassCard>
 

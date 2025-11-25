@@ -202,6 +202,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`[Google Fit Sync] Successfully saved metrics to database`);
 
+      // Generate AI insight after successful sync
+      try {
+        console.log(`[Google Fit Sync] Generating AI insight...`);
+        await generateDailyInsight(userId);
+        console.log(`[Google Fit Sync] AI insight generated successfully`);
+      } catch (insightError: any) {
+        console.error(`[Google Fit Sync] Failed to generate AI insight:`, insightError.message);
+        // Don't fail the sync if insight generation fails
+      }
+
       res.json({ 
         success: true, 
         synced: transformedMetrics.length,

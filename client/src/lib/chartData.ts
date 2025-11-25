@@ -39,18 +39,29 @@ export function transformMindShieldData(metrics: FitnessMetric[]) {
   return heatmapData;
 }
 
-// Transform fitness metrics for FuelAnalyzer (Radar Chart)
-export function transformFuelAnalyzerData(metrics: FitnessMetric[]) {
+// Transform fitness metrics for Wellness Triangle (Radar Chart with 4 health dimensions)
+export function transformWellnessTriangleData(metrics: FitnessMetric[]) {
   const latest = metrics[metrics.length - 1];
   if (!latest) return [];
   
+  // Normalize RHR to 0-100 scale (lower is better, so invert it)
+  // Typical RHR range: 40-80 bpm, optimal is 40-60
+  const normalizeRHR = (rhr: number | null) => {
+    if (!rhr) return 0;
+    // Invert so lower HR = higher score
+    return Math.max(0, Math.min(100, 100 - ((rhr - 40) * 2)));
+  };
+  
   return [
-    { subject: 'Protein', A: latest.protein || 0, fullMark: 200 },
-    { subject: 'Carbs', A: latest.carbs || 0, fullMark: 300 },
-    { subject: 'Fats', A: latest.fats || 0, fullMark: 100 },
-    { subject: 'Calories', A: latest.calories || 0, fullMark: 3000 },
+    { subject: 'Recovery', A: latest.recoveryScore || 0, fullMark: 100 },
+    { subject: 'HRV', A: latest.hrv || 0, fullMark: 100 },
+    { subject: 'Sleep', A: latest.sleepScore || 0, fullMark: 100 },
+    { subject: 'RHR', A: normalizeRHR(latest.rhr), fullMark: 100 },
   ];
 }
+
+// For backwards compatibility (renamed)
+export const transformFuelAnalyzerData = transformWellnessTriangleData;
 
 // Transform fitness metrics for LoadBalancer (Bar + Line Chart)
 export function transformLoadBalancerData(metrics: FitnessMetric[]) {
