@@ -109,17 +109,29 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
       requestBody: aggregateRequest as any,
     });
     
-    // Try to fetch heart rate data from available data sources
+    // Try to fetch heart rate and sleep data from available data sources
     // Amazfit/Zepp and other third-party apps don't work with aggregate API
     // so we fetch directly from data streams
     try {
-      console.log('[Google Fit] Attempting to fetch heart rate data...');
+      console.log('[Google Fit] Fetching data sources...');
       
-      // Get all available heart rate data sources
+      // Get all available data sources
       const dataSources = await fitness.users.dataSources.list({ userId: 'me' });
+      
+      // Find heart rate source
       const heartRateSource = dataSources.data.dataSource?.find((ds: any) => 
         ds.dataType?.name === 'com.google.heart_rate.bpm'
       );
+      
+      // Find sleep source
+      const sleepSource = dataSources.data.dataSource?.find((ds: any) => 
+        ds.dataType?.name === 'com.google.sleep.segment'
+      );
+      
+      console.log('[Google Fit] Data sources found:', {
+        heartRate: heartRateSource ? 'YES' : 'NO',
+        sleep: sleepSource ? 'YES' : 'NO',
+      });
       
       if (heartRateSource) {
         console.log('[Google Fit] Found heart rate data source:', heartRateSource.dataStreamId);
@@ -168,12 +180,58 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
         } else {
           console.log('[Google Fit] No heart rate data points found in date range');
         }
-      } else {
-        console.log('[Google Fit] No heart rate data source found - this is normal if you haven\'t synced your Amazfit/Zepp data');
       }
-    } catch (hrError: any) {
-      console.log('[Google Fit] Error fetching heart rate data:', hrError.message);
-      // Continue without heart rate data
+      
+      // Fetch sleep data if available
+      if (sleepSource) {
+        console.log('[Google Fit] Found sleep data source:', sleepSource.dataStreamId);
+        
+        const datasetId = `${startTimeMillis * 1000000}-${endTimeMillis * 1000000}`;
+        const sleepData = await fitness.users.dataSources.datasets.get({
+          userId: 'me',
+          dataSourceId: sleepSource.dataStreamId!,
+          datasetId: datasetId,
+        });
+        
+        if (sleepData.data.point && sleepData.data.point.length > 0) {
+          console.log(`[Google Fit] Found ${sleepData.data.point.length} sleep data points`);
+          
+          // Group sleep points by day
+          const sleepByDay = new Map<string, any[]>();
+          sleepData.data.point.forEach((point: any) => {
+            const pointDate = new Date(parseInt(point.startTimeNanos) / 1000000);
+            const dateKey = pointDate.toISOString().split('T')[0];
+            
+            if (!sleepByDay.has(dateKey)) {
+              sleepByDay.set(dateKey, []);
+            }
+            sleepByDay.get(dateKey)!.push(point);
+          });
+          
+          // Add sleep data to corresponding buckets
+          response.data.bucket?.forEach((bucket: any) => {
+            const bucketDate = new Date(parseInt(bucket.startTimeMillis)).toISOString().split('T')[0];
+            const sleepPoints = sleepByDay.get(bucketDate);
+            
+            if (sleepPoints && sleepPoints.length > 0) {
+              // Create a synthetic dataset for this bucket
+              const sleepDataset = {
+                dataSourceId: sleepSource.dataStreamId,
+                point: sleepPoints,
+              };
+              
+              bucket.dataset = [...(bucket.dataset || []), sleepDataset];
+            }
+          });
+          
+          console.log('[Google Fit] Successfully integrated sleep data into buckets');
+        } else {
+          console.log('[Google Fit] No sleep data points found in date range');
+        }
+      }
+    } catch (dataError: any) {
+      console.log('[Google Fit] Error fetching additional data:', dataError.message);
+      // Continue without additional data
     }
     
     return response.data;
@@ -214,6 +272,9 @@ export function transformGoogleFitData(apiData: any, userId: string) {
     // Track HR readings for HRV calculation
     const hrReadings: number[] = [];
     
+    // Track all data types we encounter for debugging
+    const dataTypesFound = new Set<string>();
+    
     // Extract data from buckets
     bucket.dataset?.forEach((dataset: any) => {
       dataset.point?.forEach((point: any) => {
@@ -225,6 +286,8 @@ export function transformGoogleFitData(apiData: any, userId: string) {
             const parts = dataset.dataSourceId?.split(':') || [];
             return parts.length > 1 ? parts[1] : parts[0];
           })();
+        
+        dataTypesFound.add(dataTypeName);
         
         switch (dataTypeName) {
           case 'com.google.step_count.delta':
@@ -276,6 +339,11 @@ export function transformGoogleFitData(apiData: any, userId: string) {
         }
       });
     });
+    
+    // Log data types found for this day (for debugging)
+    if (dataTypesFound.size > 0) {
+      console.log(`[Google Fit] ${date}: Found data types:`, Array.from(dataTypesFound).join(', '));
+    }
     
     // Calculate derived metrics
     // Sleep score based on total sleep (7-9 hours optimal)
