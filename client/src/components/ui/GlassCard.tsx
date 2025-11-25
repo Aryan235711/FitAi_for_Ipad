@@ -8,13 +8,18 @@ interface GlassCardProps {
   title?: string;
   subtitle?: string;
   delay?: number;
+  disableFloating?: boolean;
 }
 
-export function GlassCard({ children, className, title, subtitle, delay = 0 }: GlassCardProps) {
+export function GlassCard({ children, className, title, subtitle, delay = 0, disableFloating = false }: GlassCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 40, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      animate={{ 
+        opacity: 1, 
+        y: 0, 
+        scale: 1,
+      }}
       transition={{ 
         type: "spring",
         stiffness: 100,
@@ -27,18 +32,37 @@ export function GlassCard({ children, className, title, subtitle, delay = 0 }: G
         transition: { type: "spring", stiffness: 400, damping: 25 }
       }}
       className={cn(
-        "glass rounded-3xl p-6 flex flex-col relative overflow-hidden group",
+        "glass rounded-3xl p-6 flex flex-col relative overflow-hidden group perspective-1000",
         className
       )}
     >
+      {/* Subtle Floating Animation (Breathing) */}
+      {!disableFloating && (
+        <motion.div
+           className="absolute inset-0 -z-10"
+           animate={{ y: [0, -5, 0] }}
+           transition={{ 
+             duration: 6, 
+             repeat: Infinity, 
+             ease: "easeInOut",
+             delay: Math.random() * 2 // Randomize start time so cards don't float in sync
+           }}
+        />
+      )}
+
       {/* Liquid Hover Effect Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
       
       {/* Top Highlight Line */}
       <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-20 group-hover:opacity-50 transition-opacity duration-500" />
       
       {(title || subtitle) && (
-        <div className="mb-6 z-10 relative">
+        <motion.div 
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: delay + 0.3, duration: 0.5 }}
+          className="mb-6 z-10 relative"
+        >
           {title && (
             <h3 className="text-lg font-display font-medium tracking-wide text-white/90 flex items-center gap-2">
               {title}
@@ -49,7 +73,7 @@ export function GlassCard({ children, className, title, subtitle, delay = 0 }: G
               {subtitle}
             </p>
           )}
-        </div>
+        </motion.div>
       )}
       
       <div className="relative z-10 flex-1">
