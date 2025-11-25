@@ -157,20 +157,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const end = endDate || new Date().toISOString().split('T')[0];
       const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
+      console.log(`[Google Fit Sync] Starting sync for user ${userId} from ${start} to ${end}`);
+
       const data = await fetchGoogleFitData(userId, start, end);
       const transformedMetrics = transformGoogleFitData(data, userId);
+
+      console.log(`[Google Fit Sync] Transformed ${transformedMetrics.length} days of metrics`);
 
       // Save metrics to database
       await storage.saveFitnessMetrics(transformedMetrics);
 
+      console.log(`[Google Fit Sync] Successfully saved metrics to database`);
+
       res.json({ 
         success: true, 
         synced: transformedMetrics.length,
-        message: `Synced ${transformedMetrics.length} days of data`
+        message: `Successfully synced ${transformedMetrics.length} days of fitness data`,
+        details: {
+          startDate: start,
+          endDate: end,
+          metricsCount: transformedMetrics.length,
+        }
       });
     } catch (error: any) {
-      console.error("Error syncing Google Fit data:", error);
-      res.status(500).json({ message: error.message });
+      console.error("[Google Fit Sync] Error:", error);
+      res.status(500).json({ 
+        success: false,
+        message: error.message,
+        errorType: error.name || 'UnknownError',
+        details: 'Check server logs for more information'
+      });
     }
   });
 

@@ -91,13 +91,12 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
   const endTimeMillis = new Date(endDate).getTime();
   
   try {
-    // Fetch aggregated data for various metrics
     // Only use Google Fit Aggregate API supported data types
+    // Try to fetch all metrics, but gracefully handle missing data sources
     const aggregateRequest = {
       aggregateBy: [
         { dataTypeName: 'com.google.step_count.delta' },
         { dataTypeName: 'com.google.calories.expended' },
-        { dataTypeName: 'com.google.heart_rate.summary' }, // Use summary for aggregate API
         { dataTypeName: 'com.google.sleep.segment' },
       ],
       bucketByTime: { durationMillis: '86400000' }, // 1 day buckets (must be string)
@@ -109,6 +108,35 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
       userId: 'me',
       requestBody: aggregateRequest as any,
     });
+    
+    // Try to fetch heart rate separately (optional - may not be available)
+    try {
+      const heartRateRequest = {
+        aggregateBy: [
+          { dataTypeName: 'com.google.heart_rate.summary' },
+        ],
+        bucketByTime: { durationMillis: '86400000' },
+        startTimeMillis: startTimeMillis.toString(),
+        endTimeMillis: endTimeMillis.toString(),
+      };
+      
+      const heartRateResponse = await fitness.users.dataset.aggregate({
+        userId: 'me',
+        requestBody: heartRateRequest as any,
+      });
+      
+      // Merge heart rate data into main response
+      if (heartRateResponse.data.bucket) {
+        response.data.bucket?.forEach((bucket: any, index: number) => {
+          if (heartRateResponse.data.bucket[index]?.dataset) {
+            bucket.dataset = [...(bucket.dataset || []), ...heartRateResponse.data.bucket[index].dataset];
+          }
+        });
+      }
+    } catch (hrError: any) {
+      console.log('[Google Fit] Heart rate data not available (this is normal if you don\'t have a heart rate monitor):', hrError.message);
+      // Continue without heart rate data
+    }
     
     return response.data;
   } catch (error: any) {
