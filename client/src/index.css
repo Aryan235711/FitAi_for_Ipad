@@ -49,63 +49,27 @@
   --font-mono: 'Space Grotesk', monospace;
 }
 
-.light {
-  /* Light theme explicit class override */
-  --color-background: hsl(0 0% 98%);
-  --color-foreground: hsl(240 10% 4%);
-
-  --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(240 10% 4%);
-
-  --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(240 10% 4%);
-
-  --color-primary: hsl(84 100% 40%);
-  --color-primary-foreground: hsl(0 0% 98%);
-
-  --color-secondary: hsl(190 100% 45%);
-  --color-secondary-foreground: hsl(0 0% 98%);
-
-  --color-muted: hsl(240 5% 90%);
-  --color-muted-foreground: hsl(240 4% 45%);
-
-  --color-accent: hsl(324 100% 45%);
-  --color-accent-foreground: hsl(0 0% 98%);
-
-  --color-destructive: hsl(0 84% 55%);
-  --color-destructive-foreground: hsl(0 0% 98%);
-
-  --color-border: hsl(240 6% 85%);
-  --color-input: hsl(240 6% 85%);
-  --color-ring: hsl(84 100% 40%);
-
-  --color-chart-1: hsl(84 100% 40%);
-  --color-chart-2: hsl(190 100% 45%);
-  --color-chart-3: hsl(324 100% 45%);
-  --color-chart-4: hsl(280 100% 50%);
-  --color-chart-5: hsl(35 100% 50%);
-}
-
 @layer base {
   * {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary transition-colors duration-300;
+    @apply bg-background text-foreground font-sans antialiased selection:bg-primary/20 selection:text-primary;
+    background-color: black;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply bg-black/[0.04] dark:bg-white/[0.03] backdrop-blur-xl border border-black/[0.08] dark:border-white/[0.05] shadow-xl;
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/[0.05] shadow-xl;
   }
   
   .glass-hover {
-    @apply hover:bg-black/[0.08] dark:hover:bg-white/[0.06] hover:border-black/[0.15] dark:hover:border-white/[0.1] transition-all duration-300;
+    @apply hover:bg-white/[0.06] hover:border-white/[0.1] transition-all duration-300;
   }
 
   .glass-strong {
-    @apply bg-white/60 dark:bg-black/40 backdrop-blur-2xl border border-black/[0.12] dark:border-white/[0.08];
+    @apply bg-black/40 backdrop-blur-2xl border border-white/[0.08];
   }
 
   .text-glow {

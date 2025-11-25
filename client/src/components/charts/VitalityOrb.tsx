@@ -51,16 +51,16 @@ export function VitalityOrb({ score = 0, hrv = 0, sleep = 0 }: VitalityOrbProps)
         </svg>
         
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-4xl font-display font-bold text-gray-900 dark:text-black" data-testid="text-vitality-score">
+            <span className="text-4xl font-display font-bold text-black mix-blend-overlay" data-testid="text-vitality-score">
               {score || '--'}
             </span>
-            <span className="text-[10px] font-mono text-gray-700 dark:text-black/60 uppercase tracking-widest">Vitality</span>
+            <span className="text-[10px] font-mono text-black/60 uppercase tracking-widest mix-blend-overlay">Vitality</span>
         </div>
       </div>
 
       <div className="mt-4 text-center z-10 px-4">
-        <h3 className="text-lg font-medium text-foreground mb-1">{state.label}</h3>
-        <p className="text-xs text-foreground/50 leading-relaxed">
+        <h3 className="text-lg font-medium text-white mb-1">{state.label}</h3>
+        <p className="text-xs text-white/50 leading-relaxed">
           {state.suggestion}
         </p>
       </div>

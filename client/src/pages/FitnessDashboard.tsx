@@ -27,7 +27,7 @@ const VitalityOrb = React.lazy(() => import("@/components/charts/VitalityOrb").t
 
 
 const LoadingChart = () => (
-  <div className="w-full h-full flex items-center justify-center text-foreground/20">
+  <div className="w-full h-full flex items-center justify-center text-white/20">
     <Loader2 className="w-8 h-8 animate-spin" />
   </div>
 );
@@ -99,7 +99,7 @@ export default function FitnessDashboard() {
           <motion.h1 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-5xl md:text-7xl font-display font-bold text-foreground tracking-tight"
+            className="text-5xl md:text-7xl font-display font-bold text-white tracking-tight"
           >
             Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary" data-testid="text-username">{userName}</span>
           </motion.h1>
@@ -111,7 +111,7 @@ export default function FitnessDashboard() {
         
         {/* 1. Sync Index (Score Tiles) */}
         <GlassCard 
-            className="col-span-1 md:col-span-2 row-span-1 bg-gradient-to-br from-foreground/[0.08] to-transparent dark:from-white/[0.08] dark:to-transparent" 
+            className="col-span-1 md:col-span-2 row-span-1 bg-gradient-to-br from-white/[0.08] to-transparent" 
             title="The Sync Index" 
             subtitle="Composite Physiological Score"
         >
@@ -123,13 +123,13 @@ export default function FitnessDashboard() {
         {/* 2. Key Metric - Readiness */}
         <GlassCard className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" delay={0.1}>
             <div className="flex justify-between items-start">
-                <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300 shadow-[0_0_15px_rgba(132,204,22,0.1)] group-hover:shadow-[0_0_20px_rgba(132,204,22,0.6)]">
+                <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-black transition-colors duration-300 shadow-[0_0_15px_rgba(132,204,22,0.1)] group-hover:shadow-[0_0_20px_rgba(132,204,22,0.6)]">
                     <Zap className="w-6 h-6" />
                 </div>
-                <span className="text-xs font-mono text-foreground/40 uppercase tracking-wider">Readiness</span>
+                <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Readiness</span>
             </div>
             <div>
-                <div className="text-5xl font-display font-bold text-foreground mb-1 group-hover:text-primary transition-colors" data-testid="text-readiness">
+                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-primary transition-colors" data-testid="text-readiness">
                   {readinessScore !== null ? `${readinessScore}%` : '--'}
                 </div>
                 <div className="flex items-center gap-1 text-primary text-xs font-medium">
@@ -144,16 +144,16 @@ export default function FitnessDashboard() {
          {/* 3. Key Metric - Strain */}
          <GlassCard className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" delay={0.15}>
             <div className="flex justify-between items-start">
-                <div className="p-3 rounded-2xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-accent-foreground transition-colors duration-300 shadow-[0_0_15px_rgba(255,0,153,0.1)] group-hover:shadow-[0_0_20px_rgba(255,0,153,0.6)]">
+                <div className="p-3 rounded-2xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors duration-300 shadow-[0_0_15px_rgba(255,0,153,0.1)] group-hover:shadow-[0_0_20px_rgba(255,0,153,0.6)]">
                     <Battery className="w-6 h-6" />
                 </div>
-                <span className="text-xs font-mono text-foreground/40 uppercase tracking-wider">Strain</span>
+                <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Strain</span>
             </div>
             <div>
-                <div className="text-5xl font-display font-bold text-foreground mb-1 group-hover:text-accent transition-colors" data-testid="text-strain">
+                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-accent transition-colors" data-testid="text-strain">
                   {strainScore !== null ? strainScore.toFixed(1) : '--'}
                 </div>
-                <div className="flex items-center gap-1 text-foreground/60 text-xs font-medium">
+                <div className="flex items-center gap-1 text-white/60 text-xs font-medium">
                     <span>{strainScore && strainScore > 10 ? 'Optimal Zone' : 'Low Activity'}</span>
                 </div>
             </div>
@@ -229,8 +229,8 @@ export default function FitnessDashboard() {
                     <Brain className="w-10 h-10" />
                 </div>
                 <div>
-                    <h4 className="text-xl font-medium text-foreground mb-1">Daily Insight</h4>
-                    <p className="text-base text-foreground/60 max-w-lg" data-testid="text-daily-insight">
+                    <h4 className="text-xl font-medium text-white mb-1">Daily Insight</h4>
+                    <p className="text-base text-white/60 max-w-lg" data-testid="text-daily-insight">
                         {insight || 'Sync your Google Fit data to receive personalized AI insights about your health and performance trends.'}
                     </p>
                 </div>
@@ -239,7 +239,7 @@ export default function FitnessDashboard() {
 
         {/* 10. NEW SURPRISE COMPONENT: Vitality Orb */}
         <GlassCard 
-            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 bg-gradient-to-r from-background to-primary/5" 
+            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 bg-gradient-to-r from-black to-primary/5" 
             delay={0.7}
         >
              <Suspense fallback={<LoadingChart />}>
@@ -248,8 +248,8 @@ export default function FitnessDashboard() {
                       <VitalityOrb score={vitalityScore} hrv={syncIndexScores.hrv} sleep={syncIndexScores.sleep} />
                    </div>
                    <div className="w-2/3 text-right">
-                      <h2 className="text-3xl font-display font-bold text-foreground">Vitality Score</h2>
-                      <p className="text-foreground/40 mt-2 text-sm">
+                      <h2 className="text-3xl font-display font-bold text-white">Vitality Score</h2>
+                      <p className="text-white/40 mt-2 text-sm">
                         {getVitalityDescription()}
                       </p>
                    </div>
