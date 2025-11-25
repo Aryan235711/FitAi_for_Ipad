@@ -173,8 +173,10 @@ export class DatabaseStorage implements IStorage {
       const metric = recentMetrics[i];
       const precedingMetrics = recentMetrics.slice(Math.max(0, i - 7), i);
       
-      if (metric.sleepScore && precedingMetrics.length >= 2) {
-        const sleepScores = precedingMetrics.map(m => m.sleepScore).filter(Boolean) as number[];
+      if (metric.sleepScore !== null && metric.sleepScore !== undefined && precedingMetrics.length >= 2) {
+        const sleepScores = precedingMetrics
+          .map(m => m.sleepScore)
+          .filter(score => score !== null && score !== undefined) as number[];
         sleepScores.push(metric.sleepScore);
         
         const avg = sleepScores.reduce((a, b) => a + b, 0) / sleepScores.length;

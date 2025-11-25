@@ -78,29 +78,29 @@ function prepareDataSummary(metrics: FitnessMetric[]): string {
   // Trends (if we have previous data)
   if (previous) {
     summary += `\nChanges from Previous Day:\n`;
-    if (latest.rhr && previous.rhr) {
+    if (latest.rhr !== null && latest.rhr !== undefined && previous.rhr !== null && previous.rhr !== undefined) {
       const diff = latest.rhr - previous.rhr;
       summary += `- RHR: ${diff > 0 ? '+' : ''}${diff} bpm\n`;
     }
-    if (latest.sleepScore && previous.sleepScore) {
+    if (latest.sleepScore !== null && latest.sleepScore !== undefined && previous.sleepScore !== null && previous.sleepScore !== undefined) {
       const diff = latest.sleepScore - previous.sleepScore;
       summary += `- Sleep Score: ${diff > 0 ? '+' : ''}${diff}\n`;
     }
-    if (latest.steps && previous.steps) {
+    if (latest.steps !== null && latest.steps !== undefined && previous.steps !== null && previous.steps !== undefined) {
       const diff = latest.steps - previous.steps;
       summary += `- Steps: ${diff > 0 ? '+' : ''}${diff.toLocaleString()}\n`;
     }
   }
   
   // Weekly averages
-  const avgRhr = average(metrics.map(m => m.rhr).filter(Boolean) as number[]);
-  const avgSleep = average(metrics.map(m => m.sleepScore).filter(Boolean) as number[]);
-  const avgSteps = average(metrics.map(m => m.steps).filter(Boolean) as number[]);
+  const avgRhr = average(metrics.map(m => m.rhr).filter(v => v !== null && v !== undefined) as number[]);
+  const avgSleep = average(metrics.map(m => m.sleepScore).filter(v => v !== null && v !== undefined) as number[]);
+  const avgSteps = average(metrics.map(m => m.steps).filter(v => v !== null && v !== undefined) as number[]);
   
   summary += `\nWeekly Averages:\n`;
-  if (avgRhr) summary += `- Avg RHR: ${Math.round(avgRhr)} bpm\n`;
-  if (avgSleep) summary += `- Avg Sleep Score: ${Math.round(avgSleep)}/100\n`;
-  if (avgSteps) summary += `- Avg Steps: ${Math.round(avgSteps).toLocaleString()}\n`;
+  if (avgRhr !== null) summary += `- Avg RHR: ${Math.round(avgRhr)} bpm\n`;
+  if (avgSleep !== null) summary += `- Avg Sleep Score: ${Math.round(avgSleep)}/100\n`;
+  if (avgSteps !== null) summary += `- Avg Steps: ${Math.round(avgSteps).toLocaleString()}\n`;
   
   return summary;
 }

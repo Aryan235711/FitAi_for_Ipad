@@ -98,7 +98,7 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
         { dataTypeName: 'com.google.calories.expended' },
         { dataTypeName: 'com.google.heart_rate.bpm' },
         { dataTypeName: 'com.google.sleep.segment' },
-        { dataTypeName: 'com.google.active_minutes' },
+        { dataTypeName: 'com.google.activity.summary' },
       ],
       bucketByTime: { durationMillis: '86400000' }, // 1 day buckets (must be string)
       startTimeMillis: startTimeMillis.toString(),
@@ -167,9 +167,10 @@ export function transformGoogleFitData(apiData: any, userId: string) {
               metric.rhr = metric.rhr ? Math.min(metric.rhr, currentHr) : currentHr;
             }
             break;
-          case 'com.google.active_minutes':
-            // Active minutes from Google Fit
-            metric.activityMinutes += Math.round(point.value[0]?.intVal || 0);
+          case 'com.google.activity.summary':
+            // Active minutes from activity summary (field 0 = duration in milliseconds)
+            const activityDurationMs = point.value[0]?.intVal || 0;
+            metric.activityMinutes += Math.round(activityDurationMs / 60000); // Convert ms to minutes
             break;
           case 'com.google.sleep.segment':
             const sleepDuration = (point.endTimeNanos - point.startTimeNanos) / 1e9 / 60;
