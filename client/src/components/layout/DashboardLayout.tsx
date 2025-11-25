@@ -1,7 +1,8 @@
-import { ReactNode, useState } from "react";
-import { User, Settings, RefreshCw, LogOut, Link2, Link2Off, Loader2 } from "lucide-react";
+import { ReactNode } from "react";
+import { User, Moon, Sun, RefreshCw, LogOut, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useGoogleFit } from "@/hooks/useGoogleFit";
+import { useTheme } from "next-themes";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,7 +16,7 @@ import bgImage from "@assets/generated_images/abstract_dark_neon_gradient_backgr
 export function DashboardLayout({ children }: { children: ReactNode }) {
   const { user, isAuthenticated } = useAuth();
   const { isConnected, connect, disconnect, sync, isSyncing } = useGoogleFit();
-  const [showSettings, setShowSettings] = useState(false);
+  const { theme, setTheme } = useTheme();
 
   const handleSync = () => {
     if (isConnected) {
@@ -25,11 +26,15 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     }
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
   return (
-    <div className="min-h-screen w-full bg-black text-white overflow-hidden relative font-sans selection:bg-primary/30">
+    <div className="min-h-screen w-full bg-background text-foreground overflow-hidden relative font-sans selection:bg-primary/30 transition-colors duration-300">
       {/* Background Image Layer */}
       <div 
-        className="absolute inset-0 z-0 opacity-60 pointer-events-none"
+        className="absolute inset-0 z-0 opacity-60 dark:opacity-60 opacity-30 pointer-events-none"
         style={{
             backgroundImage: `url(${bgImage})`,
             backgroundSize: 'cover',
@@ -38,7 +43,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       />
       
       {/* Radial Gradient Overlay for depth */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-black/50 to-black pointer-events-none" />
+      <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
 
       {/* Top Right Controls */}
       <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
@@ -58,50 +63,18 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </span>
         </button>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button 
-              className="p-2.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300"
-              data-testid="button-settings"
-            >
-              <Settings className="w-5 h-5 text-white/80" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56 bg-black/95 backdrop-blur-xl border-white/10" align="end">
-            <DropdownMenuLabel className="text-white/60">Google Fit</DropdownMenuLabel>
-            <DropdownMenuSeparator className="bg-white/10" />
-            {isConnected ? (
-              <>
-                <DropdownMenuItem 
-                  onClick={() => sync(undefined)}
-                  disabled={isSyncing}
-                  className="text-white hover:bg-white/10 cursor-pointer"
-                  data-testid="menu-item-sync"
-                >
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                  Sync Data
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => disconnect(undefined)}
-                  className="text-white hover:bg-white/10 cursor-pointer"
-                  data-testid="menu-item-disconnect"
-                >
-                  <Link2Off className="w-4 h-4 mr-2" />
-                  Disconnect
-                </DropdownMenuItem>
-              </>
-            ) : (
-              <DropdownMenuItem 
-                onClick={() => connect(undefined)}
-                className="text-white hover:bg-white/10 cursor-pointer"
-                data-testid="menu-item-connect"
-              >
-                <Link2 className="w-4 h-4 mr-2" />
-                Connect Google Fit
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <button 
+          onClick={toggleTheme}
+          className="p-2.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300"
+          data-testid="button-theme-toggle"
+          aria-label="Toggle theme"
+        >
+          {theme === 'dark' ? (
+            <Sun className="w-5 h-5 text-white/80 hover:text-yellow-300 transition-colors" />
+          ) : (
+            <Moon className="w-5 h-5 text-gray-800 hover:text-gray-600 transition-colors" />
+          )}
+        </button>
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
