@@ -109,32 +109,62 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
       requestBody: aggregateRequest as any,
     });
     
-    // Try to fetch heart rate separately (optional - may not be available)
+    // Try to fetch heart rate data from all available sources
     try {
-      const heartRateRequest = {
-        aggregateBy: [
-          { dataTypeName: 'com.google.heart_rate.summary' },
-        ],
-        bucketByTime: { durationMillis: '86400000' },
-        startTimeMillis: startTimeMillis.toString(),
-        endTimeMillis: endTimeMillis.toString(),
-      };
-      
-      const heartRateResponse = await fitness.users.dataset.aggregate({
-        userId: 'me',
-        requestBody: heartRateRequest as any,
-      });
-      
-      // Merge heart rate data into main response
-      if (heartRateResponse.data.bucket) {
-        response.data.bucket?.forEach((bucket: any, index: number) => {
-          if (heartRateResponse.data.bucket[index]?.dataset) {
-            bucket.dataset = [...(bucket.dataset || []), ...heartRateResponse.data.bucket[index].dataset];
-          }
+      // First, try the summary endpoint
+      try {
+        const heartRateRequest = {
+          aggregateBy: [
+            { dataTypeName: 'com.google.heart_rate.summary' },
+          ],
+          bucketByTime: { durationMillis: '86400000' },
+          startTimeMillis: startTimeMillis.toString(),
+          endTimeMillis: endTimeMillis.toString(),
+        };
+        
+        const heartRateResponse = await fitness.users.dataset.aggregate({
+          userId: 'me',
+          requestBody: heartRateRequest as any,
         });
+        
+        // Merge heart rate data into main response
+        if (heartRateResponse.data.bucket) {
+          response.data.bucket?.forEach((bucket: any, index: number) => {
+            if (heartRateResponse.data.bucket[index]?.dataset) {
+              bucket.dataset = [...(bucket.dataset || []), ...heartRateResponse.data.bucket[index].dataset];
+            }
+          });
+        }
+        console.log('[Google Fit] Successfully fetched heart rate data from summary endpoint');
+      } catch (summaryError: any) {
+        console.log('[Google Fit] Summary endpoint failed, trying BPM endpoint...', summaryError.message);
+        
+        // Try the BPM endpoint as alternative
+        const heartRateBpmRequest = {
+          aggregateBy: [
+            { dataTypeName: 'com.google.heart_rate.bpm' },
+          ],
+          bucketByTime: { durationMillis: '86400000' },
+          startTimeMillis: startTimeMillis.toString(),
+          endTimeMillis: endTimeMillis.toString(),
+        };
+        
+        const bpmResponse = await fitness.users.dataset.aggregate({
+          userId: 'me',
+          requestBody: heartRateBpmRequest as any,
+        });
+        
+        if (bpmResponse.data.bucket) {
+          response.data.bucket?.forEach((bucket: any, index: number) => {
+            if (bpmResponse.data.bucket[index]?.dataset) {
+              bucket.dataset = [...(bucket.dataset || []), ...bpmResponse.data.bucket[index].dataset];
+            }
+          });
+        }
+        console.log('[Google Fit] Successfully fetched heart rate data from BPM endpoint');
       }
     } catch (hrError: any) {
-      console.log('[Google Fit] Heart rate data not available (this is normal if you don\'t have a heart rate monitor):', hrError.message);
+      console.log('[Google Fit] Heart rate data not available:', hrError.message);
       // Continue without heart rate data
     }
     

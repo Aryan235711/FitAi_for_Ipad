@@ -24,6 +24,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ============== GOOGLE FIT ROUTES ==============
   
+  // DEBUG: List available Google Fit data sources
+  app.get('/api/google-fit/datasources', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { getValidAccessToken } = await import('./googleFit');
+      const { google } = await import('googleapis');
+      
+      const accessToken = await getValidAccessToken(userId);
+      const fitness = google.fitness({ version: 'v1', auth: accessToken });
+      
+      const response = await fitness.users.dataSources.list({ userId: 'me' });
+      
+      res.json({
+        message: "Available Google Fit Data Sources",
+        dataSources: response.data.dataSource?.map((ds: any) => ({
+          dataStreamId: ds.dataStreamId,
+          dataType: ds.dataType?.name,
+          device: ds.device?.model || 'Unknown',
+          application: ds.application?.name || 'Unknown',
+        })) || [],
+      });
+    } catch (error: any) {
+      console.error("Error listing data sources:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
   // DEBUG: Show OAuth configuration
   app.get('/api/google-fit/debug', isAuthenticated, async (req: any, res) => {
     const protocol = req.protocol;
