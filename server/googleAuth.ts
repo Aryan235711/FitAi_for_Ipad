@@ -33,7 +33,7 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Google OAuth Strategy with dynamic callback URL
+  // Google OAuth Strategy
   passport.use(
     new GoogleStrategy(
       {
@@ -41,6 +41,8 @@ export async function setupAuth(app: Express) {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
         callbackURL: "/api/google-fit/callback",
         passReqToCallback: false,
+        accessType: "offline",
+        prompt: "consent",
       },
       async (accessToken: string, refreshToken: string, profile: any, done: any) => {
         try {
@@ -50,6 +52,8 @@ export async function setupAuth(app: Express) {
           const lastName = profile.name?.familyName;
           const profileImageUrl = profile.photos?.[0]?.value;
           const userId = profile.id;
+
+          console.log("[Google OAuth] Authenticated user:", { userId, email });
 
           // Upsert user into database
           await storage.upsertUser({
@@ -71,8 +75,10 @@ export async function setupAuth(app: Express) {
             refreshToken,
           };
 
+          console.log("[Google OAuth] User session created for:", userId);
           return done(null, user);
         } catch (error) {
+          console.error("[Google OAuth] Error:", error);
           return done(error);
         }
       }
@@ -84,16 +90,27 @@ export async function setupAuth(app: Express) {
 
   // Google OAuth routes
   app.get("/api/login", (req, res, next) => {
-    passport.authenticate("google", { scope: ["profile", "email"] })(req, res, next);
+    console.log("[Google OAuth] Login initiated from:", req.get("host"));
+    const authenticator = passport.authenticate("google", {
+      scope: ["profile", "email"],
+      accessType: "offline",
+    });
+    authenticator(req, res, next);
   });
 
   app.get(
     "/api/google-fit/callback",
     (req, res, next) => {
-      passport.authenticate("google", { failureRedirect: "/login?error=google_auth_failed" })(req, res, next);
+      console.log("[Google OAuth] Callback received with query:", req.query);
+      const authenticator = passport.authenticate("google", {
+        failureRedirect: "/login?error=google_auth_failed",
+        failureMessage: true,
+      });
+      authenticator(req, res, next);
     },
     (req, res) => {
       // Successful authentication
+      console.log("[Google OAuth] Callback successful, redirecting to /");
       res.redirect("/");
     }
   );
