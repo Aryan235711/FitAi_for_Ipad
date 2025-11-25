@@ -1,5 +1,6 @@
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, Legend } from "recharts";
 import { format, parseISO } from "date-fns";
+import { memo } from "react";
 
 interface NerveCheckDataPoint {
   date: string;
@@ -11,7 +12,7 @@ interface NerveCheckProps {
   data?: NerveCheckDataPoint[];
 }
 
-export function NerveCheck({ data = [] }: NerveCheckProps) {
+function NerveCheckComponent({ data = [] }: NerveCheckProps) {
   const chartData = data.length > 0 ? data : [
     { date: new Date().toISOString(), hrv: 0, sleepConsistency: 0 }
   ];
@@ -75,3 +76,5 @@ export function NerveCheck({ data = [] }: NerveCheckProps) {
     </div>
   );
 }
+
+export const NerveCheck = memo(NerveCheckComponent);

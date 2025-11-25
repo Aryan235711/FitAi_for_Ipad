@@ -1,4 +1,5 @@
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, Cell } from "recharts";
+import { memo } from "react";
 
 interface RecoveryDataPoint {
   x: number;
@@ -11,7 +12,7 @@ interface RecoveryRadarProps {
   data?: RecoveryDataPoint[];
 }
 
-export function RecoveryRadar({ data = [] }: RecoveryRadarProps) {
+function RecoveryRadarComponent({ data = [] }: RecoveryRadarProps) {
   const chartData = data.length > 0 ? data : [{ x: 0, y: 0, z: 60, name: 'No data' }];
 
   return (
@@ -60,3 +61,5 @@ export function RecoveryRadar({ data = [] }: RecoveryRadarProps) {
     </div>
   );
 }
+
+export const RecoveryRadar = memo(RecoveryRadarComponent);

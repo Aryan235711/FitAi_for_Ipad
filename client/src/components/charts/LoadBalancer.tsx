@@ -1,5 +1,6 @@
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { format, parseISO } from "date-fns";
+import { memo } from "react";
 
 interface LoadBalancerDataPoint {
   date: string;
@@ -11,7 +12,7 @@ interface LoadBalancerProps {
   data?: LoadBalancerDataPoint[];
 }
 
-export function LoadBalancer({ data = [] }: LoadBalancerProps) {
+function LoadBalancerComponent({ data = [] }: LoadBalancerProps) {
   const chartData = data.length > 0 ? data : [
     { date: new Date().toISOString(), strain: 0, recovery: 0 }
   ];
@@ -72,3 +73,5 @@ export function LoadBalancer({ data = [] }: LoadBalancerProps) {
     </div>
   );
 }
+
+export const LoadBalancer = memo(LoadBalancerComponent);

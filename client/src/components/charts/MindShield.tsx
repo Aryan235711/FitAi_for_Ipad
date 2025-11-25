@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { memo } from "react";
 
 interface MindShieldDataPoint {
   day: string;
@@ -10,7 +11,7 @@ interface MindShieldProps {
   data?: MindShieldDataPoint[];
 }
 
-export function MindShield({ data = [] }: MindShieldProps) {
+function MindShieldComponent({ data = [] }: MindShieldProps) {
   // Use provided data or fallback to empty array  
   const heatmapData = data.length > 0 ? data : Array(28).fill({ day: 'Mon', week: 'W1', value: 0 });
 
@@ -48,3 +49,5 @@ export function MindShield({ data = [] }: MindShieldProps) {
     </div>
   );
 }
+
+export const MindShield = memo(MindShieldComponent);

@@ -1,4 +1,5 @@
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from "recharts";
+import { memo } from "react";
 
 interface WellnessData {
   subject: string;
@@ -10,7 +11,7 @@ interface WellnessTriangleProps {
   data?: WellnessData[];
 }
 
-export function WellnessTriangle({ data = [] }: WellnessTriangleProps) {
+function WellnessTriangleComponent({ data = [] }: WellnessTriangleProps) {
   const chartData = data.length > 0 ? data : [
     { subject: 'Recovery', A: 0, fullMark: 100 },
     { subject: 'HRV', A: 0, fullMark: 100 },
@@ -52,3 +53,5 @@ export function WellnessTriangle({ data = [] }: WellnessTriangleProps) {
     </div>
   );
 }
+
+export const WellnessTriangle = memo(WellnessTriangleComponent);
