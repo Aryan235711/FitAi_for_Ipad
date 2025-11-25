@@ -1,0 +1,39 @@
+SW registered:  ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/', …}
+VM433 client:745 WebSocket connection to 'wss://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/?token=JsKPDUnQ_W_j' failed: 
+createConnection @ VM433 client:745
+connect @ VM433 client:411
+connect @ VM433 client:751
+connect @ VM433 client:289
+connect @ VM433 client:373
+(anonymous) @ VM433 client:823Understand this error
+VM433 client:755 WebSocket connection to 'wss://localhost:5173/?token=JsKPDUnQ_W_j' failed: 
+createConnection @ VM433 client:755
+connect @ VM433 client:411
+connect @ VM433 client:759Understand this error
+VM433 client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ VM433 client:765
+await in connect
+connect @ VM433 client:289
+connect @ VM433 client:373
+(anonymous) @ VM433 client:823Understand this error
+client:745 WebSocket connection to 'wss://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/?token=JsKPDUnQ_W_j' failed: 
+createConnection @ client:745
+connect @ client:411
+connect @ client:751
+connect @ client:289
+connect @ client:373
+(anonymous) @ client:823Understand this error
+main.tsx:9 SW registered:  ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/', …}
+client:755 WebSocket connection to 'wss://localhost:5173/?token=JsKPDUnQ_W_j' failed: 
+createConnection @ client:755
+connect @ client:411
+connect @ client:759Understand this error
+client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-opti

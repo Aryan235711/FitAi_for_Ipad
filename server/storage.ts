@@ -80,7 +80,7 @@ export class DatabaseStorage implements IStorage {
   async saveGoogleFitToken(tokenData: InsertGoogleFitToken): Promise<GoogleFitToken> {
     const [token] = await db
       .insert(googleFitTokens)
-      .values(tokenData)
+      .values([tokenData])
       .onConflictDoUpdate({
         target: googleFitTokens.userId,
         set: {

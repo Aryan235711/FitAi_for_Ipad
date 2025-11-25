@@ -124,11 +124,13 @@ export function setupAuth(app: Express) {
   // 7. Authentication routes
   app.get(
     "/auth/google",
-    passport.authenticate("google", { 
-      scope: SCOPES,
-      accessType: "offline",
-      prompt: "consent"
-    })
+    (req: any, res: any, next: any) => {
+      passport.authenticate("google", { 
+        scope: SCOPES,
+        accessType: "offline",
+        prompt: "consent"
+      } as any)(req, res, next);
+    }
   );
 
   app.get(

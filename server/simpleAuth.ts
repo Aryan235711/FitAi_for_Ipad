@@ -53,11 +53,11 @@ export function setupSimpleAuth(app: Express) {
 
       // Clean up expired tokens periodically
       if (Math.random() < 0.1) {
-        for (const [key, value] of LOGIN_TOKENS.entries()) {
+        Array.from(LOGIN_TOKENS.entries()).forEach(([key, value]) => {
           if (value.expires < Date.now()) {
             LOGIN_TOKENS.delete(key);
           }
-        }
+        });
       }
 
       const domain = process.env.REPLIT_DOMAINS || "localhost:5000";
