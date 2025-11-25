@@ -3,6 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { motion } from "framer-motion";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
+import { SkeletonLoader, ChartSkeleton, MetricCardSkeleton } from "@/components/ui/SkeletonLoader";
 import { ArrowUpRight, Zap, Battery, Brain, Loader2, TrendingUp, Target, Moon, Activity, BarChart3, Sparkles } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useFitnessData } from "@/hooks/useFitnessData";
@@ -33,9 +34,7 @@ const VitalityOrb = React.lazy(() => import("@/components/charts/VitalityOrb").t
 
 
 const LoadingChart = () => (
-  <div className="w-full h-full flex items-center justify-center text-white/20">
-    <Loader2 className="w-8 h-8 animate-spin" />
-  </div>
+  <ChartSkeleton />
 );
 
 export default function FitnessDashboard() {
@@ -275,8 +274,8 @@ export default function FitnessDashboard() {
         </div>
       </header>
 
-      {/* Bento Grid Layout - iPad Optimized */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)] pb-8">
+      {/* Bento Grid Layout - iPad Optimized with Landscape Support */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 md:gap-4 lg:gap-6 auto-rows-[minmax(160px,auto)] pb-8 landscape:gap-2 landscape:auto-rows-[minmax(140px,auto)]">
         
         {/* 1. Sync Index (Score Tiles) */}
         <GlassCard 
@@ -291,44 +290,50 @@ export default function FitnessDashboard() {
 
         {/* 2. Key Metric - Readiness */}
         <GlassCard 
-          className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" 
+          className="col-span-1 row-span-1 flex flex-col justify-between cursor-pointer" 
           delay={0.1}
         >
           <div {...readinessLongPress.handlers} data-testid="card-readiness-metric">
-            <div className="flex justify-between items-start">
-                <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-black transition-colors duration-300 shadow-[0_0_15px_rgba(132,204,22,0.1)] group-hover:shadow-[0_0_20px_rgba(132,204,22,0.6)]">
-                    <Zap className="w-6 h-6" />
+            {isLoading ? (
+              <MetricCardSkeleton />
+            ) : (
+              <>
+                <div className="flex justify-between items-start">
+                    <div className="p-3 rounded-2xl bg-primary/20 text-primary shadow-[0_0_15px_rgba(132,204,22,0.2)]">
+                        <Zap className="w-6 h-6" />
+                    </div>
+                    <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Readiness</span>
                 </div>
-                <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Readiness</span>
-            </div>
-            <div>
-                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-primary transition-colors" data-testid="text-readiness">
-                  {readinessScore !== null ? (
-                    <>
-                      <AnimatedNumber value={readinessScore} duration={2} />%
-                    </>
-                  ) : '--'}
-                </div>
-                <motion.div 
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 2.2 }}
-                  className="flex items-center gap-1 text-primary text-xs font-medium"
-                >
-                    {readinessChange !== null && readinessChange > 0 && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 2.3, type: "spring" }}
-                      >
-                        <ArrowUpRight className="w-3 h-3" />
-                      </motion.div>
-                    )}
-                    <span data-testid="text-readiness-change">
-                      {readinessChange !== null ? `${readinessChange > 0 ? '+' : ''}${readinessChange}% vs yesterday` : 'No data'}
-                    </span>
-                </motion.div>
-            </div>
+                <div>
+                    <div className="text-5xl font-display font-bold text-white mb-1" data-testid="text-readiness">
+                      {readinessScore !== null ? (
+                        <>
+                          <AnimatedNumber value={readinessScore} duration={2} />%
+                        </>
+                      ) : '--'}
+                    </div>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 2.2 }}
+                      className="flex items-center gap-1 text-primary text-xs font-medium"
+                    >
+                        {readinessChange !== null && readinessChange > 0 && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 2.3, type: "spring" }}
+                          >
+                            <ArrowUpRight className="w-3 h-3" />
+                          </motion.div>
+                        )}
+                        <span data-testid="text-readiness-change">
+                          {readinessChange !== null ? `${readinessChange > 0 ? '+' : ''}${readinessChange}% vs yesterday` : 'No data'}
+                        </span>
+                    </motion.div>
+                    </div>
+              </>
+            )}
           </div>
         </GlassCard>
 
@@ -349,31 +354,37 @@ export default function FitnessDashboard() {
 
          {/* 3. Key Metric - Strain */}
          <GlassCard 
-           className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" 
+           className="col-span-1 row-span-1 flex flex-col justify-between cursor-pointer" 
            delay={0.15}
          >
           <div {...strainLongPress.handlers} data-testid="card-strain-metric">
-            <div className="flex justify-between items-start">
-                <div className="p-3 rounded-2xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors duration-300 shadow-[0_0_15px_rgba(255,0,153,0.1)] group-hover:shadow-[0_0_20px_rgba(255,0,153,0.6)]">
-                    <Battery className="w-6 h-6" />
+            {isLoading ? (
+              <MetricCardSkeleton />
+            ) : (
+              <>
+                <div className="flex justify-between items-start">
+                    <div className="p-3 rounded-2xl bg-accent/20 text-accent shadow-[0_0_15px_rgba(255,0,153,0.2)]">
+                        <Battery className="w-6 h-6" />
+                    </div>
+                    <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Strain</span>
                 </div>
-                <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Strain</span>
-            </div>
-            <div>
-                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-accent transition-colors" data-testid="text-strain">
-                  {strainScore !== null ? (
-                    <AnimatedNumber value={strainScore} decimals={1} duration={2} />
-                  ) : '--'}
+                <div>
+                    <div className="text-5xl font-display font-bold text-white mb-1" data-testid="text-strain">
+                      {strainScore !== null ? (
+                        <AnimatedNumber value={strainScore} decimals={1} duration={2} />
+                      ) : '--'}
+                    </div>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 2.2 }}
+                      className="flex items-center gap-1 text-white/60 text-xs font-medium"
+                    >
+                        <span>{strainScore && strainScore > 10 ? 'Optimal Zone' : 'Low Activity'}</span>
+                    </motion.div>
                 </div>
-                <motion.div 
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 2.2 }}
-                  className="flex items-center gap-1 text-white/60 text-xs font-medium"
-                >
-                    <span>{strainScore && strainScore > 10 ? 'Optimal Zone' : 'Low Activity'}</span>
-                </motion.div>
-            </div>
+              </>
+            )}
           </div>
         </GlassCard>
 
