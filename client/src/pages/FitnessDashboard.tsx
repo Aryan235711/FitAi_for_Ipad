@@ -11,6 +11,8 @@ const MindShield = React.lazy(() => import("@/components/charts/MindShield").the
 const FuelAnalyzer = React.lazy(() => import("@/components/charts/FuelAnalyzer").then(module => ({ default: module.FuelAnalyzer })));
 const SyncIndex = React.lazy(() => import("@/components/charts/SyncIndex").then(module => ({ default: module.SyncIndex })));
 const LoadBalancer = React.lazy(() => import("@/components/charts/LoadBalancer").then(module => ({ default: module.LoadBalancer })));
+const VitalityOrb = React.lazy(() => import("@/components/charts/VitalityOrb").then(module => ({ default: module.VitalityOrb })));
+
 
 const LoadingChart = () => (
   <div className="w-full h-full flex items-center justify-center text-white/20">
@@ -21,41 +23,31 @@ const LoadingChart = () => (
 export default function FitnessDashboard() {
   return (
     <DashboardLayout>
-      {/* Header */}
-      <header className="flex justify-between items-end mb-10">
+      {/* Header Area - Simplified since nav is gone */}
+      <header className="flex justify-between items-end mb-8 pt-4">
         <div>
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-2 mb-2"
+          >
+             <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_rgba(132,204,22,0.8)]" />
+             <span className="text-xs font-mono text-primary uppercase tracking-widest">Live Biometrics</span>
+          </motion.div>
           <motion.h1 
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="text-4xl md:text-5xl font-display font-bold text-white tracking-tight"
+            className="text-5xl md:text-7xl font-display font-bold text-white tracking-tight"
           >
-            Good Morning, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Alex</span>
+            Hello, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">Alex</span>
           </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-white/50 mt-2 font-mono"
-          >
-            Your metabolic sync is <span className="text-primary">optimised</span> today.
-          </motion.p>
-        </div>
-        <div className="flex gap-4">
-           {/* Quick Stats */}
-           <div className="glass rounded-full px-6 py-2 flex items-center gap-3 hover:bg-white/5 transition-colors cursor-pointer">
-              <div className="relative">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                <div className="absolute inset-0 w-2 h-2 rounded-full bg-green-500 animate-ping opacity-75" />
-              </div>
-              <span className="text-sm font-mono text-white/80">Google Fit: Live</span>
-           </div>
         </div>
       </header>
 
-      {/* Bento Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[minmax(180px,auto)]">
+      {/* Bento Grid Layout - Refined for full width */}
+      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-6 auto-rows-[minmax(180px,auto)] pb-8">
         
-        {/* 1. Sync Index (Score Tiles) - Large Feature */}
+        {/* 1. Sync Index (Score Tiles) */}
         <GlassCard 
             className="col-span-1 md:col-span-2 row-span-1 bg-gradient-to-br from-white/[0.08] to-transparent" 
             title="The Sync Index" 
@@ -75,7 +67,7 @@ export default function FitnessDashboard() {
                 <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Readiness</span>
             </div>
             <div>
-                <div className="text-4xl font-display font-bold text-white mb-1 group-hover:text-primary transition-colors">92%</div>
+                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-primary transition-colors">92%</div>
                 <div className="flex items-center gap-1 text-primary text-xs font-medium">
                     <ArrowUpRight className="w-3 h-3" />
                     <span>+4% vs yesterday</span>
@@ -92,14 +84,14 @@ export default function FitnessDashboard() {
                 <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Strain</span>
             </div>
             <div>
-                <div className="text-4xl font-display font-bold text-white mb-1 group-hover:text-accent transition-colors">14.5</div>
+                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-accent transition-colors">14.5</div>
                 <div className="flex items-center gap-1 text-white/60 text-xs font-medium">
                     <span>Optimal Zone</span>
                 </div>
             </div>
         </GlassCard>
 
-        {/* 4. Recovery Radar (3D Bubble) - Large Visual */}
+        {/* 4. Recovery Radar (3D Bubble) */}
         <GlassCard 
             className="col-span-1 md:col-span-2 lg:col-span-2 row-span-2" 
             title="Recovery Radar" 
@@ -159,22 +151,42 @@ export default function FitnessDashboard() {
             </Suspense>
         </GlassCard>
 
-         {/* 9. Context Card */}
+         {/* 9. Context Card - Adjusted to fill space better */}
          <GlassCard 
             className="col-span-1 md:col-span-2 row-span-1 bg-primary/5 border-primary/20" 
             delay={0.6}
         >
-            <div className="flex items-center gap-4 h-full">
-                <div className="p-4 rounded-full bg-primary/20 text-primary shadow-[0_0_15px_rgba(132,204,22,0.3)]">
-                    <Brain className="w-8 h-8" />
+            <div className="flex items-center gap-6 h-full">
+                <div className="p-5 rounded-full bg-primary/20 text-primary shadow-[0_0_20px_rgba(132,204,22,0.3)] animate-pulse">
+                    <Brain className="w-10 h-10" />
                 </div>
                 <div>
-                    <h4 className="text-lg font-medium text-white">Insight</h4>
-                    <p className="text-sm text-white/60 max-w-md">
+                    <h4 className="text-xl font-medium text-white mb-1">Daily Insight</h4>
+                    <p className="text-base text-white/60 max-w-lg">
                         Your high protein intake yesterday correlated with a <span className="text-primary font-bold">12% boost</span> in Deep Sleep duration.
                     </p>
                 </div>
             </div>
+        </GlassCard>
+
+        {/* 10. NEW SURPRISE COMPONENT: Vitality Orb */}
+        <GlassCard 
+            className="col-span-1 md:col-span-2 lg:col-span-2 row-span-1 bg-gradient-to-r from-black to-primary/5" 
+            delay={0.7}
+        >
+             <Suspense fallback={<LoadingChart />}>
+                <div className="flex items-center justify-between h-full pr-8">
+                   <div className="w-1/3 h-full">
+                      <VitalityOrb />
+                   </div>
+                   <div className="w-2/3 text-right">
+                      <h2 className="text-3xl font-display font-bold text-white">Vitality Score</h2>
+                      <p className="text-white/40 mt-2 text-sm">
+                        Your overall energy field is expanding. The combination of <span className="text-secondary">high HRV</span> and <span className="text-accent">consistent sleep</span> has unlocked a new performance tier.
+                      </p>
+                   </div>
+                </div>
+            </Suspense>
         </GlassCard>
 
       </div>
