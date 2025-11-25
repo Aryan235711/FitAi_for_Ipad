@@ -92,13 +92,13 @@ export async function fetchGoogleFitData(userId: string, startDate: string, endD
   
   try {
     // Fetch aggregated data for various metrics
+    // Only use Google Fit Aggregate API supported data types
     const aggregateRequest = {
       aggregateBy: [
         { dataTypeName: 'com.google.step_count.delta' },
         { dataTypeName: 'com.google.calories.expended' },
         { dataTypeName: 'com.google.heart_rate.bpm' },
         { dataTypeName: 'com.google.sleep.segment' },
-        { dataTypeName: 'com.google.activity.summary' },
       ],
       bucketByTime: { durationMillis: '86400000' }, // 1 day buckets (must be string)
       startTimeMillis: startTimeMillis.toString(),
@@ -167,11 +167,6 @@ export function transformGoogleFitData(apiData: any, userId: string) {
               metric.rhr = metric.rhr ? Math.min(metric.rhr, currentHr) : currentHr;
             }
             break;
-          case 'com.google.activity.summary':
-            // Active minutes from activity summary (field 0 = duration in milliseconds)
-            const activityDurationMs = point.value[0]?.intVal || 0;
-            metric.activityMinutes += Math.round(activityDurationMs / 60000); // Convert ms to minutes
-            break;
           case 'com.google.sleep.segment':
             const sleepDuration = (point.endTimeNanos - point.startTimeNanos) / 1e9 / 60;
             const sleepType = point.value[0]?.intVal;
@@ -209,14 +204,12 @@ export function transformGoogleFitData(apiData: any, userId: string) {
       metric.recoveryScore = Math.round(metric.recoveryScore);
     }
     
-    // Workout intensity from activity minutes and calories
-    if (metric.activityMinutes > 0) {
-      const intensityFromTime = Math.min(100, (metric.activityMinutes / 60) * 100);
-      const intensityFromCalories = Math.min(100, (metric.calories / 2500) * 100);
-      metric.workoutIntensity = Math.round((intensityFromTime + intensityFromCalories) / 2);
-    } else if (metric.steps > 8000) {
-      // Light workout intensity from steps only
-      metric.workoutIntensity = Math.min(50, Math.round((metric.steps / 10000) * 50));
+    // Workout intensity derived from steps and calories
+    // High steps (>10k) or high calories (>2500) indicates higher intensity
+    if (metric.steps > 0 || metric.calories > 0) {
+      const stepIntensity = Math.min(100, (metric.steps / 15000) * 100); // 15k steps = max
+      const calorieIntensity = Math.min(100, (metric.calories / 3000) * 100); // 3k cal = max
+      metric.workoutIntensity = Math.round(Math.max(stepIntensity, calorieIntensity));
     }
     
     // Default HRV if not available (estimate from RHR)
@@ -226,7 +219,7 @@ export function transformGoogleFitData(apiData: any, userId: string) {
     
     // Estimate nutrition macros if not available (based on calories and activity level)
     if (metric.calories > 0 && metric.protein === 0 && metric.carbs === 0 && metric.fats === 0) {
-      const isActiveDay = metric.activityMinutes > 30 || metric.steps > 8000;
+      const isActiveDay = metric.steps > 8000;
       if (isActiveDay) {
         // Active day macro split (30% protein, 50% carbs, 20% fat)
         metric.protein = Math.round((metric.calories * 0.30) / 4); // 4 cal/g protein

@@ -21,17 +21,17 @@ export function useFitnessData(days: number = 30) {
   // Calculate readiness score (simplified formula)
   const readinessScore = latestMetric
     ? Math.min(100, Math.round(
-        ((latestMetric.sleepScore || 70) * 0.4) +
-        ((latestMetric.recoveryScore || 70) * 0.3) +
-        ((latestMetric.hrv || 50) * 0.3)
+        ((latestMetric.sleepScore !== null && latestMetric.sleepScore !== undefined ? latestMetric.sleepScore : 70) * 0.4) +
+        ((latestMetric.recoveryScore !== null && latestMetric.recoveryScore !== undefined ? latestMetric.recoveryScore : 70) * 0.3) +
+        ((latestMetric.hrv !== null && latestMetric.hrv !== undefined ? latestMetric.hrv : 50) * 0.3)
       ))
     : null;
 
   const previousReadiness = previousMetric
     ? Math.min(100, Math.round(
-        ((previousMetric.sleepScore || 70) * 0.4) +
-        ((previousMetric.recoveryScore || 70) * 0.3) +
-        ((previousMetric.hrv || 50) * 0.3)
+        ((previousMetric.sleepScore !== null && previousMetric.sleepScore !== undefined ? previousMetric.sleepScore : 70) * 0.4) +
+        ((previousMetric.recoveryScore !== null && previousMetric.recoveryScore !== undefined ? previousMetric.recoveryScore : 70) * 0.3) +
+        ((previousMetric.hrv !== null && previousMetric.hrv !== undefined ? previousMetric.hrv : 50) * 0.3)
       ))
     : null;
 
@@ -42,8 +42,8 @@ export function useFitnessData(days: number = 30) {
   // Calculate strain (simplified - based on workout intensity and steps)
   const strainScore = latestMetric
     ? Math.min(20, Math.round(
-        ((latestMetric.workoutIntensity || 0) * 0.1) +
-        ((latestMetric.steps || 0) / 1000)
+        ((latestMetric.workoutIntensity !== null && latestMetric.workoutIntensity !== undefined ? latestMetric.workoutIntensity : 0) * 0.1) +
+        ((latestMetric.steps !== null && latestMetric.steps !== undefined ? latestMetric.steps : 0) / 1000)
       ))
     : null;
 
