@@ -290,7 +290,7 @@ export default function FitnessDashboard() {
 
         {/* 2. Key Metric - Readiness */}
         <GlassCard 
-          className="col-span-1 row-span-1 flex flex-col justify-between cursor-pointer" 
+          className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" 
           delay={0.1}
         >
           <div {...readinessLongPress.handlers} data-testid="card-readiness-metric">
@@ -299,13 +299,13 @@ export default function FitnessDashboard() {
             ) : (
               <>
                 <div className="flex justify-between items-start">
-                    <div className="p-3 rounded-2xl bg-primary/20 text-primary shadow-[0_0_15px_rgba(132,204,22,0.2)]">
+                    <div className="p-3 rounded-2xl bg-primary/10 text-primary group-hover:bg-primary group-hover:text-black transition-colors duration-300 shadow-[0_0_15px_rgba(132,204,22,0.1)] group-hover:shadow-[0_0_20px_rgba(132,204,22,0.6)]">
                         <Zap className="w-6 h-6" />
                     </div>
                     <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Readiness</span>
                 </div>
                 <div>
-                    <div className="text-5xl font-display font-bold text-white mb-1" data-testid="text-readiness">
+                    <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-primary transition-colors" data-testid="text-readiness">
                       {readinessScore !== null ? (
                         <>
                           <AnimatedNumber value={readinessScore} duration={2} />%
@@ -354,7 +354,7 @@ export default function FitnessDashboard() {
 
          {/* 3. Key Metric - Strain */}
          <GlassCard 
-           className="col-span-1 row-span-1 flex flex-col justify-between cursor-pointer" 
+           className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" 
            delay={0.15}
          >
           <div {...strainLongPress.handlers} data-testid="card-strain-metric">
@@ -363,13 +363,13 @@ export default function FitnessDashboard() {
             ) : (
               <>
                 <div className="flex justify-between items-start">
-                    <div className="p-3 rounded-2xl bg-accent/20 text-accent shadow-[0_0_15px_rgba(255,0,153,0.2)]">
+                    <div className="p-3 rounded-2xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors duration-300 shadow-[0_0_15px_rgba(255,0,153,0.1)] group-hover:shadow-[0_0_20px_rgba(255,0,153,0.6)]">
                         <Battery className="w-6 h-6" />
                     </div>
                     <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Strain</span>
                 </div>
                 <div>
-                    <div className="text-5xl font-display font-bold text-white mb-1" data-testid="text-strain">
+                    <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-accent transition-colors" data-testid="text-strain">
                       {strainScore !== null ? (
                         <AnimatedNumber value={strainScore} decimals={1} duration={2} />
                       ) : '--'}
