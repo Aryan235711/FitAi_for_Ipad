@@ -2,7 +2,7 @@ import React, { Suspense, useEffect } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { motion } from "framer-motion";
-import { ArrowUpRight, Zap, Battery, Brain, Loader2 } from "lucide-react";
+import { ArrowUpRight, Zap, Battery, Brain, Loader2, TrendingUp, Target, Moon, Activity, BarChart3 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useFitnessData } from "@/hooks/useFitnessData";
 import { toast } from "sonner";
@@ -63,7 +63,12 @@ export default function FitnessDashboard() {
   // Algorithmic Biometric Signature Analyzer - Pattern-based insights (not AI)
   const getBiometricSignature = () => {
     if (!latestMetric || metrics.length < 3) {
-      return 'Sync more data to unlock your unique biometric signature pattern analysis.';
+      return (
+        <span className="flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 text-white/40" />
+          Sync more data to unlock your unique biometric signature pattern analysis.
+        </span>
+      );
     }
     
     // Calculate 7-day metrics for trend analysis - keep data aligned!
@@ -117,28 +122,49 @@ export default function FitnessDashboard() {
     const hrvValues = alignedPairs.hrvValues;
     const sleepValues = alignedPairs.sleepValues;
     
-    // Generate signature pattern
+    // Generate signature pattern with Lucide icons
     const signatures = [
       // Strong negative RHR-Sleep correlation (good: lower RHR = better sleep)
-      rhrSleepCorr < -0.5 && `⚡ Strong sleep-recovery coupling detected (r=${rhrSleepCorr.toFixed(2)})`,
+      rhrSleepCorr < -0.5 && (
+        <span className="flex items-center gap-2">
+          <Zap className="w-4 h-4 text-primary animate-pulse" />
+          Strong sleep-recovery coupling detected (r={rhrSleepCorr.toFixed(2)})
+        </span>
+      ),
       
       // HRV trend analysis
-      hrvTrend === 'improving' && latestMetric.hrv && latestMetric.hrv > 60 && hrvValues.length >= 2 && hrvValues[0] > 0 &&
-        `📈 Nervous system resilience trending upward (+${((hrvValues[hrvValues.length-1] / hrvValues[0] - 1) * 100).toFixed(1)}% in 7d)`,
+      hrvTrend === 'improving' && latestMetric.hrv && latestMetric.hrv > 60 && hrvValues.length >= 2 && hrvValues[0] > 0 && (
+        <span className="flex items-center gap-2">
+          <TrendingUp className="w-4 h-4 text-secondary animate-pulse" />
+          Nervous system resilience trending upward (+{((hrvValues[hrvValues.length-1] / hrvValues[0] - 1) * 100).toFixed(1)}% in 7d)
+        </span>
+      ),
       
       // Optimal zone detection
-      latestMetric.rhr && latestMetric.rhr < 55 && latestMetric.sleepScore && latestMetric.sleepScore > 85 &&
-        `🎯 Elite recovery zone: RHR ${latestMetric.rhr}bpm + sleep ${latestMetric.sleepScore}/100`,
+      latestMetric.rhr && latestMetric.rhr < 55 && latestMetric.sleepScore && latestMetric.sleepScore > 85 && (
+        <span className="flex items-center gap-2">
+          <Target className="w-4 h-4 text-accent animate-pulse" />
+          Elite recovery zone: RHR {latestMetric.rhr}bpm + sleep {latestMetric.sleepScore}/100
+        </span>
+      ),
       
       // Circadian stability pattern
       sleepValues.length >= 5 && sleepValues.length > 0 &&
-        Math.max(...sleepValues) - Math.min(...sleepValues) < 20 &&
-        `🌙 Circadian rhythm locked: ±${(Math.max(...sleepValues) - Math.min(...sleepValues)).toFixed(0)} variance`,
+        Math.max(...sleepValues) - Math.min(...sleepValues) < 20 && (
+        <span className="flex items-center gap-2">
+          <Moon className="w-4 h-4 text-primary animate-pulse" />
+          Circadian rhythm locked: ±{(Math.max(...sleepValues) - Math.min(...sleepValues)).toFixed(0)} variance
+        </span>
+      ),
       
       // Recovery acceleration pattern
       latestMetric.recoveryScore && latestMetric.recoveryScore > 90 && 
-        latestMetric.hrv && latestMetric.rhr && latestMetric.rhr > 0 && latestMetric.hrv > latestMetric.rhr * 0.8 &&
-        `⚙️ Peak adaptation state: Recovery ${latestMetric.recoveryScore}/100, HRV:RHR ratio ${(latestMetric.hrv / latestMetric.rhr).toFixed(2)}`,
+        latestMetric.hrv && latestMetric.rhr && latestMetric.rhr > 0 && latestMetric.hrv > latestMetric.rhr * 0.8 && (
+        <span className="flex items-center gap-2">
+          <Activity className="w-4 h-4 text-secondary animate-pulse" />
+          Peak adaptation state: Recovery {latestMetric.recoveryScore}/100, HRV:RHR ratio {(latestMetric.hrv / latestMetric.rhr).toFixed(2)}
+        </span>
+      ),
     ].filter(Boolean);
     
     // Fallback with safe array access
@@ -149,7 +175,12 @@ export default function FitnessDashboard() {
       ? (100 - (Math.max(...sleepValues) - Math.min(...sleepValues))).toFixed(0)
       : 0;
     
-    return signatures[0] || `Biometric variance: RHR ±${rhrVariance}bpm, Sleep consistency ${sleepConsistency}%`;
+    return signatures[0] || (
+      <span className="flex items-center gap-2">
+        <BarChart3 className="w-4 h-4 text-white/40" />
+        Biometric variance: RHR ±{rhrVariance}bpm, Sleep consistency {sleepConsistency}%
+      </span>
+    );
   };
 
   // Handle Google Fit callback notifications
