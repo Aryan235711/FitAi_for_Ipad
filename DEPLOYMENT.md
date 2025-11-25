@@ -1,8 +1,22 @@
 # FitSync Pro - Deployment Guide
 
-## 🚀 Deploy to Vercel
+## ⚠️ Important: Backend Considerations
 
-FitSync Pro is now PWA-ready and optimized for Vercel deployment!
+FitSync Pro uses an **Express.js backend** with PostgreSQL, Google OAuth, and session management. This architecture is designed for platforms that support long-running Node.js servers.
+
+### Recommended Deployment Platforms
+
+**Best Options (Backend + Frontend):**
+- **Railway.app** ⭐ (Recommended) - Supports Node.js, PostgreSQL, automatic HTTPS
+- **Render.com** - Free tier available, good for fullstack apps
+- **Fly.io** - Global deployment with database support
+- **Replit Deployments** - Native platform, easiest setup
+
+**Vercel Note:** Vercel is optimized for serverless/static sites. To deploy this app to Vercel, you would need to refactor the Express backend into Vercel serverless functions, which is a significant architectural change.
+
+## 🚀 Deploy to Railway (Recommended)
+
+FitSync Pro is now PWA-ready and works great on Railway!
 
 ### Prerequisites
 - GitHub account
@@ -20,13 +34,16 @@ git remote add origin <your-github-repo-url>
 git push -u origin main
 ```
 
-### Step 2: Deploy to Vercel
+### Step 2: Deploy to Railway
 
-1. Go to [vercel.com](https://vercel.com) and sign in
-2. Click **"Add New Project"**
-3. Import your GitHub repository
-4. Vercel will auto-detect the settings from `vercel.json`
-5. Add environment variables:
+1. Go to [railway.app](https://railway.app) and sign in with GitHub
+2. Click **"New Project"** → **"Deploy from GitHub repo"**
+3. Select your FitSync Pro repository
+4. Railway will auto-detect it as a Node.js app
+5. Add a PostgreSQL database:
+   - Click **"+ New"** → **"Database"** → **"Add PostgreSQL"**
+   - Railway will automatically set `DATABASE_URL`
+6. Add environment variables in the Variables tab:
    - `DATABASE_URL` - Your PostgreSQL database URL (use Neon or Vercel Postgres)
    - `SESSION_SECRET` - Random string for session encryption
    - `GOOGLE_CLIENT_ID` - From Google Cloud Console
@@ -38,18 +55,21 @@ git push -u origin main
 
 6. Click **"Deploy"**
 
+7. Click **"Deploy"**
+8. Railway will provide a URL like `https://your-app.up.railway.app`
+
 ### Step 3: Update Google OAuth Redirect URI
 
 After deployment, update your Google Cloud Console OAuth credentials:
 
 **Authorized redirect URIs:**
 ```
-https://your-app.vercel.app/api/google-fit/callback
+https://your-app.up.railway.app/api/google-fit/callback
 ```
 
 **Authorized JavaScript origins:**
 ```
-https://your-app.vercel.app
+https://your-app.up.railway.app
 ```
 
 Changes may take 5-10 minutes to propagate.
@@ -59,7 +79,7 @@ Changes may take 5-10 minutes to propagate.
 Once deployed:
 
 1. Open Safari on your iPad
-2. Navigate to `https://your-app.vercel.app`
+2. Navigate to your Railway deployment URL (e.g., `https://your-app.up.railway.app`)
 3. Tap the **Share** button (square with arrow)
 4. Scroll and tap **"Add to Home Screen"**
 5. Name it "FitSync Pro"
@@ -75,11 +95,19 @@ Once deployed:
 ✅ **Fast loading** - Service worker caching  
 ✅ **iOS optimized** - Black translucent status bar  
 
+### Alternative Deployment: Vercel (Frontend Only)
+
+To deploy on Vercel, you would need to:
+1. Refactor the Express backend into Vercel serverless functions
+2. Use Vercel Postgres or external database
+3. Modify OAuth flow for serverless architecture
+4. This requires significant code changes and is not recommended unless you need Vercel specifically
+
 ### Database Options
 
-For production, consider:
-- **Neon** (recommended) - Serverless PostgreSQL with free tier
-- **Vercel Postgres** - Integrated with Vercel
+For production:
+- **Railway PostgreSQL** (recommended) - Included, automatic setup
+- **Neon** - Serverless PostgreSQL with generous free tier
 - **Supabase** - PostgreSQL + additional features
 
 ### Notes
