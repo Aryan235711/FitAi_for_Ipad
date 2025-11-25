@@ -4,8 +4,44 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./googleAuth";
 import { getAuthUrl, fetchGoogleFitData, transformGoogleFitData } from "./googleFit";
 import { generateDailyInsight } from "./aiInsights";
-import { insertFitnessMetricSchema, type InsertFitnessMetric } from "@shared/schema";
+import { insertFitnessMetricSchema, type InsertFitnessMetric, type FitnessMetric } from "@shared/schema";
 import { resolveBaseUrl } from "./utils/baseUrl";
+
+function mapGoogleFitSyncError(error: any) {
+  const rawMessage = error?.message || "Failed to sync Google Fit data";
+  const normalizedMessage = rawMessage.toLowerCase();
+
+  if (normalizedMessage.includes("no google fit token")) {
+    return {
+      status: 400,
+      message: "Please connect Google Fit before syncing.",
+      errorType: "MissingOAuthConsent",
+    };
+  }
+
+  if (normalizedMessage.includes("refresh token")) {
+    return {
+      status: 400,
+      message: "Google Fit access expired. Reconnect to refresh permissions.",
+      errorType: "StaleRefreshToken",
+    };
+  }
+
+  const apiStatus = error?.code || error?.status || error?.response?.status;
+  if (apiStatus === 403) {
+    return {
+      status: 403,
+      message: "Google Fit denied the request. Reconnect and try again.",
+      errorType: "GoogleApiForbidden",
+    };
+  }
+
+  return {
+    status: 500,
+    message: rawMessage,
+    errorType: error?.name || "GoogleFitSyncError",
+  };
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth Auth (unified for login + Fit access)
@@ -51,7 +87,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user?.id;
       const token = await storage.getGoogleFitToken(userId);
-      res.json({ connected: !!token, expiresAt: token?.expiresAt });
+      let latestMetric: FitnessMetric | undefined;
+      if (token) {
+        const recentMetrics = await storage.getFitnessMetrics(userId, 1);
+        latestMetric = recentMetrics.length > 0 ? recentMetrics[recentMetrics.length - 1] : undefined;
+      }
+
+      res.json({
+        connected: !!token,
+        expiresAt: token?.expiresAt,
+        hasSyncedData: !!latestMetric,
+        lastSyncedAt: latestMetric?.date ?? null,
+      });
     } catch (error: any) {
       console.error("Error checking Google Fit status:", error);
       res.status(500).json({ message: error.message });
@@ -114,10 +161,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error: any) {
       console.error("[Google Fit Sync] Error:", error);
-      res.status(500).json({ 
+      const mapped = mapGoogleFitSyncError(error);
+      res.status(mapped.status).json({ 
         success: false,
-        message: error.message,
-        errorType: error.name || 'UnknownError',
+        message: mapped.message,
+        errorType: mapped.errorType,
         details: 'Check server logs for more information'
       });
     }

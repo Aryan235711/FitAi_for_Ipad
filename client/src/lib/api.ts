@@ -39,6 +39,22 @@ export interface Insight {
 export interface GoogleFitStatus {
   connected: boolean;
   expiresAt?: string;
+  hasSyncedData?: boolean;
+  lastSyncedAt?: string | null;
+}
+
+export class ApiError extends Error {
+  status: number;
+  errorType?: string;
+  details?: unknown;
+
+  constructor(message: string, status: number, errorType?: string, details?: unknown) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.errorType = errorType;
+    this.details = details;
+  }
 }
 
 class ApiClient {
@@ -57,19 +73,18 @@ class ApiClient {
     });
 
     if (!response.ok) {
-      const error = await response.json().catch(() => ({ message: 'Request failed' }));
-      const errorMessage = error.message || `HTTP ${response.status}`;
+      const errorPayload = await response.json().catch(() => ({ message: 'Request failed' }));
+      const errorMessage = errorPayload.message || `HTTP ${response.status}`;
       
-      // Log detailed error info to console for debugging
       console.error(`[API Error] ${endpoint}:`, {
         status: response.status,
         statusText: response.statusText,
         message: errorMessage,
-        errorType: error.errorType,
-        details: error.details,
+        errorType: errorPayload.errorType,
+        details: errorPayload.details,
       });
       
-      throw new Error(errorMessage);
+      throw new ApiError(errorMessage, response.status, errorPayload.errorType, errorPayload.details);
     }
 
     return response.json();

@@ -1,7 +1,8 @@
-import { ReactNode } from "react";
-import { User, RefreshCw, LogOut, Loader2 } from "lucide-react";
+import { ReactNode, useMemo } from "react";
+import { User, RefreshCw, LogOut, Loader2, Power } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useGoogleFit } from "@/hooks/useGoogleFit";
+import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,10 +12,61 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import bgImage from "@assets/generated_images/abstract_dark_neon_gradient_background_for_fitness_app.png";
+import { formatDistanceToNow } from "date-fns";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
-  const { user, isAuthenticated } = useAuth();
-  const { isConnected, connect, disconnect, sync, isSyncing } = useGoogleFit();
+  const { user } = useAuth();
+  const { isConnected, hasSyncedData, lastSyncedAt, connect, disconnect, sync, isSyncing, isDisconnecting } = useGoogleFit();
+
+  const handleDisconnect = () => {
+    if (!isConnected || isDisconnecting) return;
+    const confirmed = window.confirm('Disconnect Google Fit? You can reconnect anytime.');
+    if (confirmed) {
+      disconnect();
+    }
+  };
+
+  const statusDetails = useMemo(() => {
+    const lastSyncDate = lastSyncedAt ? new Date(lastSyncedAt) : null;
+    const relativeTime = lastSyncDate
+      ? formatDistanceToNow(lastSyncDate, { addSuffix: true })
+      : null;
+    const isSyncStale = lastSyncDate
+      ? Date.now() - lastSyncDate.getTime() > 24 * 60 * 60 * 1000
+      : false;
+
+    if (!isConnected) {
+      return {
+        color: "bg-rose-500",
+        label: "Google Fit disconnected",
+        tooltip: "Connect Google Fit to start syncing data.",
+      };
+    }
+
+    if (hasSyncedData) {
+      if (isSyncStale) {
+        return {
+          color: "bg-amber-400",
+          label: relativeTime ? `Last sync ${relativeTime}` : "Data needs refresh",
+          tooltip: "It's been more than a day since the last sync. Run a sync to keep insights fresh.",
+        };
+      }
+
+      return {
+        color: "bg-emerald-400",
+        label: relativeTime ? `Synced ${relativeTime}` : "Google Fit synced",
+        tooltip: relativeTime
+          ? `Last sync completed ${relativeTime}.`
+          : "Latest sync info not available yet, but Google Fit is connected.",
+      };
+    }
+
+    return {
+      color: "bg-sky-400",
+      label: "Connected — waiting for first sync",
+      tooltip: "Start a sync to import historical Google Fit data.",
+    };
+  }, [hasSyncedData, isConnected, lastSyncedAt]);
 
   const handleSync = () => {
     if (isConnected) {
@@ -41,6 +93,40 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
       {/* Top Right Controls */}
       <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 min-h-[44px] cursor-default"
+              aria-live="polite"
+            >
+              <span
+                className={`h-2.5 w-2.5 rounded-full shadow-[0_0_10px] ${statusDetails.color}`}
+              />
+              <span className="text-xs font-medium text-white/80">
+                {statusDetails.label}
+              </span>
+              {isConnected && (
+                <button
+                  type="button"
+                  onClick={handleDisconnect}
+                  disabled={isDisconnecting}
+                  className="ml-2 p-1 rounded-full bg-white/0 border border-transparent hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary transition disabled:opacity-50"
+                  aria-label="Disconnect Google Fit"
+                >
+                  {isDisconnecting ? (
+                    <Loader2 className="w-3.5 h-3.5 text-white/80 animate-spin" />
+                  ) : (
+                    <Power className="w-3.5 h-3.5 text-white/80" />
+                  )}
+                </button>
+              )}
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {statusDetails.tooltip}
+          </TooltipContent>
+        </Tooltip>
+
         <button 
           onClick={handleSync}
           disabled={isSyncing}
