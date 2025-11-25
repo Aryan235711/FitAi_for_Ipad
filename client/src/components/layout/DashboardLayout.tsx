@@ -80,7 +80,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 bg-black/95 backdrop-blur-xl border-white/10" align="end">
             <DropdownMenuLabel className="text-white">
-              {user?.firstName || user?.email || 'My Account'}
+              {user?.email || 'My Account'}
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-white/10" />
             <DropdownMenuItem 
