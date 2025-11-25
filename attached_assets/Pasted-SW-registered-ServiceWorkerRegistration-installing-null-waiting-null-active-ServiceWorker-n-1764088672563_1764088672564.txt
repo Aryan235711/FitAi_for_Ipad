@@ -1,0 +1,184 @@
+SW registered:  ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/', …}
+VM358 client:745 WebSocket connection to 'wss://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/?token=DH-IEudqF_LB' failed: 
+createConnection @ VM358 client:745
+connect @ VM358 client:411
+connect @ VM358 client:751
+connect @ VM358 client:289
+connect @ VM358 client:373
+(anonymous) @ VM358 client:823Understand this error
+App.tsx:40 Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+resolveDispatcher @ chunk-KMU3Z7QX.js?v=da7f89b7:392
+exports.useEffect @ chunk-KMU3Z7QX.js?v=da7f89b7:923
+QueryClientProvider @ @tanstack_react-query.js?v=da7f89b7:2750
+react_stack_bottom_frame @ react-dom_client.js?v=96b5f48c:18509
+renderWithHooks @ react-dom_client.js?v=96b5f48c:5654
+updateFunctionComponent @ react-dom_client.js?v=96b5f48c:7475
+beginWork @ react-dom_client.js?v=96b5f48c:8525
+runWithFiberInDEV @ react-dom_client.js?v=96b5f48c:997
+performUnitOfWork @ react-dom_client.js?v=96b5f48c:12561
+workLoopSync @ react-dom_client.js?v=96b5f48c:12424
+renderRootSync @ react-dom_client.js?v=96b5f48c:12408
+performWorkOnRoot @ react-dom_client.js?v=96b5f48c:11766
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=96b5f48c:13505
+performWorkUntilDeadline @ react-dom_client.js?v=96b5f48c:36
+<QueryClientProvider>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=da7f89b7:247
+App @ App.tsx:40
+react_stack_bottom_frame @ react-dom_client.js?v=96b5f48c:18509
+renderWithHooks @ react-dom_client.js?v=96b5f48c:5654
+updateFunctionComponent @ react-dom_client.js?v=96b5f48c:7475
+beginWork @ react-dom_client.js?v=96b5f48c:8525
+runWithFiberInDEV @ react-dom_client.js?v=96b5f48c:997
+performUnitOfWork @ react-dom_client.js?v=96b5f48c:12561
+workLoopSync @ react-dom_client.js?v=96b5f48c:12424
+renderRootSync @ react-dom_client.js?v=96b5f48c:12408
+performWorkOnRoot @ react-dom_client.js?v=96b5f48c:11766
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=96b5f48c:13505
+performWorkUntilDeadline @ react-dom_client.js?v=96b5f48c:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=96b5f48c:247
+(anonymous) @ main.tsx:17Understand this error
+App.tsx:40 Invalid hook call. Hooks can only be called inside of the body of a function component. This could happen for one of the following reasons:
+1. You might have mismatching versions of React and the renderer (such as React DOM)
+2. You might be breaking the Rules of Hooks
+3. You might have more than one copy of React in the same app
+See https://react.dev/link/invalid-hook-call for tips about how to debug and fix this problem.
+resolveDispatcher @ chunk-KMU3Z7QX.js?v=da7f89b7:392
+exports.useEffect @ chunk-KMU3Z7QX.js?v=da7f89b7:923
+QueryClientProvider @ @tanstack_react-query.js?v=da7f89b7:2750
+react_stack_bottom_frame @ react-dom_client.js?v=96b5f48c:18509
+renderWithHooks @ react-dom_client.js?v=96b5f48c:5654
+updateFunctionComponent @ react-dom_client.js?v=96b5f48c:7475
+beginWork @ react-dom_client.js?v=96b5f48c:8525
+runWithFiberInDEV @ react-dom_client.js?v=96b5f48c:997
+performUnitOfWork @ react-dom_client.js?v=96b5f48c:12561
+workLoopSync @ react-dom_client.js?v=96b5f48c:12424
+renderRootSync @ react-dom_client.js?v=96b5f48c:12408
+performWorkOnRoot @ react-dom_client.js?v=96b5f48c:11827
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=96b5f48c:13505
+performWorkUntilDeadline @ react-dom_client.js?v=96b5f48c:36
+<QueryClientProvider>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=da7f89b7:247
+App @ App.tsx:40
+react_stack_bottom_frame @ react-dom_client.js?v=96b5f48c:18509
+renderWithHooks @ react-dom_client.js?v=96b5f48c:5654
+updateFunctionComponent @ react-dom_client.js?v=96b5f48c:7475
+beginWork @ react-dom_client.js?v=96b5f48c:8525
+runWithFiberInDEV @ react-dom_client.js?v=96b5f48c:997
+performUnitOfWork @ react-dom_client.js?v=96b5f48c:12561
+workLoopSync @ react-dom_client.js?v=96b5f48c:12424
+renderRootSync @ react-dom_client.js?v=96b5f48c:12408
+performWorkOnRoot @ react-dom_client.js?v=96b5f48c:11827
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=96b5f48c:13505
+performWorkUntilDeadline @ react-dom_client.js?v=96b5f48c:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=96b5f48c:247
+(anonymous) @ main.tsx:17Understand this error
+chunk-KMU3Z7QX.js?v=da7f89b7:923 Uncaught TypeError: Cannot read properties of null (reading 'useEffect')
+    at exports.useEffect (chunk-KMU3Z7QX.js?v=da7f89b7:923:35)
+    at QueryClientProvider (@tanstack_react-query.js?v=da7f89b7:2750:9)
+    at Object.react_stack_bottom_frame (react-dom_client.js?v=96b5f48c:18509:20)
+    at renderWithHooks (react-dom_client.js?v=96b5f48c:5654:24)
+    at updateFunctionComponent (react-dom_client.js?v=96b5f48c:7475:21)
+    at beginWork (react-dom_client.js?v=96b5f48c:8525:20)
+    at runWithFiberInDEV (react-dom_client.js?v=96b5f48c:997:72)
+    at performUnitOfWork (react-dom_client.js?v=96b5f48c:12561:98)
+    at workLoopSync (react-dom_client.js?v=96b5f48c:12424:43)
+    at renderRootSync (react-dom_client.js?v=96b5f48c:12408:13)
+exports.useEffect @ chunk-KMU3Z7QX.js?v=da7f89b7:923
+QueryClientProvider @ @tanstack_react-query.js?v=da7f89b7:2750
+react_stack_bottom_frame @ react-dom_client.js?v=96b5f48c:18509
+renderWithHooks @ react-dom_client.js?v=96b5f48c:5654
+updateFunctionComponent @ react-dom_client.js?v=96b5f48c:7475
+beginWork @ react-dom_client.js?v=96b5f48c:8525
+runWithFiberInDEV @ react-dom_client.js?v=96b5f48c:997
+performUnitOfWork @ react-dom_client.js?v=96b5f48c:12561
+workLoopSync @ react-dom_client.js?v=96b5f48c:12424
+renderRootSync @ react-dom_client.js?v=96b5f48c:12408
+performWorkOnRoot @ react-dom_client.js?v=96b5f48c:11827
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=96b5f48c:13505
+performWorkUntilDeadline @ react-dom_client.js?v=96b5f48c:36
+<QueryClientProvider>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=da7f89b7:247
+App @ App.tsx:40
+react_stack_bottom_frame @ react-dom_client.js?v=96b5f48c:18509
+renderWithHooks @ react-dom_client.js?v=96b5f48c:5654
+updateFunctionComponent @ react-dom_client.js?v=96b5f48c:7475
+beginWork @ react-dom_client.js?v=96b5f48c:8525
+runWithFiberInDEV @ react-dom_client.js?v=96b5f48c:997
+performUnitOfWork @ react-dom_client.js?v=96b5f48c:12561
+workLoopSync @ react-dom_client.js?v=96b5f48c:12424
+renderRootSync @ react-dom_client.js?v=96b5f48c:12408
+performWorkOnRoot @ react-dom_client.js?v=96b5f48c:11827
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=96b5f48c:13505
+performWorkUntilDeadline @ react-dom_client.js?v=96b5f48c:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=96b5f48c:247
+(anonymous) @ main.tsx:17Understand this error
+App.tsx:40 An error occurred in the <QueryClientProvider> component.
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://react.dev/link/error-boundaries to learn more about error boundaries.
+
+defaultOnUncaughtError @ react-dom_client.js?v=96b5f48c:6966
+logUncaughtError @ react-dom_client.js?v=96b5f48c:7020
+runWithFiberInDEV @ react-dom_client.js?v=96b5f48c:997
+lane.callback @ react-dom_client.js?v=96b5f48c:7048
+callCallback @ react-dom_client.js?v=96b5f48c:5491
+commitCallbacks @ react-dom_client.js?v=96b5f48c:5503
+runWithFiberInDEV @ react-dom_client.js?v=96b5f48c:999
+commitLayoutEffectOnFiber @ react-dom_client.js?v=96b5f48c:9976
+flushLayoutEffects @ react-dom_client.js?v=96b5f48c:12924
+commitRoot @ react-dom_client.js?v=96b5f48c:12803
+commitRootWhenReady @ react-dom_client.js?v=96b5f48c:12016
+performWorkOnRoot @ react-dom_client.js?v=96b5f48c:11950
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=96b5f48c:13505
+performWorkUntilDeadline @ react-dom_client.js?v=96b5f48c:36
+<QueryClientProvider>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=da7f89b7:247
+App @ App.tsx:40
+react_stack_bottom_frame @ react-dom_client.js?v=96b5f48c:18509
+renderWithHooks @ react-dom_client.js?v=96b5f48c:5654
+updateFunctionComponent @ react-dom_client.js?v=96b5f48c:7475
+beginWork @ react-dom_client.js?v=96b5f48c:8525
+runWithFiberInDEV @ react-dom_client.js?v=96b5f48c:997
+performUnitOfWork @ react-dom_client.js?v=96b5f48c:12561
+workLoopSync @ react-dom_client.js?v=96b5f48c:12424
+renderRootSync @ react-dom_client.js?v=96b5f48c:12408
+performWorkOnRoot @ react-dom_client.js?v=96b5f48c:11827
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=96b5f48c:13505
+performWorkUntilDeadline @ react-dom_client.js?v=96b5f48c:36
+<App>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=96b5f48c:247
+(anonymous) @ main.tsx:17Understand this warning
+main.tsx:9 SW registered:  ServiceWorkerRegistration {installing: null, waiting: null, active: ServiceWorker, navigationPreload: NavigationPreloadManager, scope: 'https://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/', …}
+client:745 WebSocket connection to 'wss://1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/?token=DH-IEudqF_LB' failed: 
+createConnection @ client:745
+connect @ client:411
+connect @ client:751
+connect @ client:289
+connect @ client:373
+(anonymous) @ client:823Understand this error
+client:755 WebSocket connection to 'wss://localhost:5173/?token=DH-IEudqF_LB' failed: 
+createConnection @ client:755
+connect @ client:411
+connect @ client:759Understand this error
+client:765 [vite] failed to connect to websocket.
+your current setup:
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev/ <--[HTTP]--> localhost:5173/ (server)
+  (browser) 1dbec563-d475-448b-af15-95f393b9828d-00-1fxbkc3wzg0ne.picard.replit.dev:/ <--[WebSocket (failing)]--> localhost:5173/ (server)
+Check out your Vite / network configuration and https://vite.dev/config/server-options.html#server-hmr .
+connect @ client:765
+await in connect
+connect @ client:289
+connect @ client:373
+(anonymous) @ client:823Understand this error
+client:809 [vite] TypeError: Cannot read properties of undefined (reading 'send')
+    at Object.send (client:449:7)
+    at Object.send (client:780:16)
+    at Object.send (client:318:23)
+    at Object.send (client:396:30)

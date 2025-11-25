@@ -8,7 +8,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
       // Redirect to login
-      window.location.href = '/api/login';
+      window.location.href = '/login';
     }
   }, [isLoading, isAuthenticated]);
 
