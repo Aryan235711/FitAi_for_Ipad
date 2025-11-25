@@ -28,16 +28,16 @@ function MindShieldComponent({ data = [] }: MindShieldProps) {
         {heatmapData.map((item, i) => (
           <div 
             key={i} 
-            className="group relative aspect-square rounded-md overflow-hidden"
+            className="group relative aspect-square rounded-md overflow-hidden cursor-pointer"
           >
             <div 
               className={cn(
-                "w-full h-full transition-all duration-300 group-hover:scale-110",
+                "w-full h-full transition-all duration-300 group-hover:scale-110 group-focus-within:scale-110",
                 getColor(item.value)
               )} 
             />
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-               <span className="text-[10px] font-bold text-black">{item.value}</span>
+            <div className="absolute inset-0 flex items-center justify-center opacity-60 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
+               <span className="text-[10px] font-bold text-white drop-shadow-lg">{item.value}</span>
             </div>
           </div>
         ))}
