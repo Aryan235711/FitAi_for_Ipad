@@ -312,26 +312,28 @@ export default function FitnessDashboard() {
                         </>
                       ) : '--'}
                     </div>
-                <motion.div 
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 2.2 }}
-                  className="flex items-center gap-1 text-primary text-xs font-medium"
-                >
-                    {readinessChange !== null && readinessChange > 0 && (
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 2.3, type: "spring" }}
-                      >
-                        <ArrowUpRight className="w-3 h-3" />
-                      </motion.div>
-                    )}
-                    <span data-testid="text-readiness-change">
-                      {readinessChange !== null ? `${readinessChange > 0 ? '+' : ''}${readinessChange}% vs yesterday` : 'No data'}
-                    </span>
-                </motion.div>
-            </div>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 2.2 }}
+                      className="flex items-center gap-1 text-primary text-xs font-medium"
+                    >
+                        {readinessChange !== null && readinessChange > 0 && (
+                          <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 2.3, type: "spring" }}
+                          >
+                            <ArrowUpRight className="w-3 h-3" />
+                          </motion.div>
+                        )}
+                        <span data-testid="text-readiness-change">
+                          {readinessChange !== null ? `${readinessChange > 0 ? '+' : ''}${readinessChange}% vs yesterday` : 'No data'}
+                        </span>
+                    </motion.div>
+                    </div>
+              </>
+            )}
           </div>
         </GlassCard>
 
@@ -356,27 +358,33 @@ export default function FitnessDashboard() {
            delay={0.15}
          >
           <div {...strainLongPress.handlers} data-testid="card-strain-metric">
-            <div className="flex justify-between items-start">
-                <div className="p-3 rounded-2xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors duration-300 shadow-[0_0_15px_rgba(255,0,153,0.1)] group-hover:shadow-[0_0_20px_rgba(255,0,153,0.6)]">
-                    <Battery className="w-6 h-6" />
+            {isLoading ? (
+              <MetricCardSkeleton />
+            ) : (
+              <>
+                <div className="flex justify-between items-start">
+                    <div className="p-3 rounded-2xl bg-accent/10 text-accent group-hover:bg-accent group-hover:text-white transition-colors duration-300 shadow-[0_0_15px_rgba(255,0,153,0.1)] group-hover:shadow-[0_0_20px_rgba(255,0,153,0.6)]">
+                        <Battery className="w-6 h-6" />
+                    </div>
+                    <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Strain</span>
                 </div>
-                <span className="text-xs font-mono text-white/40 uppercase tracking-wider">Strain</span>
-            </div>
-            <div>
-                <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-accent transition-colors" data-testid="text-strain">
-                  {strainScore !== null ? (
-                    <AnimatedNumber value={strainScore} decimals={1} duration={2} />
-                  ) : '--'}
+                <div>
+                    <div className="text-5xl font-display font-bold text-white mb-1 group-hover:text-accent transition-colors" data-testid="text-strain">
+                      {strainScore !== null ? (
+                        <AnimatedNumber value={strainScore} decimals={1} duration={2} />
+                      ) : '--'}
+                    </div>
+                    <motion.div 
+                      initial={{ opacity: 0, y: 5 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 2.2 }}
+                      className="flex items-center gap-1 text-white/60 text-xs font-medium"
+                    >
+                        <span>{strainScore && strainScore > 10 ? 'Optimal Zone' : 'Low Activity'}</span>
+                    </motion.div>
                 </div>
-                <motion.div 
-                  initial={{ opacity: 0, y: 5 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 2.2 }}
-                  className="flex items-center gap-1 text-white/60 text-xs font-medium"
-                >
-                    <span>{strainScore && strainScore > 10 ? 'Optimal Zone' : 'Low Activity'}</span>
-                </motion.div>
-            </div>
+              </>
+            )}
           </div>
         </GlassCard>
 
