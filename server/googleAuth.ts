@@ -45,6 +45,28 @@ export async function setupAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  // COMPREHENSIVE REQUEST LOGGING - log EVERY request to OAuth endpoints
+  app.use((req, res, next) => {
+    if (req.path.includes("/api/login") || req.path.includes("/api/google-fit/callback")) {
+      console.log("\n========== OAUTH REQUEST RECEIVED ==========");
+      console.log("[Request] Path:", req.path);
+      console.log("[Request] Method:", req.method);
+      console.log("[Request] Query:", JSON.stringify(req.query));
+      console.log("[Request] Headers:", {
+        host: req.get("host"),
+        protocol: req.get("x-forwarded-proto") || req.protocol,
+        userAgent: req.get("user-agent")?.substring(0, 50),
+      });
+      console.log("[Request] Session:", {
+        sessionID: req.sessionID,
+        hasSession: !!req.session,
+        isAuth: req.isAuthenticated?.(),
+      });
+      console.log("==========================================\n");
+    }
+    next();
+  });
+
   // Middleware to dynamically set the passport strategy's callback URL per request
   app.use((req, res, next) => {
     // Extract the full callback URL from request
@@ -54,14 +76,6 @@ export async function setupAuth(app: Express) {
     
     // Store on request for access in routes
     req.fullCallbackUrl = fullCallbackUrl;
-    
-    console.log("[Auth] Request:", {
-      method: req.method,
-      path: req.path,
-      protocol: protocol,
-      host: host,
-      sessionID: req.sessionID,
-    });
     
     next();
   });
@@ -74,7 +88,7 @@ export async function setupAuth(app: Express) {
       callbackURL: "/api/google-fit/callback",
       passReqToCallback: true,
       accessType: "offline",
-      prompt: "consent",
+      prompt: "select_account",  // Avoid "403: org_internal" by forcing account selection
     },
       (req: any, accessToken: string, refreshToken: string, profile: any, done: any) => {
         (async () => {
@@ -160,35 +174,83 @@ export async function setupAuth(app: Express) {
       console.log("[Google OAuth] Full Callback URL:", req.fullCallbackUrl);
       console.log("[Google OAuth] Host:", req.get("host"));
       console.log("[Google OAuth] Protocol:", req.get("x-forwarded-proto") || req.protocol);
+      console.log("[Google OAuth] Starting OAuth flow with prompt=select_account");
       
+      // Add prompt: 'select_account' to avoid "403: org_internal" error
+      // and 'consent' to force consent screen (gets refresh token)
       passport.authenticate("google", {
         scope: ["profile", "email"],
+        prompt: "select_account",
+        accessType: "offline",
       })(req, res, next);
     } catch (error: any) {
-      console.error("[Google OAuth] Login error:", error.message);
-      res.status(500).json({ error: error.message });
+      console.error("[Google OAuth] Login error:", error.message, error.stack);
+      res.status(500).json({ error: error.message, stack: error.stack });
     }
   });
 
-  // Callback with direct Passport handling
+  // Callback with direct Passport handling - with comprehensive error logging
   app.get(
     "/api/google-fit/callback",
-    passport.authenticate("google", {
-      failureRedirect: "/login?error=auth_failed",
-    }),
+    (req, res, next) => {
+      console.log("[Google OAuth Callback] ===== CALLBACK ROUTE HIT =====");
+      console.log("[Google OAuth Callback] URL:", req.originalUrl);
+      console.log("[Google OAuth Callback] Query:", req.query);
+      console.log("[Google OAuth Callback] Session ID:", req.sessionID);
+      console.log("[Google OAuth Callback] Is Authenticated:", req.isAuthenticated?.());
+      
+      // Check for error from Google
+      if (req.query.error) {
+        console.error("[Google OAuth Callback] ===== ERROR FROM GOOGLE =====");
+        console.error("[Google OAuth Callback] Error:", req.query.error);
+        console.error("[Google OAuth Callback] Error URI:", req.query.error_uri);
+        console.error("[Google OAuth Callback] Error description:", req.query.error_description);
+        return res.status(400).json({
+          error: req.query.error,
+          errorDescription: req.query.error_description,
+          solution: "Check Google Cloud Console OAuth consent screen is set to 'External' for personal Google accounts",
+        });
+      }
+      
+      console.log("[Google OAuth Callback] No error param, proceeding with Passport authenticate...");
+      
+      // Call passport authenticate
+      passport.authenticate("google", {
+        failureRedirect: "/login?error=auth_failed",
+        failureMessage: true,
+      })(req, res, next);
+    },
     (req, res) => {
       try {
-        console.log("[Google OAuth] ===== CALLBACK SUCCESS =====");
-        console.log("[Google OAuth] User authenticated:", req.user?.id);
-        console.log("[Google OAuth] Session ID:", req.sessionID);
-        console.log("[Google OAuth] Redirecting to /");
+        console.log("[Google OAuth Callback] ===== CALLBACK SUCCESS HANDLER =====");
+        console.log("[Google OAuth Callback] User:", req.user?.id, req.user?.email);
+        console.log("[Google OAuth Callback] Session ID:", req.sessionID);
+        console.log("[Google OAuth Callback] Redirecting to /");
         res.redirect("/");
       } catch (error: any) {
-        console.error("[Google OAuth] ERROR during redirect:", error.message);
+        console.error("[Google OAuth Callback] ERROR in success handler:", {
+          message: error.message,
+          stack: error.stack?.split("\n")[0],
+        });
         res.status(500).json({ error: "Redirect failed", message: error.message });
       }
     }
   );
+
+  // Add a catch-all error handler for OAuth errors
+  app.use((err: any, req: any, res: any, next: any) => {
+    if (req.path.includes("/api/login") || req.path.includes("/api/google-fit/callback")) {
+      console.error("[Global Error Handler] OAuth error detected:", {
+        path: req.path,
+        statusCode: err.statusCode || err.status || 500,
+        message: err.message,
+        stack: err.stack?.split("\n").slice(0, 3),
+        authError: err.authError,
+        details: err.details,
+      });
+    }
+    next(err);
+  });
 
   app.get("/api/logout", (req, res) => {
     req.logout((err) => {
