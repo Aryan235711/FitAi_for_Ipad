@@ -57,47 +57,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // DEBUG: Show OAuth configuration
-  app.get('/api/google-fit/debug', isAuthenticated, async (req: any, res) => {
-    const protocol = req.protocol;
-    const hostname = req.hostname;
-    const host = req.get('host');
-    const originalUrl = req.originalUrl;
+  // DEBUG: Show OAuth configuration (PUBLIC - no auth required for debugging)
+  app.get('/api/google-fit/debug', async (req: any, res) => {
+    const replyDomains = process.env.REPLIT_DOMAINS || "unknown";
+    const replId = process.env.REPL_ID || "unknown";
+    const replOwner = process.env.REPL_OWNER || "unknown";
     
-    const constructedRedirectUri = `https://${hostname}/api/google-fit/callback`;
-    const alternativeRedirectUri = `https://${host}/api/google-fit/callback`;
+    // The ONLY redirect URI that matters for THIS deployment
+    const correctRedirectUri = `https://${replyDomains}/api/google-fit/callback`;
     
     res.json({
-      message: "Google OAuth Debug Information",
-      currentRequest: {
-        protocol,
-        hostname,
-        host,
-        originalUrl,
-        fullUrl: `${protocol}://${host}${originalUrl}`,
-      },
-      redirectUris: {
-        constructed: constructedRedirectUri,
-        alternative: alternativeRedirectUri,
-        recommended: `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/api/google-fit/callback`,
-      },
-      googleCloudConsoleInstructions: {
+      message: "CRITICAL: Google OAuth Redirect URI Verification",
+      urgent: "IF YOU'RE GETTING 403 ERRORS, YOU MUST DO THIS NOW:",
+      
+      correctRedirectUri: correctRedirectUri,
+      currentlyUsing: correctRedirectUri,
+      
+      instructions: {
         step1: "Go to https://console.cloud.google.com/apis/credentials",
-        step2: "Click on your OAuth 2.0 Client ID",
-        step3: "Under 'Authorized redirect URIs', add BOTH of these:",
-        urisToAdd: [
-          constructedRedirectUri,
-          alternativeRedirectUri,
-          `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/api/google-fit/callback`,
-        ],
-        step4: "Click 'Save'",
-        step5: "Wait 5 minutes for changes to propagate",
+        step2: "Find your OAuth 2.0 Client ID (NOT the secret)",
+        step3: "Click on it to open the details",
+        step4: "Look for 'Authorized redirect URIs' section",
+        step5: "Make sure this URI is EXACTLY registered:",
+        requiredUri: correctRedirectUri,
+        step6: "If not there, click 'ADD URI' and paste:",
+        step7: "Click SAVE",
+        step8: "Wait 5-10 minutes for changes to propagate to Google servers",
       },
-      currentEnv: {
-        REPL_SLUG: process.env.REPL_SLUG || "not-set",
-        REPL_OWNER: process.env.REPL_OWNER || "not-set",
+      
+      debug: {
+        REPLIT_DOMAINS: replyDomains,
+        REPL_ID: replId,
+        REPL_OWNER: replOwner,
         hasClientId: !!process.env.GOOGLE_CLIENT_ID,
         hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+        redirectUriBeingSent: correctRedirectUri,
+      },
+      
+      troubleshooting: {
+        issue: "Still getting 403 error?",
+        check1: "Verify redirect URI is EXACTLY as shown above (case-sensitive, no extra slashes)",
+        check2: "Make sure it's registered in Google Cloud Console for your Client ID",
+        check3: "Wait 10 minutes after saving - Google takes time to propagate",
+        check4: "Try incognito/private browser window",
+        check5: "Clear browser cookies and cache",
+        check6: "Make sure OAuth consent screen is set to 'External'",
+        check7: "Make sure your Gmail is added as a test user",
       }
     });
   });
