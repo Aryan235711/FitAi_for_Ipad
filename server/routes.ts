@@ -120,42 +120,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Google Fit OAuth callback
-  app.get('/api/google-fit/callback', async (req, res) => {
-    const { code, state: userId, error } = req.query;
-
-    // Log all incoming parameters for debugging
-    console.log('[Google Fit Callback] Received:', {
-      code: code ? 'present' : 'missing',
-      userId,
-      error,
-      fullUrl: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
-    });
-
-    if (error) {
-      console.error('[Google Fit Callback] OAuth error:', error);
-      return res.redirect(`/?error=${error}`);
-    }
-
-    if (!code || !userId) {
-      console.error('[Google Fit Callback] Missing code or state');
-      return res.status(400).send('Missing code or state parameter');
-    }
-
-    try {
-      const redirectUri = `https://${req.get('host')}/api/google-fit/callback`;
-      console.log('[Google Fit Callback] Using redirect URI:', redirectUri);
-      
-      await exchangeCodeForTokens(code as string, userId as string, redirectUri);
-      
-      // Redirect back to app
-      res.redirect('/?connected=true');
-    } catch (error: any) {
-      console.error("Error in Google Fit callback:", error);
-      res.redirect('/?error=connection_failed');
-    }
-  });
-
   // Check Google Fit connection status
   app.get('/api/google-fit/status', isAuthenticated, async (req: any, res) => {
     try {
