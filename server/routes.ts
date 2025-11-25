@@ -24,13 +24,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // ============== GOOGLE FIT ROUTES ==============
   
+  // DEBUG: Show OAuth configuration
+  app.get('/api/google-fit/debug', isAuthenticated, async (req: any, res) => {
+    const protocol = req.protocol;
+    const hostname = req.hostname;
+    const host = req.get('host');
+    const originalUrl = req.originalUrl;
+    
+    const constructedRedirectUri = `https://${hostname}/api/google-fit/callback`;
+    const alternativeRedirectUri = `https://${host}/api/google-fit/callback`;
+    
+    res.json({
+      message: "Google OAuth Debug Information",
+      currentRequest: {
+        protocol,
+        hostname,
+        host,
+        originalUrl,
+        fullUrl: `${protocol}://${host}${originalUrl}`,
+      },
+      redirectUris: {
+        constructed: constructedRedirectUri,
+        alternative: alternativeRedirectUri,
+        recommended: `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/api/google-fit/callback`,
+      },
+      googleCloudConsoleInstructions: {
+        step1: "Go to https://console.cloud.google.com/apis/credentials",
+        step2: "Click on your OAuth 2.0 Client ID",
+        step3: "Under 'Authorized redirect URIs', add BOTH of these:",
+        urisToAdd: [
+          constructedRedirectUri,
+          alternativeRedirectUri,
+          `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co/api/google-fit/callback`,
+        ],
+        step4: "Click 'Save'",
+        step5: "Wait 5 minutes for changes to propagate",
+      },
+      currentEnv: {
+        REPL_SLUG: process.env.REPL_SLUG || "not-set",
+        REPL_OWNER: process.env.REPL_OWNER || "not-set",
+        hasClientId: !!process.env.GOOGLE_CLIENT_ID,
+        hasClientSecret: !!process.env.GOOGLE_CLIENT_SECRET,
+      }
+    });
+  });
+  
   // Initiate Google Fit OAuth flow
   app.get('/api/google-fit/connect', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const redirectUri = `https://${req.hostname}/api/google-fit/callback`;
+      // Use req.get('host') instead of req.hostname to include port if needed
+      const redirectUri = `https://${req.get('host')}/api/google-fit/callback`;
       const authUrl = getAuthUrl(userId, redirectUri);
-      res.json({ authUrl });
+      
+      console.log('[Google Fit Connect] Redirect URI:', redirectUri);
+      console.log('[Google Fit Connect] Auth URL:', authUrl);
+      
+      res.json({ authUrl, redirectUri });
     } catch (error: any) {
       console.error("Error initiating Google Fit connection:", error);
       res.status(500).json({ message: error.message });
@@ -39,14 +89,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Google Fit OAuth callback
   app.get('/api/google-fit/callback', async (req, res) => {
-    const { code, state: userId } = req.query;
+    const { code, state: userId, error } = req.query;
+
+    // Log all incoming parameters for debugging
+    console.log('[Google Fit Callback] Received:', {
+      code: code ? 'present' : 'missing',
+      userId,
+      error,
+      fullUrl: `${req.protocol}://${req.get('host')}${req.originalUrl}`,
+    });
+
+    if (error) {
+      console.error('[Google Fit Callback] OAuth error:', error);
+      return res.redirect(`/?error=${error}`);
+    }
 
     if (!code || !userId) {
+      console.error('[Google Fit Callback] Missing code or state');
       return res.status(400).send('Missing code or state parameter');
     }
 
     try {
-      const redirectUri = `https://${req.hostname}/api/google-fit/callback`;
+      const redirectUri = `https://${req.get('host')}/api/google-fit/callback`;
+      console.log('[Google Fit Callback] Using redirect URI:', redirectUri);
+      
       await exchangeCodeForTokens(code as string, userId as string, redirectUri);
       
       // Redirect back to app
