@@ -1,6 +1,7 @@
 import { ReactNode, CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { tokens } from "@/design";
+import { motion } from "framer-motion";
 
 const toneMap = {
   success: {
@@ -61,14 +62,16 @@ export function StatusChip({ label, tone = "info", className, children, "aria-li
   };
 
   return (
-    <div
+    <motion.div
       className={cn("inline-flex items-center gap-2", className)}
       style={chipStyle}
       aria-live={ariaLive}
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: "spring", stiffness: 600, damping: 35 }}
     >
       <span className="rounded-full" style={dotStyle} />
       <span className="tracking-[0.08em] uppercase whitespace-nowrap">{label}</span>
       {children}
-    </div>
+    </motion.div>
   );
 }

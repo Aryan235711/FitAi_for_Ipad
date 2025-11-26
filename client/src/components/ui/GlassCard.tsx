@@ -67,6 +67,11 @@ export function GlassCard({ children, className, title, subtitle, delay = 0, dis
         y: -4,
         transition: { type: "spring", stiffness: 400, damping: 25 }
       }}
+      whileTap={{
+        scale: 0.985,
+        y: 2,
+        transition: { type: "spring", stiffness: 600, damping: 40 }
+      }}
       className={cn(
         "flex flex-col relative overflow-hidden group perspective-1000",
         className

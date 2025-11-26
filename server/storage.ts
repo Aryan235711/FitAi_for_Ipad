@@ -39,6 +39,9 @@ export interface IStorage {
   getLatestInsight(userId: string): Promise<Insight | undefined>;
   saveInsight(insight: InsertInsight): Promise<Insight>;
   markInsightAsRead(insightId: number): Promise<void>;
+
+  // Ops
+  healthCheck(): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -230,6 +233,10 @@ export class DatabaseStorage implements IStorage {
       .update(insights)
       .set({ isRead: true })
       .where(eq(insights.id, insightId));
+  }
+
+  async healthCheck(): Promise<void> {
+    await db.execute(sql`select 1`);
   }
 }
 

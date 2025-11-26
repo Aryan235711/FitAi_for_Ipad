@@ -3,7 +3,7 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { motion } from "framer-motion";
 import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
-import { ArrowUpRight, Zap, Battery, Brain, Loader2, TrendingUp, Target, Moon, Activity, BarChart3, Sparkles } from "lucide-react";
+import { ArrowUpRight, Zap, Battery, Loader2, TrendingUp, Target, Moon, Activity, BarChart3, Sparkles, PlugZap, WifiOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useFitnessData } from "@/hooks/useFitnessData";
 import { useGoogleFit } from "@/hooks/useGoogleFit";
@@ -13,6 +13,7 @@ import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import { MetricTooltip } from "@/components/ui/MetricTooltip";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { DesignButton } from "@/design";
 import {
   transformRecoveryRadarData,
   transformNerveCheckData,
@@ -39,6 +40,32 @@ const LoadingChart = () => (
   </div>
 );
 
+const ChartEmptyState = ({
+  icon: Icon = PlugZap,
+  message,
+  actionLabel,
+  onAction,
+}: {
+  icon?: typeof PlugZap;
+  message: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}) => (
+  <div className="h-full min-h-[220px] flex flex-col items-center justify-center gap-4 text-center text-white/70 px-4">
+    <div className="p-3 rounded-2xl bg-white/5 text-primary shadow-inner">
+      <Icon className="w-5 h-5" />
+    </div>
+    <p className="text-sm leading-relaxed max-w-xs">
+      {message}
+    </p>
+    {actionLabel && onAction && (
+      <DesignButton tone="secondary" size="sm" onClick={onAction}>
+        {actionLabel}
+      </DesignButton>
+    )}
+  </div>
+);
+
 export default function FitnessDashboard() {
   const { user } = useAuth();
   const [location] = useLocation();
@@ -52,14 +79,45 @@ export default function FitnessDashboard() {
     strainScore 
   } = useFitnessData();
   
-  const { sync, isSyncing, isConnected } = useGoogleFit();
+  const { sync, isSyncing, isConnected, connect, hasSyncedData } = useGoogleFit();
 
   const userName = user?.firstName || user?.email?.split('@')[0] || 'User';
+  const [refreshError, setRefreshError] = React.useState<string | null>(null);
+  const hasMetrics = metrics.length > 0;
+
+  const handleEmptyAction = () => {
+    if (isConnected) {
+      sync(undefined);
+    } else {
+      connect(undefined);
+    }
+  };
+
+  const guidanceMessage = React.useMemo(() => {
+    if (!isConnected) {
+      return 'Connect Google Fit to unlock live biometrics on your iPad.';
+    }
+    if (!hasSyncedData || !hasMetrics) {
+      return 'Connected and waiting for your first sync. Pull down to import your history.';
+    }
+    return null;
+  }, [isConnected, hasSyncedData, hasMetrics]);
+  const guidanceActionLabel = isConnected ? 'Sync now' : 'Connect Fit';
+
+  useEffect(() => {
+    if (!refreshError) return;
+    const timeout = setTimeout(() => setRefreshError(null), 4000);
+    return () => clearTimeout(timeout);
+  }, [refreshError]);
 
   // Pull-to-refresh functionality
   const handleRefresh = async () => {
+    setRefreshError(null);
+
     if (!isConnected) {
-      toast.error('Please connect Google Fit first');
+      const message = 'Connect Google Fit before refreshing.';
+      setRefreshError(message);
+      toast.error(message);
       return;
     }
     
@@ -71,15 +129,15 @@ export default function FitnessDashboard() {
         });
       });
     } catch (error) {
-      // Error already handled by sync mutation
-      throw error;
+      const message = error instanceof Error ? error.message : 'Sync failed. Please try again.';
+      setRefreshError(message);
     }
   };
 
-  const { containerRef, pullDistance, isRefreshing, isThresholdMet } = usePullToRefresh({
+  const { containerRef, pullDistance, isRefreshing } = usePullToRefresh({
     onRefresh: handleRefresh,
     threshold: 80,
-    enabled: isConnected,
+    enabled: true,
   });
 
   // Long-press tooltips for key metrics
@@ -251,6 +309,7 @@ export default function FitnessDashboard() {
         pullDistance={pullDistance}
         isRefreshing={isRefreshing}
         threshold={80}
+        errorMessage={refreshError}
       />
       
       {/* Main Content Container with Pull-to-Refresh */}
@@ -275,6 +334,15 @@ export default function FitnessDashboard() {
           </motion.h1>
         </div>
       </header>
+
+      {guidanceMessage && (
+        <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <span>{guidanceMessage}</span>
+          <DesignButton tone="secondary" size="sm" onClick={handleEmptyAction}>
+            {guidanceActionLabel}
+          </DesignButton>
+        </div>
+      )}
 
       {/* Bento Grid Layout - iPad Optimized */}
       <motion.div
@@ -412,9 +480,18 @@ export default function FitnessDashboard() {
             delay={0.2}
             data-testid="card-recovery-radar"
         >
-            <Suspense fallback={<LoadingChart />}>
+            {hasMetrics ? (
+              <Suspense fallback={<LoadingChart />}>
                 <RecoveryRadar data={recoveryRadarData} />
-            </Suspense>
+              </Suspense>
+            ) : (
+              <ChartEmptyState
+                icon={WifiOff}
+                message="Sync Google Fit to visualize how sleep, strain, and RHR interact."
+                actionLabel={guidanceActionLabel}
+                onAction={handleEmptyAction}
+              />
+            )}
         </GlassCard>
 
         {/* 5. Nerve Check (Dual Line) */}
@@ -426,9 +503,17 @@ export default function FitnessDashboard() {
             delay={0.3}
             data-testid="card-nerve-check"
         >
-            <Suspense fallback={<LoadingChart />}>
+            {hasMetrics ? (
+              <Suspense fallback={<LoadingChart />}>
                 <NerveCheck data={nerveCheckData} />
-            </Suspense>
+              </Suspense>
+            ) : (
+              <ChartEmptyState
+                message="Your nervous system trends appear after at least a few synced days."
+                actionLabel={guidanceActionLabel}
+                onAction={handleEmptyAction}
+              />
+            )}
         </GlassCard>
 
         {/* 6. Wellness Triangle (Radar) - Multi-dimensional Health Score */}
@@ -440,9 +525,17 @@ export default function FitnessDashboard() {
             delay={0.4}
             data-testid="card-wellness-triangle"
         >
-            <Suspense fallback={<LoadingChart />}>
+            {hasMetrics ? (
+              <Suspense fallback={<LoadingChart />}>
                 <WellnessTriangle data={wellnessTriangleData} />
-            </Suspense>
+              </Suspense>
+            ) : (
+              <ChartEmptyState
+                message="Sync at least one day to map your resilience, recovery, and sleep triangle."
+                actionLabel={guidanceActionLabel}
+                onAction={handleEmptyAction}
+              />
+            )}
         </GlassCard>
 
         {/* 7. MindShield (Heatmap) */}
@@ -454,9 +547,17 @@ export default function FitnessDashboard() {
             delay={0.5}
             data-testid="card-mindshield"
         >
-             <Suspense fallback={<LoadingChart />}>
-                <MindShield data={mindShieldData} />
-            </Suspense>
+             {hasMetrics ? (
+               <Suspense fallback={<LoadingChart />}>
+                  <MindShield data={mindShieldData} />
+              </Suspense>
+             ) : (
+               <ChartEmptyState
+                 message="Sleep consistency heatmaps unlock after syncing at least three nights."
+                 actionLabel={guidanceActionLabel}
+                 onAction={handleEmptyAction}
+               />
+             )}
         </GlassCard>
         
         {/* 8. Load Balancer (Bar + Line) */}
@@ -468,9 +569,17 @@ export default function FitnessDashboard() {
             delay={0.55}
             data-testid="card-load-balancer"
         >
-             <Suspense fallback={<LoadingChart />}>
-                <LoadBalancer data={loadBalancerData} />
-            </Suspense>
+             {hasMetrics ? (
+               <Suspense fallback={<LoadingChart />}>
+                  <LoadBalancer data={loadBalancerData} />
+              </Suspense>
+             ) : (
+               <ChartEmptyState
+                 message="We need at least one synced workout to chart strain vs recovery."
+                 actionLabel={guidanceActionLabel}
+                 onAction={handleEmptyAction}
+               />
+             )}
         </GlassCard>
 
          {/* 9. Context Card - Daily AI Insight */}
@@ -532,26 +641,34 @@ export default function FitnessDashboard() {
         </GlassCard>
 
         {/* 10. Vitality Orb with Biometric Signature */}
-        <GlassCard 
-          motionConfig={{ variants: variants.fadeInUp("lg") }}
+          <GlassCard 
+           motionConfig={{ variants: variants.fadeInUp("lg") }}
             className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-gradient-to-r from-black to-primary/5" 
             delay={0.7}
             data-testid="card-vitality-orb"
-        >
-             <Suspense fallback={<LoadingChart />}>
+          >
+             {hasMetrics ? (
+              <Suspense fallback={<LoadingChart />}>
                 <div className="flex items-center justify-between h-full pr-8">
-                   <div className="w-1/3 h-full">
-                      <VitalityOrb score={vitalityScore} hrv={syncIndexScores.hrv} sleep={syncIndexScores.sleep} />
-                   </div>
-                   <div className="w-2/3 text-right">
-                      <h2 className="text-3xl font-display font-bold text-white">Vitality Score</h2>
-                      <p className="text-white/60 mt-2 text-sm font-mono">
-                        {getBiometricSignature()}
-                      </p>
-                   </div>
+                  <div className="w-1/3 h-full">
+                    <VitalityOrb score={vitalityScore} hrv={syncIndexScores.hrv} sleep={syncIndexScores.sleep} />
+                  </div>
+                  <div className="w-2/3 text-right">
+                    <h2 className="text-3xl font-display font-bold text-white">Vitality Score</h2>
+                    <p className="text-white/60 mt-2 text-sm font-mono">
+                      {getBiometricSignature()}
+                    </p>
+                  </div>
                 </div>
-            </Suspense>
-        </GlassCard>
+              </Suspense>
+             ) : (
+              <ChartEmptyState
+                message="We need a few synced days to calculate your Vitality Score."
+                actionLabel={guidanceActionLabel}
+                onAction={handleEmptyAction}
+              />
+             )}
+          </GlassCard>
 
       </motion.div>
       </div> {/* End of pull-to-refresh container */}

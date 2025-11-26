@@ -47,6 +47,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Setup Google OAuth Auth (unified for login + Fit access)
   setupAuth(app);
 
+  const healthHandler = async (_req: any, res: any) => {
+    try {
+      await storage.healthCheck();
+      res.json({
+        status: "ok",
+        uptime: process.uptime(),
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || "development",
+      });
+    } catch (error: any) {
+      console.error("[Health] check failed", error?.message || error);
+      res.status(500).json({
+        status: "error",
+        message: "Database check failed",
+        error: error?.message || "Unknown",
+      });
+    }
+  };
+
+  app.get("/health", healthHandler);
+  app.get("/api/health", healthHandler);
+
   // ============== AUTH ROUTES ==============
   app.get('/api/auth/user', async (req: any, res) => {
     try {

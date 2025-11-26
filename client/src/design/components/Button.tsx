@@ -1,7 +1,8 @@
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { tokens } from "@/design";
-import { ButtonHTMLAttributes, forwardRef } from "react";
+import { forwardRef } from "react";
+import { motion, type HTMLMotionProps } from "framer-motion";
 
 type ButtonTone = "primary" | "secondary" | "ghost";
 
@@ -58,20 +59,24 @@ const sizePadding: Record<SizeToken, string> = {
   lg: `${tokens.spacing.md} ${tokens.spacing.xl}`,
 };
 
+type MotionButtonAttributes = HTMLMotionProps<"button">;
+
 export interface DesignButtonProps
-  extends ButtonHTMLAttributes<HTMLButtonElement>,
+  extends Omit<MotionButtonAttributes, "tone" | "size" | "isSquare">,
     VariantProps<typeof buttonBase> {
   tone?: ButtonTone;
   size?: SizeToken;
   isSquare?: boolean;
 }
 
+const MotionButton = motion.button;
+
 export const DesignButton = forwardRef<HTMLButtonElement, DesignButtonProps>(
   ({ className, tone = "primary", size = "md", isSquare = false, style, type = "button", ...props }, ref) => {
     const toneConfig = toneStyles[tone];
 
     return (
-      <button
+      <MotionButton
         ref={ref}
         className={cn(buttonBase({ tone, size, isSquare }), className)}
         style={{
@@ -84,6 +89,9 @@ export const DesignButton = forwardRef<HTMLButtonElement, DesignButtonProps>(
         }}
         data-variant={tone}
         type={type}
+        whileTap={{ scale: 0.96 }}
+        whileHover={{ translateY: -2 }}
+        transition={{ type: "spring", stiffness: 500, damping: 30 }}
         {...props}
       />
     );
