@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { ChartSurface } from "@/components/ui/ChartSurface";
 
 interface VitalityOrbProps {
   score?: number;
@@ -21,7 +22,7 @@ export function VitalityOrb({ score = 0, hrv = 0, sleep = 0 }: VitalityOrbProps)
   const state = getState();
 
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center relative overflow-hidden rounded-3xl">
+    <ChartSurface className="h-full w-full flex flex-col items-center justify-center overflow-hidden" radius="2xl" padding="xl">
       <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent z-0" />
       
       <div className="relative z-10 w-full h-[200px] flex items-center justify-center">
@@ -64,6 +65,6 @@ export function VitalityOrb({ score = 0, hrv = 0, sleep = 0 }: VitalityOrbProps)
           {state.suggestion}
         </p>
       </div>
-    </div>
+    </ChartSurface>
   );
 }

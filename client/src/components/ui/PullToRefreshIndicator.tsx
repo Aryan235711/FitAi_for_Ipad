@@ -5,15 +5,18 @@ interface PullToRefreshIndicatorProps {
   pullDistance: number;
   isRefreshing: boolean;
   threshold: number;
+  errorMessage?: string | null;
 }
 
 export function PullToRefreshIndicator({
   pullDistance,
   isRefreshing,
   threshold,
+  errorMessage,
 }: PullToRefreshIndicatorProps) {
   const progress = Math.min(pullDistance / threshold, 1);
-  const isVisible = pullDistance > 0 || isRefreshing;
+  const hasError = Boolean(errorMessage);
+  const isVisible = pullDistance > 0 || isRefreshing || hasError;
 
   return (
     <motion.div
@@ -56,6 +59,15 @@ export function PullToRefreshIndicator({
           className="text-xs text-white/60 text-center mt-2 font-mono uppercase tracking-wider"
         >
           {progress >= 1 ? 'Release to sync' : 'Pull to sync'}
+        </motion.p>
+      )}
+      {hasError && (
+        <motion.p
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-xs text-rose-300 text-center mt-2 font-medium"
+        >
+          {errorMessage}
         </motion.p>
       )}
     </motion.div>

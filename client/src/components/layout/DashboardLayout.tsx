@@ -3,6 +3,8 @@ import { User, RefreshCw, LogOut, Loader2, Power } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useGoogleFit } from "@/hooks/useGoogleFit";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import { StatusChip } from "@/components/ui/StatusChip";
+import { DesignButton } from "@/design";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,7 +39,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
 
     if (!isConnected) {
       return {
-        color: "bg-rose-500",
+        tone: "danger" as const,
         label: "Google Fit disconnected",
         tooltip: "Connect Google Fit to start syncing data.",
       };
@@ -46,14 +48,14 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     if (hasSyncedData) {
       if (isSyncStale) {
         return {
-          color: "bg-amber-400",
+          tone: "warning" as const,
           label: relativeTime ? `Last sync ${relativeTime}` : "Data needs refresh",
           tooltip: "It's been more than a day since the last sync. Run a sync to keep insights fresh.",
         };
       }
 
       return {
-        color: "bg-emerald-400",
+        tone: "success" as const,
         label: relativeTime ? `Synced ${relativeTime}` : "Google Fit synced",
         tooltip: relativeTime
           ? `Last sync completed ${relativeTime}.`
@@ -62,7 +64,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
     }
 
     return {
-      color: "bg-sky-400",
+      tone: "info" as const,
       label: "Connected — waiting for first sync",
       tooltip: "Start a sync to import historical Google Fit data.",
     };
@@ -95,60 +97,64 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
         <Tooltip>
           <TooltipTrigger asChild>
-            <div
-              className="flex items-center gap-2 px-3 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 min-h-[44px] cursor-default"
+            <StatusChip
+              label={statusDetails.label}
+              tone={statusDetails.tone}
+              className="cursor-default select-none"
               aria-live="polite"
             >
-              <span
-                className={`h-2.5 w-2.5 rounded-full shadow-[0_0_10px] ${statusDetails.color}`}
-              />
-              <span className="text-xs font-medium text-white/80">
-                {statusDetails.label}
-              </span>
               {isConnected && (
-                <button
+                <DesignButton
                   type="button"
                   onClick={handleDisconnect}
                   disabled={isDisconnecting}
-                  className="ml-2 p-1 rounded-full bg-white/0 border border-transparent hover:bg-white/10 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary transition disabled:opacity-50"
+                  tone="ghost"
+                  size="sm"
+                  isSquare
                   aria-label="Disconnect Google Fit"
+                  className="ml-2 border border-transparent hover:border-white/30 min-h-0"
                 >
                   {isDisconnecting ? (
                     <Loader2 className="w-3.5 h-3.5 text-white/80 animate-spin" />
                   ) : (
                     <Power className="w-3.5 h-3.5 text-white/80" />
                   )}
-                </button>
+                </DesignButton>
               )}
-            </div>
+            </StatusChip>
           </TooltipTrigger>
           <TooltipContent side="bottom">
             {statusDetails.tooltip}
           </TooltipContent>
         </Tooltip>
 
-        <button 
+        <DesignButton
           onClick={handleSync}
           disabled={isSyncing}
-          className="group flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-primary/50 transition-all duration-500 disabled:opacity-50 min-h-[44px] min-w-[44px]"
+          tone={isConnected ? "secondary" : "primary"}
+          size="lg"
+          className="group gap-2 min-h-[44px] min-w-[44px] backdrop-blur-md"
           data-testid="button-sync-fit"
           aria-label={isConnected ? "Sync fitness data" : "Connect Google Fit"}
           aria-pressed={isSyncing}
         >
           {isSyncing ? (
-            <Loader2 className="w-4 h-4 text-primary animate-spin" />
+            <Loader2 className="w-4 h-4 text-white animate-spin" />
           ) : (
-            <RefreshCw className="w-4 h-4 text-primary group-hover:rotate-180 group-focus-within:rotate-180 transition-transform duration-700 ease-in-out" />
+            <RefreshCw className="w-4 h-4 text-white group-hover:rotate-180 group-focus-within:rotate-180 transition-transform duration-700 ease-in-out" />
           )}
-          <span className="text-xs font-medium text-white/80">
+          <span className="text-xs font-medium tracking-wide uppercase">
             {isConnected ? 'Sync Fit' : 'Connect Fit'}
           </span>
-        </button>
+        </DesignButton>
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button 
-              className="p-1 rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:border-white/30 transition-all duration-300 min-h-[44px] min-w-[44px]"
+            <DesignButton
+              tone="ghost"
+              size="md"
+              isSquare
+              className="p-1 bg-white/5 backdrop-blur-md border border-white/10 hover:border-white/40 min-h-[44px] min-w-[44px]"
               data-testid="button-profile"
               aria-label="User profile menu"
             >
@@ -165,7 +171,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
                   </div>
                 </div>
               )}
-            </button>
+            </DesignButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56 bg-black/95 backdrop-blur-xl border-white/10" align="end">
             <DropdownMenuLabel className="text-white">

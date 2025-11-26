@@ -98,6 +98,24 @@ Once deployed:
 ✅ **Fast loading** - Service worker caching  
 ✅ **iOS optimized** - Black translucent status bar  
 
+## 🚀 Deploy to Render (Great for personal use)
+
+Render closely matches Railway’s developer experience but gives you a predictable URL (`https://fitai-for-ipad.onrender.com`) and free SSL. Recommended steps:
+
+1. **Create service** → “Web Service” → connect your GitHub repo → choose `week1-design-tokens` (or `main`) branch.
+2. **Auto-deploys** → enable “Automatic deploys on Git push” so every merge ships to iPad automatically.
+3. **Environment variables** → add the same keys as Railway plus `PUBLIC_URL=https://<your-service>.onrender.com` (Render does *not* set it automatically).
+4. **Health checks** → point Render’s health probe to `/health` (new endpoint) for faster rollout detection.
+5. **Deploy** → Render runs `npm run build` + `npm start`. Confirm the logs show `[Google Auth] Callback URL: https://<service>/auth/google/callback`.
+
+You can also add a free PostgreSQL instance on Render, but using an external provider (Neon, Supabase) works fine—just update `DATABASE_URL`.
+
+### Health Checks & Monitoring
+
+- The server now exposes `GET /health` (and `/api/health`) returning `{ status: "ok", uptime, timestamp }` once the DB and session stack respond.
+- Connect this endpoint to Render’s health check, UptimeRobot, or any monitor so you know when the app goes offline.
+- Startup now validates required env vars (database, sessions, Google OAuth). Missing keys stop the boot early with a clear error so production deploys don’t silently fail.
+
 ### Alternative Deployment: Vercel (Frontend Only)
 
 To deploy on Vercel, you would need to:

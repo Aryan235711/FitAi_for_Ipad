@@ -8,6 +8,7 @@ import { nanoid } from "nanoid";
 import { createServer as createViteServer, createLogger } from "vite";
 
 import runApp from "./app";
+import { validateEnvironment } from "./utils/validateEnv";
 
 import viteConfig from "../vite.config";
 
@@ -62,5 +63,6 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 (async () => {
+  validateEnvironment();
   await runApp(setupVite);
 })();

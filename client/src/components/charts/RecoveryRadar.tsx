@@ -1,5 +1,6 @@
 import { ResponsiveContainer, ScatterChart, Scatter, XAxis, YAxis, ZAxis, Tooltip, Cell } from "recharts";
 import { memo } from "react";
+import { ChartSurface } from "@/components/ui/ChartSurface";
 
 interface RecoveryDataPoint {
   x: number;
@@ -16,7 +17,7 @@ function RecoveryRadarComponent({ data = [] }: RecoveryRadarProps) {
   const chartData = data.length > 0 ? data : [{ x: 0, y: 0, z: 60, name: 'No data' }];
 
   return (
-    <div className="h-full w-full min-h-[200px]">
+    <ChartSurface className="h-full w-full" minHeight="240px" padding="lg">
       <ResponsiveContainer width="100%" height="100%">
         <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
           <XAxis 
@@ -58,7 +59,7 @@ function RecoveryRadarComponent({ data = [] }: RecoveryRadarProps) {
           </Scatter>
         </ScatterChart>
       </ResponsiveContainer>
-    </div>
+    </ChartSurface>
   );
 }
 
