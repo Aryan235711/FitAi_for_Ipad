@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./googleAuth";
-import { getAuthUrl, fetchGoogleFitData, transformGoogleFitData } from "./googleFit";
+import { fetchGoogleFitData, transformGoogleFitData } from "./googleFit";
 import { generateDailyInsight } from "./aiInsights";
 import { insertFitnessMetricSchema, type InsertFitnessMetric, type FitnessMetric } from "@shared/schema";
 import { resolveBaseUrl } from "./utils/baseUrl";
@@ -66,16 +66,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ============== GOOGLE FIT ROUTES ==============
   
   // Initiate Google Fit OAuth flow
-  app.get('/api/google-fit/connect', isAuthenticated, async (req: any, res) => {
+  app.get('/api/google-fit/connect', isAuthenticated, async (_req: any, res) => {
     try {
-      const userId = req.user?.id;
-      const redirectUri = `${resolveBaseUrl()}/auth/google/callback`;
-      const authUrl = getAuthUrl(userId, redirectUri);
-      
-      console.log('[Google Fit Connect] Redirect URI:', redirectUri);
-      console.log('[Google Fit Connect] Auth URL:', authUrl);
-      
-      res.json({ authUrl, redirectUri });
+      const authUrl = `${resolveBaseUrl()}/auth/google`;
+      console.log('[Google Fit Connect] Using unified auth route:', authUrl);
+      res.json({ authUrl });
     } catch (error: any) {
       console.error("Error initiating Google Fit connection:", error);
       res.status(500).json({ message: error.message });

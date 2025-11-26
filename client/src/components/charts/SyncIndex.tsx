@@ -1,4 +1,5 @@
 import { CircularProgress } from "./CircularProgress";
+import { ChartSurface } from "@/components/ui/ChartSurface";
 
 interface SyncIndexProps {
   hrv?: number;
@@ -8,7 +9,7 @@ interface SyncIndexProps {
 
 export function SyncIndex({ hrv = 0, sleep = 0, recovery = 0 }: SyncIndexProps) {
   return (
-    <div className="grid grid-cols-3 gap-4 h-full items-center">
+    <ChartSurface className="grid grid-cols-3 gap-4 h-full items-center" padding="lg" minHeight="220px">
       <div className="flex flex-col items-center gap-2">
         <CircularProgress value={recovery} color="var(--color-primary)" label="REC" delay={0.2} />
         <span className="text-xs font-mono text-white/50 uppercase mt-2">Recovery</span>
@@ -21,6 +22,6 @@ export function SyncIndex({ hrv = 0, sleep = 0, recovery = 0 }: SyncIndexProps) 
         <CircularProgress value={sleep} color="var(--color-accent)" label="SLP" delay={0.6} />
         <span className="text-xs font-mono text-white/50 uppercase mt-2">Sleep</span>
       </div>
-    </div>
+    </ChartSurface>
   );
 }

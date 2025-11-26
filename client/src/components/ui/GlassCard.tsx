@@ -1,6 +1,9 @@
 import { cn } from "@/lib/utils";
-import { ReactNode } from "react";
-import { motion } from "framer-motion";
+import { ReactNode, CSSProperties } from "react";
+import { motion, type MotionProps } from "framer-motion";
+import { tokens } from "@/design";
+
+type MotionOverrides = Pick<MotionProps, "variants" | "initial" | "animate" | "exit" | "transition" | "whileInView" | "viewport">;
 
 interface GlassCardProps {
   children: ReactNode;
@@ -10,33 +13,65 @@ interface GlassCardProps {
   delay?: number;
   disableFloating?: boolean;
   "data-testid"?: string;
+  motionConfig?: MotionOverrides;
 }
 
-export function GlassCard({ children, className, title, subtitle, delay = 0, disableFloating = false, "data-testid": testId }: GlassCardProps) {
+export function GlassCard({ children, className, title, subtitle, delay = 0, disableFloating = false, motionConfig, "data-testid": testId }: GlassCardProps) {
+  const cardRadius = tokens.radii["2xl"];
+  const baseCardStyle: CSSProperties = {
+    padding: tokens.spacing.lg,
+    borderRadius: cardRadius,
+    background: tokens.glass.background,
+    border: tokens.glass.border,
+    backdropFilter: tokens.glass.blur,
+    boxShadow: tokens.glass.shadow,
+  };
+
+  const defaultInitial = { opacity: 0, y: 40, scale: 0.95 };
+  const defaultAnimate = { opacity: 1, y: 0, scale: 1 };
+  const defaultTransition = {
+    type: "spring" as const,
+    stiffness: 100,
+    damping: 20,
+    mass: 1,
+    delay,
+  };
+
+  const resolvedInitial =
+    motionConfig?.initial !== undefined
+      ? motionConfig.initial
+      : motionConfig?.variants
+        ? undefined
+        : defaultInitial;
+
+  const resolvedAnimate =
+    motionConfig?.animate !== undefined
+      ? motionConfig.animate
+      : motionConfig?.variants
+        ? undefined
+        : defaultAnimate;
+
+  const resolvedTransition = motionConfig?.transition ?? defaultTransition;
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
-      animate={{ 
-        opacity: 1, 
-        y: 0, 
-        scale: 1,
-      }}
-      transition={{ 
-        type: "spring",
-        stiffness: 100,
-        damping: 20,
-        mass: 1,
-        delay: delay,
-      }}
+      variants={motionConfig?.variants}
+      initial={resolvedInitial}
+      animate={resolvedAnimate}
+      exit={motionConfig?.exit}
+      transition={resolvedTransition}
+      whileInView={motionConfig?.whileInView}
+      viewport={motionConfig?.viewport}
       whileHover={{ 
         scale: 1.02,
         y: -4,
         transition: { type: "spring", stiffness: 400, damping: 25 }
       }}
       className={cn(
-        "glass rounded-3xl p-6 flex flex-col relative overflow-hidden group perspective-1000",
+        "flex flex-col relative overflow-hidden group perspective-1000",
         className
       )}
+      style={baseCardStyle}
       data-testid={testId}
       role="region"
       aria-label={title || "Card"}
@@ -56,14 +91,19 @@ export function GlassCard({ children, className, title, subtitle, delay = 0, dis
       )}
 
       {/* Liquid Hover Effect Background - iPad friendly */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-30 group-hover:opacity-100 transition-opacity duration-700" />
+      <div
+        className="absolute inset-0 bg-gradient-to-br from-white/[0.03] to-transparent opacity-30 group-hover:opacity-100 transition-opacity duration-700"
+        style={{ borderRadius: cardRadius }}
+      />
       
       {/* Animated Glow Border on Hover - iPad friendly */}
-      <div className="absolute inset-0 rounded-3xl opacity-20 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" 
+      <div
+        className="absolute inset-0 opacity-20 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         style={{
+          borderRadius: cardRadius,
           background: "linear-gradient(90deg, transparent, rgba(132,204,22,0.2), transparent)",
           backgroundSize: "200% 100%",
-          animation: "shimmer 3s linear infinite"
+          animation: "shimmer 3s linear infinite",
         }}
       />
       
@@ -75,7 +115,8 @@ export function GlassCard({ children, className, title, subtitle, delay = 0, dis
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: delay + 0.3, duration: 0.5 }}
-          className="mb-6 z-10 relative"
+          className="z-10 relative"
+          style={{ marginBottom: tokens.spacing.lg }}
         >
           {title && (
             <h3 className="text-lg font-display font-medium tracking-wide text-white/90 flex items-center gap-2">

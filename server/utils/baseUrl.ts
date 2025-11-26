@@ -16,6 +16,10 @@ export function resolveBaseUrl() {
     return sanitizeUrl(`https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`);
   }
 
+  if (process.env.RENDER_EXTERNAL_URL) {
+    return sanitizeUrl(process.env.RENDER_EXTERNAL_URL);
+  }
+
   const railwayDomain =
     process.env.RAILWAY_PUBLIC_DOMAIN ||
     process.env.RAILWAY_STATIC_URL ||

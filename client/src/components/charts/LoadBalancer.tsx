@@ -1,6 +1,7 @@
 import { ResponsiveContainer, ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { format, parseISO } from "date-fns";
 import { memo } from "react";
+import { ChartSurface } from "@/components/ui/ChartSurface";
 
 interface LoadBalancerDataPoint {
   date: string;
@@ -18,7 +19,7 @@ function LoadBalancerComponent({ data = [] }: LoadBalancerProps) {
   ];
 
   return (
-    <div className="h-full w-full min-h-[200px]">
+    <ChartSurface className="h-full w-full" minHeight="240px" padding="lg">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
           <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
@@ -70,7 +71,7 @@ function LoadBalancerComponent({ data = [] }: LoadBalancerProps) {
           />
         </ComposedChart>
       </ResponsiveContainer>
-    </div>
+    </ChartSurface>
   );
 }
 

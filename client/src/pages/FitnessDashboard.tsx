@@ -21,6 +21,7 @@ import {
   transformMindShieldData,
   calculateSyncIndexScores,
 } from "@/lib/chartData";
+import { variants } from "@/design";
 
 // Lazy Load Heavy Chart Components
 const RecoveryRadar = React.lazy(() => import("@/components/charts/RecoveryRadar").then(module => ({ default: module.RecoveryRadar })));
@@ -276,10 +277,17 @@ export default function FitnessDashboard() {
       </header>
 
       {/* Bento Grid Layout - iPad Optimized */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)] pb-8">
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)] pb-8"
+        variants={variants.stagger(0.08, 0.2)}
+        initial="hidden"
+        animate="show"
+        viewport={{ once: true, amount: 0.2 }}
+      >
         
         {/* 1. Sync Index (Score Tiles) */}
         <GlassCard 
+            motionConfig={{ variants: variants.fadeInUp("lg") }}
             className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-gradient-to-br from-white/[0.08] to-transparent" 
             title="The Sync Index" 
             subtitle="Composite Physiological Score"
@@ -292,6 +300,7 @@ export default function FitnessDashboard() {
 
         {/* 2. Key Metric - Readiness */}
         <GlassCard 
+          motionConfig={{ variants: variants.fadeInUp("md") }}
           className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" 
           delay={0.1}
         >
@@ -350,6 +359,7 @@ export default function FitnessDashboard() {
 
          {/* 3. Key Metric - Strain */}
          <GlassCard 
+           motionConfig={{ variants: variants.fadeInUp("md") }}
            className="col-span-1 row-span-1 flex flex-col justify-between group cursor-pointer" 
            delay={0.15}
          >
@@ -395,6 +405,7 @@ export default function FitnessDashboard() {
 
         {/* 4. Recovery Radar (3D Bubble) */}
         <GlassCard 
+          motionConfig={{ variants: variants.fadeInUp("lg") }}
             className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-2" 
             title="Recovery Radar" 
             subtitle="Workout Intensity vs Sleep vs RHR"
@@ -408,6 +419,7 @@ export default function FitnessDashboard() {
 
         {/* 5. Nerve Check (Dual Line) */}
         <GlassCard 
+          motionConfig={{ variants: variants.fadeInUp("lg") }}
             className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-2" 
             title="Nerve Check" 
             subtitle="HRV Trends & Sleep Consistency"
@@ -421,6 +433,7 @@ export default function FitnessDashboard() {
 
         {/* 6. Wellness Triangle (Radar) - Multi-dimensional Health Score */}
         <GlassCard 
+          motionConfig={{ variants: variants.fadeInUp("md") }}
             className="col-span-1 sm:col-span-2 md:col-span-2 lg:col-span-1 row-span-2" 
             title="Wellness Triangle" 
             subtitle="Holistic Health Dimensions"
@@ -434,6 +447,7 @@ export default function FitnessDashboard() {
 
         {/* 7. MindShield (Heatmap) */}
         <GlassCard 
+          motionConfig={{ variants: variants.fadeInUp("md") }}
             className="col-span-1 sm:col-span-2 md:col-span-1 lg:col-span-1 row-span-1 md:row-span-2" 
             title="MindShield" 
             subtitle="Sleep Consistency Map"
@@ -447,6 +461,7 @@ export default function FitnessDashboard() {
         
         {/* 8. Load Balancer (Bar + Line) */}
         <GlassCard 
+          motionConfig={{ variants: variants.fadeInUp("lg") }}
             className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-2" 
             title="Load Balancer" 
             subtitle="Strain vs Recovery Trends"
@@ -460,6 +475,7 @@ export default function FitnessDashboard() {
 
          {/* 9. Context Card - Daily AI Insight */}
          <GlassCard 
+          motionConfig={{ variants: variants.fadeInUp("lg") }}
             className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/20" 
             delay={0.6}
             data-testid="card-ai-insights"
@@ -517,6 +533,7 @@ export default function FitnessDashboard() {
 
         {/* 10. Vitality Orb with Biometric Signature */}
         <GlassCard 
+          motionConfig={{ variants: variants.fadeInUp("lg") }}
             className="col-span-1 sm:col-span-2 md:col-span-3 lg:col-span-2 row-span-1 bg-gradient-to-r from-black to-primary/5" 
             delay={0.7}
             data-testid="card-vitality-orb"
@@ -536,7 +553,7 @@ export default function FitnessDashboard() {
             </Suspense>
         </GlassCard>
 
-      </div>
+      </motion.div>
       </div> {/* End of pull-to-refresh container */}
     </DashboardLayout>
   );
