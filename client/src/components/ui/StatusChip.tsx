@@ -1,7 +1,7 @@
-import { ReactNode, CSSProperties, HTMLAttributes } from "react";
+import { ReactNode, CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { tokens } from "@/design";
-import { motion } from "framer-motion";
+import { motion, type HTMLMotionProps } from "framer-motion";
 
 const toneMap = {
   success: {
@@ -32,7 +32,7 @@ const toneMap = {
 
 type StatusTone = keyof typeof toneMap;
 
-interface StatusChipProps extends HTMLAttributes<HTMLDivElement> {
+interface StatusChipProps extends HTMLMotionProps<"div"> {
   label: string;
   tone?: StatusTone;
   className?: string;
@@ -69,7 +69,7 @@ export function StatusChip({
   };
 
   return (
-    <motion.div
+    <motion.div                                                 
       className={cn("inline-flex items-center gap-2", className)}
       style={chipStyle}
       aria-live={ariaLive}
