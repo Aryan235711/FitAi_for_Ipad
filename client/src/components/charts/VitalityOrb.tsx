@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { ChartSurface } from "@/components/ui/ChartSurface";
+// TEMPORARY CHANGE FOR ROLLBACK VALIDATION
 
 interface VitalityOrbProps {
   score?: number;
