@@ -1,0 +1,130 @@
+name: Auto Rollback (Safe)
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  parse-rollback-request:
+    if: |
+      github.event.issue.pull_request == null &&
+      contains(github.event.comment.body, '/rollback') &&
+      (github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'OWNER')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 20
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Parse rollback command
+        id: parse
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = context.payload.comment.body;
+            const match = body.match(/\/rollback\s+(\w+)\s+([a-f0-9]{7,40})/i);
+            if (match) {
+              const [, component, commit] = match;
+              core.setOutput('component', component);
+              core.setOutput('commit', commit);
+              core.setOutput('should_rollback', 'true');
+              core.info(`Parsed rollback request: ${component} -> ${commit}`);
+            } else {
+              core.setOutput('should_rollback', 'false');
+              core.info('Invalid rollback format. Use: /rollback ComponentName abc123f');
+            }
+
+      - name: Analyze rollback impact (dry run)
+        if: steps.parse.outputs.should_rollback == 'true'
+        id: analyze
+        run: |
+          COMPONENT="${{ steps.parse.outputs.component }}"
+          COMMIT="${{ steps.parse.outputs.commit }}"
+          npx tsx scripts/component-rollback.ts \
+            --component="$COMPONENT" \
+            --commit="$COMMIT" > rollback-analysis.txt
+          if grep -q "Files that would be rolled back" rollback-analysis.txt; then
+            echo "rollback_safe=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "rollback_safe=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create rollback PR
+        if: steps.analyze.outputs.rollback_safe == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMPONENT="${{ steps.parse.outputs.component }}"
+          COMMIT="${{ steps.parse.outputs.commit }}"
+          BRANCH="auto-rollback/${COMPONENT}-$(date +%s)"
+          git checkout -b "$BRANCH"
+          npx tsx scripts/component-rollback.ts \
+            --component="$COMPONENT" \
+            --commit="$COMMIT" \
+            --apply
+          git config user.name "Rollback Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          printf 'fix(%s): selective rollback to %s\n\nRequested by: @%s\nIssue: %s\n\n[auto-rollback]\n' \
+            "$COMPONENT" "$COMMIT" "${{ github.event.comment.user.login }}" "${{ github.event.issue.html_url }}" \
+            > rollback-commit-msg.txt
+          git commit -F rollback-commit-msg.txt
+          git push origin "$BRANCH"
+          {
+            echo "**Automated rollback requested by @${{ github.event.comment.user.login }}**"
+            echo
+            echo "Component: \`${COMPONENT}\`"
+            echo "Target commit: \`${COMMIT}\`"
+            echo "Original issue: ${{ github.event.issue.html_url }}"
+            echo
+            echo "## Files Changed"
+            cat rollback-analysis.txt
+            echo
+            echo "## Safety Checks"
+            echo "- ✅ Component validated"
+            echo "- ✅ Commit verified"
+            echo "- ✅ Files limited to approved directories"
+            echo "- ✅ Human approval required for merge"
+          } > pr-body.md
+          gh pr create \
+            --title "🔄 Auto Rollback: ${COMPONENT} to ${COMMIT}" \
+            --body-file pr-body.md \
+            --label "auto-rollback" \
+            --label "needs-review"
+
+      - name: Comment result
+        if: always()
+        uses: actions/github-script@v6
+        env:
+          ROLLBACK_COMPONENT: ${{ steps.parse.outputs.component || '' }}
+          ROLLBACK_COMMIT: ${{ steps.parse.outputs.commit || '' }}
+          ROLLBACK_VALID: ${{ steps.parse.outputs.should_rollback || 'false' }}
+          ROLLBACK_SAFE: ${{ steps.analyze.outputs.rollback_safe || 'false' }}
+        with:
+          script: |
+            const component = process.env.ROLLBACK_COMPONENT;
+            const commit = process.env.ROLLBACK_COMMIT;
+            const valid = process.env.ROLLBACK_VALID === 'true';
+            const safe = process.env.ROLLBACK_SAFE === 'true';
+            let body;
+            if (!valid) {
+              body = '❌ Invalid rollback command. Use `/rollback ComponentName abc123f`';
+            } else if (safe) {
+              body = `🔄 **Rollback PR Created**\n\nComponent: \`${component}\`\nTarget: \`${commit}\`\n\nA rollback PR has been created for review. **Do not merge without inspection.**`;
+            } else {
+              body = `❌ **Rollback Failed**\n\nComponent: \`${component}\`\nTarget: \`${commit}\`\n\nNo files matched or the dry-run detected an issue. Verify the component name and commit hash.`;
+            }
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });

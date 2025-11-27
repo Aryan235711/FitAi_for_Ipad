@@ -1,0 +1,90 @@
+name: Smart Baseline Update
+
+on:
+  issue_comment:
+    types: [created]
+
+jobs:
+  update-baselines:
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/update-baselines') &&
+      (github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'OWNER')
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: refs/pull/${{ github.event.issue.number }}/head
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+
+      - name: Update visual baselines
+        run: npm run test:visual:update
+
+      - name: Commit updated baselines
+        run: |
+          git config user.name "Baseline Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add e2e/__screenshots__/
+          if git diff --staged --quiet; then
+            echo "No baseline changes to commit"
+          else
+            git commit -m "chore: update visual baselines [approved by @${{ github.event.comment.user.login }}]"
+            git push
+          fi
+
+      - name: Comment success
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '✅ Visual baselines updated successfully!'
+            });
+
+  reject-baselines:
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/reject-baselines') &&
+      (github.event.comment.author_association == 'MEMBER' ||
+       github.event.comment.author_association == 'OWNER')
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Comment rejection
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const login = '${{ github.event.comment.user.login }}';
+            const body = [
+              `🚫 **Baseline changes rejected by @${login}**`,
+              '',
+              'Please investigate the visual changes and ensure they are intentional before updating baselines.',
+              '',
+              '**Next steps:**',
+              '1. Review the failing visual tests locally',
+              '2. Fix any unintended visual regressions',
+              '3. Comment `/update-baselines` when ready to approve'
+            ].join('\n');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });

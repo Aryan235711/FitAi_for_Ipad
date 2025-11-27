@@ -1,0 +1,33 @@
+name: Baseline Audit Log
+description: Track baseline approvals and rejections for weekly QA reviews
+labels: ["baseline-audit", "quality"]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Weekly Summary
+      description: Describe the overall health of baseline changes for this period.
+      placeholder: "No unexpected baseline updates. Two approvals for chart components."
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: audit_items
+    attributes:
+      label: Verification Checklist
+      options:
+        - label: All baseline approvals were intentional
+        - label: No false rejections occurred
+        - label: AI risk assessment matched reviewer expectations
+        - label: Team is satisfied with the current workflow
+    validations:
+      required: true
+
+  - type: textarea
+    id: actions
+    attributes:
+      label: Follow-up Actions
+      description: List any investigations, fixes, or documentation updates required.
+      placeholder: "Update VitalityOrb test docs with empty-state fallback."
+    validations:
+      required: false
