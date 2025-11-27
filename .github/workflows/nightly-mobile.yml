@@ -37,7 +37,7 @@ jobs:
 
       - name: Upload mobile test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: nightly-mobile-report
           path: playwright-report/
