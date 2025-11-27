@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, ApiError } from '@/lib/api';
+import { api, ApiError, type GoogleFitStatus } from '@/lib/api';
 import { toast } from 'sonner';
+import { getE2EState, isE2EMode } from '@/lib/e2eState';
 
 function getFriendlyErrorMessage(fallback: string, error: unknown) {
   if (error instanceof ApiError) {
@@ -24,6 +25,29 @@ function getFriendlyErrorMessage(fallback: string, error: unknown) {
 }
 
 export function useGoogleFit() {
+  if (isE2EMode) {
+    const overrides = getE2EState()?.googleFitStatus;
+    const defaultState: Partial<GoogleFitStatus> = {
+      connected: true,
+      hasSyncedData: true,
+      lastSyncedAt: new Date().toISOString(),
+    };
+    const status = { ...defaultState, ...overrides } as GoogleFitStatus;
+
+    return {
+      status,
+      isLoading: false,
+      isConnected: status.connected ?? false,
+      hasSyncedData: status.hasSyncedData ?? false,
+      lastSyncedAt: status.lastSyncedAt ?? null,
+      connect: () => void 0,
+      disconnect: () => void 0,
+      sync: () => void 0,
+      isSyncing: false,
+      isDisconnecting: false,
+    } as const;
+  }
+
   const queryClient = useQueryClient();
 
   const { data: status, isLoading } = useQuery({

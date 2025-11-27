@@ -75,6 +75,20 @@
   .text-glow {
     text-shadow: 0 0 20px currentColor;
   }
+
+  .min-h-screen-safe {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .h-screen-safe {
+    height: 100vh;
+    height: 100dvh;
+  }
+
+  .touch-pan-y {
+    touch-action: pan-y;
+  }
   
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
@@ -87,5 +101,14 @@
   }
   100% {
     background-position: 200% 0;
+  }
+}
+
+@keyframes vitality-orb-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }

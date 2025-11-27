@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, MotionConfig } from "framer-motion";
 import { ChartSurface } from "@/components/ui/ChartSurface";
 
 interface VitalityOrbProps {
@@ -22,49 +22,76 @@ export function VitalityOrb({ score = 0, hrv = 0, sleep = 0 }: VitalityOrbProps)
   const state = getState();
 
   return (
-    <ChartSurface className="h-full w-full flex flex-col items-center justify-center overflow-hidden" radius="2xl" padding="xl">
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent z-0" />
-      
-      <div className="relative z-10 w-full h-[200px] flex items-center justify-center">
-        <svg viewBox="0 0 200 200" className="w-full h-full drop-shadow-[0_0_30px_rgba(132,204,22,0.6)]">
-          <defs>
-            <linearGradient id="orbGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#ccff00" />
-              <stop offset="100%" stopColor="#00f0ff" />
-            </linearGradient>
-          </defs>
-          <g transform="translate(100 100)">
-            <motion.path
-              d={path1}
-              animate={{
-                d: [path1, path2, path1],
-                rotate: [0, 180, 360],
-                scale: [1, 1.1, 1]
-              }}
-              transition={{
-                duration: 10,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }}
-              fill="url(#orbGradient)"
-            />
-          </g>
-        </svg>
+    <MotionConfig reducedMotion="never">
+      <ChartSurface
+        className="h-full w-full flex flex-col items-center justify-center"
+        radius="2xl"
+        padding="xl"
+        data-testid="vitality-orb"
+      >
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent z-0" />
         
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span className="text-4xl font-display font-bold text-black mix-blend-overlay" data-testid="text-vitality-score">
-              {score || '--'}
-            </span>
-            <span className="text-[10px] font-mono text-black/60 uppercase tracking-widest mix-blend-overlay">Vitality</span>
+        <div className="relative z-10 w-full h-[200px] flex items-center justify-center">
+          <div
+            className="w-full h-full"
+            data-testid="vitality-orb-rotator"
+            style={{
+              animation: "vitality-orb-spin 18s linear infinite",
+              transformOrigin: "center center",
+            }}
+          >
+            <svg
+              viewBox="0 0 200 200"
+              className="w-full h-full drop-shadow-[0_0_30px_rgba(132,204,22,0.6)]"
+            >
+            <defs>
+              <linearGradient id="orbGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ccff00" />
+                <stop offset="100%" stopColor="#00f0ff" />
+              </linearGradient>
+            </defs>
+            <g transform="translate(100 100)">
+              <motion.path
+                d={path1}
+                animate={{
+                  d: [path1, path2, path1],
+                  scale: [1, 1.08, 1]
+                }}
+                transition={{
+                  duration: 10,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                fill="url(#orbGradient)"
+              />
+              <motion.circle
+                cx={32}
+                cy={-18}
+                r={3}
+                fill="rgba(255,255,255,0.9)"
+                data-testid="vitality-orb-indicator"
+                animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.25, 1] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              />
+            </g>
+            </svg>
+          </div>
+          
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-4xl font-display font-bold text-black mix-blend-overlay" data-testid="text-vitality-score">
+                {score || '--'}
+              </span>
+              <span className="text-[10px] font-mono text-black/60 uppercase tracking-widest mix-blend-overlay">Vitality</span>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-4 text-center z-10 px-4">
-        <h3 className="text-lg font-medium text-white mb-1">{state.label}</h3>
-        <p className="text-xs text-white/50 leading-relaxed">
-          {state.suggestion}
-        </p>
-      </div>
-    </ChartSurface>
+        <div className="mt-4 text-center z-10 px-4">
+          <h3 className="text-lg font-medium text-white mb-1">{state.label}</h3>
+          <p className="text-xs text-white/50 leading-relaxed">
+            {state.suggestion}
+          </p>
+        </div>
+      </ChartSurface>
+    </MotionConfig>
   );
 }

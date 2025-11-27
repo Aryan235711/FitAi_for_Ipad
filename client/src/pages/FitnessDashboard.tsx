@@ -13,7 +13,7 @@ import { PullToRefreshIndicator } from "@/components/ui/PullToRefreshIndicator";
 import { MetricTooltip } from "@/components/ui/MetricTooltip";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
-import { DesignButton } from "@/design";
+import { DesignButton } from "@/design/components/Button";
 import {
   transformRecoveryRadarData,
   transformNerveCheckData,
@@ -23,6 +23,7 @@ import {
   calculateSyncIndexScores,
 } from "@/lib/chartData";
 import { variants } from "@/design";
+import { FitnessMetric } from "@/lib/api";
 
 // Lazy Load Heavy Chart Components
 const RecoveryRadar = React.lazy(() => import("@/components/charts/RecoveryRadar").then(module => ({ default: module.RecoveryRadar })));
@@ -76,7 +77,8 @@ export default function FitnessDashboard() {
     isLoading, 
     readinessScore, 
     readinessChange,
-    strainScore 
+    strainScore,
+    error: metricsError,
   } = useFitnessData();
   
   const { sync, isSyncing, isConnected, connect, hasSyncedData } = useGoogleFit();
@@ -84,6 +86,7 @@ export default function FitnessDashboard() {
   const userName = user?.firstName || user?.email?.split('@')[0] || 'User';
   const [refreshError, setRefreshError] = React.useState<string | null>(null);
   const hasMetrics = metrics.length > 0;
+  const errorMessage = metricsError?.message ?? refreshError;
 
   const handleEmptyAction = () => {
     if (isConnected) {
@@ -155,12 +158,13 @@ export default function FitnessDashboard() {
   });
 
   // Transform data for charts
-  const recoveryRadarData = transformRecoveryRadarData(metrics);
-  const nerveCheckData = transformNerveCheckData(metrics);
-  const wellnessTriangleData = transformWellnessTriangleData(metrics);
-  const loadBalancerData = transformLoadBalancerData(metrics);
-  const mindShieldData = transformMindShieldData(metrics);
-  const syncIndexScores = calculateSyncIndexScores(metrics);
+  const recoveryRadarData = transformRecoveryRadarData(metrics as FitnessMetric[]);
+  const nerveCheckData = transformNerveCheckData(metrics as FitnessMetric[]);
+  const wellnessTriangleData = transformWellnessTriangleData(metrics as FitnessMetric[]);
+  const loadBalancerData = transformLoadBalancerData(metrics as FitnessMetric[]);
+  const mindShieldData = transformMindShieldData(metrics as FitnessMetric[]);
+  const syncIndexScores = calculateSyncIndexScores(metrics as FitnessMetric[]);
+
   
   // Calculate vitality score (combination of readiness and recovery)
   const vitalityScore = latestMetric 
@@ -335,6 +339,19 @@ export default function FitnessDashboard() {
         </div>
       </header>
 
+      {isLoading && (
+        <div className="mb-4 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 flex items-center gap-3" data-testid="state-loading">
+          <Loader2 className="w-4 h-4 animate-spin text-primary" />
+          <span>Loading your latest biometrics…</span>
+        </div>
+      )}
+
+      {errorMessage && (
+        <div className="mb-4 rounded-2xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-200" data-testid="state-error">
+          {errorMessage}
+        </div>
+      )}
+
       {guidanceMessage && (
         <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <span>{guidanceMessage}</span>
@@ -346,11 +363,12 @@ export default function FitnessDashboard() {
 
       {/* Bento Grid Layout - iPad Optimized */}
       <motion.div
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)] pb-8"
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 auto-rows-[minmax(180px,auto)] pb-8"
         variants={variants.stagger(0.08, 0.2)}
         initial="hidden"
         animate="show"
         viewport={{ once: true, amount: 0.2 }}
+        data-testid="dashboard-grid"
       >
         
         {/* 1. Sync Index (Score Tiles) */}
