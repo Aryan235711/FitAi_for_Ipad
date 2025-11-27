@@ -1,0 +1,50 @@
+name: Test Suite
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Analyze bundle size
+        run: |
+          npm run analyze:ci
+          node scripts/check-bundle-size.mjs
+
+      - name: Run unit tests
+        run: npm run test
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run desktop E2E tests
+        run: npx playwright test --project=chromium --project=webkit
+
+      - name: Run mobile E2E tests
+        run: npx playwright test e2e/mobile-interactions.spec.ts --project=mobile-safari --project=ipad-pro
+        env:
+          VITE_DISABLE_OVERLAY: true
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/

@@ -1,0 +1,10 @@
+# Default reviewers
+* @Aryan235711
+
+# Critical build + workflow files require review
+vite.config.ts @Aryan235711
+package.json @Aryan235711
+.github/workflows/ @Aryan235711
+scripts/ @Aryan235711
+client/index.html @Aryan235711
+client/src/components/layout/ @Aryan235711

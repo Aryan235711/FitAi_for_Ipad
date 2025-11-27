@@ -1,4 +1,4 @@
-import { ReactNode, CSSProperties } from "react";
+import { ReactNode, CSSProperties, HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import { tokens } from "@/design";
 import { motion } from "framer-motion";
@@ -32,7 +32,7 @@ const toneMap = {
 
 type StatusTone = keyof typeof toneMap;
 
-interface StatusChipProps {
+interface StatusChipProps extends HTMLAttributes<HTMLDivElement> {
   label: string;
   tone?: StatusTone;
   className?: string;
@@ -40,7 +40,14 @@ interface StatusChipProps {
   "aria-live"?: "off" | "polite" | "assertive";
 }
 
-export function StatusChip({ label, tone = "info", className, children, "aria-live": ariaLive }: StatusChipProps) {
+export function StatusChip({
+  label,
+  tone = "info",
+  className,
+  children,
+  "aria-live": ariaLive,
+  ...rest
+}: StatusChipProps) {
   const palette = toneMap[tone];
 
   const chipStyle: CSSProperties = {
@@ -68,6 +75,7 @@ export function StatusChip({ label, tone = "info", className, children, "aria-li
       aria-live={ariaLive}
       whileTap={{ scale: 0.95 }}
       transition={{ type: "spring", stiffness: 600, damping: 35 }}
+      {...rest}
     >
       <span className="rounded-full" style={dotStyle} />
       <span className="tracking-[0.08em] uppercase whitespace-nowrap">{label}</span>

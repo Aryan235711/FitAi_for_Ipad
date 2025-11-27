@@ -5,10 +5,45 @@ import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 import { metaImagesPlugin } from "./vite-plugin-meta-images";
 
+const vendorChunkRules: Array<{ name: string; matchers: RegExp[] }> = [
+  {
+    name: "vendor-react",
+    matchers: [/node_modules\/(react|react-dom|scheduler)\//, /node_modules\/wouter\//],
+  },
+  {
+    name: "vendor-query",
+    matchers: [/node_modules\/(@tanstack|react-query)\//],
+  },
+  {
+    name: "vendor-motion",
+    matchers: [/node_modules\/framer-motion\//],
+  },
+  {
+    name: "vendor-charts",
+    matchers: [/node_modules\/(recharts|recharts-scale)\//],
+  },
+  {
+    name: "vendor-icons",
+    matchers: [/node_modules\/lucide-react\//],
+  },
+];
+
+const matchVendorChunk = (id: string) => {
+  if (!id.includes("node_modules")) return null;
+  for (const rule of vendorChunkRules) {
+    if (rule.matchers.some((matcher) => matcher.test(id))) {
+      return rule.name;
+    }
+  }
+  return "vendor-misc";
+};
+
+const enableRuntimeOverlay = process.env.VITE_DISABLE_OVERLAY !== "true";
+
 export default defineConfig({
   plugins: [
     react(),
-    runtimeErrorOverlay(),
+    ...(enableRuntimeOverlay ? [runtimeErrorOverlay()] : []),
     tailwindcss(),
     metaImagesPlugin(),
     ...(process.env.NODE_ENV !== "production" &&
@@ -39,6 +74,11 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => matchVendorChunk(id) ?? undefined,
+      },
+    },
   },
   server: {
     host: "0.0.0.0",

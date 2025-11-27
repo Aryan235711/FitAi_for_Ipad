@@ -4,7 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useGoogleFit } from "@/hooks/useGoogleFit";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { StatusChip } from "@/components/ui/StatusChip";
-import { DesignButton } from "@/design";
+import { DesignButton } from "@/design/components/Button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +13,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import bgImage from "@assets/generated_images/abstract_dark_neon_gradient_background_for_fitness_app.png";
 import { formatDistanceToNow } from "date-fns";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
@@ -79,20 +78,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen w-full bg-background text-foreground overflow-hidden relative font-sans selection:bg-primary/30">
-      {/* Background Image Layer */}
-      <div 
-        className="absolute inset-0 z-0 opacity-60 pointer-events-none"
-        style={{
-            backgroundImage: `url(${bgImage})`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-        }}
-      />
-      
-      {/* Radial Gradient Overlay for depth */}
-      <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-background/50 to-background pointer-events-none" />
-
+    <div className="min-h-screen-safe w-full bg-background text-foreground overflow-hidden relative font-sans selection:bg-primary/30">
       {/* Top Right Controls */}
       <div className="absolute top-6 right-6 z-50 flex items-center gap-3">
         <Tooltip>
@@ -102,6 +88,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               tone={statusDetails.tone}
               className="cursor-default select-none"
               aria-live="polite"
+              data-testid="chip-sync-status"
             >
               {isConnected && (
                 <DesignButton
@@ -191,8 +178,8 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
       </div>
 
       {/* Main Content */}
-      <main className="relative z-10 h-screen overflow-y-auto scrollbar-hide p-4 md:p-8 lg:p-12">
-        <div className="max-w-[1600px] mx-auto h-full flex flex-col">
+      <main className="relative z-10 min-h-screen-safe overflow-y-auto overscroll-contain scrollbar-hide p-4 md:p-8 lg:p-12 touch-pan-y">
+        <div className="max-w-[1600px] mx-auto flex flex-col min-h-full">
             {children}
         </div>
       </main>
