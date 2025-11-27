@@ -1,0 +1,43 @@
+name: Nightly Mobile Tests
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  extended-mobile:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Run full mobile tests (Safari)
+        run: npx playwright test --project=mobile-safari
+        env:
+          VITE_DISABLE_OVERLAY: true
+
+      - name: Run full mobile tests (iPad)
+        run: npx playwright test --project=ipad-pro
+        env:
+          VITE_DISABLE_OVERLAY: true
+
+      - name: Upload mobile test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-mobile-report
+          path: playwright-report/

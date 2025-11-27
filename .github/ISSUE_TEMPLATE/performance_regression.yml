@@ -1,0 +1,43 @@
+name: Performance regression
+description: Report bundle-size or runtime regressions
+labels: [performance]
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      placeholder: Main bundle jumped to 220 KB gzipped
+    validations:
+      required: true
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Metrics
+      description: Provide before/after bundle sizes, LCP, CLS, or FPS numbers.
+      placeholder: |
+        Before: main bundle 5.7 KB gz
+        After: main bundle 42 KB gz
+        Device/network: iPad Pro / Fast 3G
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Steps + build URLs to reproduce the regression.
+    validations:
+      required: true
+  - type: textarea
+    id: suspected
+    attributes:
+      label: Suspected change
+      description: Link to commit/PR or describe the area of code affected.
+    validations:
+      required: false
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Temporary mitigation
+      description: Any workarounds or toggles that reduce the impact.
+    validations:
+      required: false
