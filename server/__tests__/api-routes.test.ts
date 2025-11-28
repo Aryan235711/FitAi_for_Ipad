@@ -12,6 +12,7 @@ const storageMocks = vi.hoisted(() => ({
   getGoogleFitToken: vi.fn().mockResolvedValue({
     userId: 'user-123',
     accessToken: 'access-token',
+    refreshToken: 'test-refresh-token',
     expiresAt: new Date(Date.now() + 60_000),
   }),
   saveGoogleFitToken: vi.fn(),
@@ -119,6 +120,28 @@ describe('API Routes', () => {
       success: false,
       errorType: 'StaleRefreshToken',
     });
+  });
+
+  it('returns 400 with friendly message when refresh token is missing from storage', async () => {
+    storageMocks.getGoogleFitToken.mockResolvedValueOnce({
+      userId: 'user-no-refresh',
+      accessToken: 'access-token',
+      expiresAt: new Date(Date.now() + 60_000),
+      // No refreshToken
+    });
+
+    const response = await request(app)
+      .post('/api/google-fit/sync')
+      .set('x-test-user', 'user-no-refresh')
+      .send({ startDate: '2024-01-01', endDate: '2024-01-05' });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toMatchObject({
+      success: false,
+      message: 'Google Fit: refresh token missing',
+      errorType: 'MissingRefreshToken',
+    });
+    expect(fetchGoogleFitDataMock).not.toHaveBeenCalled();
   });
 
   it('saves transformed Google Fit metrics on successful sync', async () => {
