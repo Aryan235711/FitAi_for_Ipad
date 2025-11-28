@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 5000;
+const PORT = Number(process.env.VITE_PORT ?? 5173);
 const BASE_URL = `http://localhost:${PORT}`;
 
 export default defineConfig({
@@ -40,7 +40,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "cross-env VITE_E2E_BYPASS_AUTH=true VITE_DISABLE_OVERLAY=true npm run dev:client",
+    command: "cross-env VITE_PORT=5173 VITE_E2E_BYPASS_AUTH=true VITE_DISABLE_OVERLAY=true npm run dev:client",
     url: BASE_URL,
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

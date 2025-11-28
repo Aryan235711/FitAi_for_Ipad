@@ -1,6 +1,7 @@
 import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, Tooltip } from "recharts";
 import { memo } from "react";
 import { ChartSurface } from "@/components/ui/ChartSurface";
+import "./triangle-effects.css";
 
 interface WellnessData {
   subject: string;
@@ -21,7 +22,7 @@ function WellnessTriangleComponent({ data = [] }: WellnessTriangleProps) {
   ];
 
   return (
-    <ChartSurface className="h-full w-full" minHeight="240px" padding="lg">
+    <ChartSurface className="h-full w-full wellness-triangle-animated" minHeight="240px" padding="lg">
       <ResponsiveContainer width="100%" height="100%">
         <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
           <PolarGrid stroke="rgba(132,204,22,0.2)" strokeWidth={1.5} />

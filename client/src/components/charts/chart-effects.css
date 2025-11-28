@@ -1,0 +1,19 @@
+.vitality-orb-animated {
+  animation: vitality-orb-spin 18s linear infinite;
+  transform-origin: center center;
+}
+
+@keyframes vitality-orb-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #root .vitality-orb-animated {
+    animation: none !important;
+  }
+}

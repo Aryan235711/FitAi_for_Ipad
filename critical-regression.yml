@@ -1,0 +1,38 @@
+name: "🚨 Critical Regression - Rollback Request"
+description: "Report a critical production regression and request an emergency component rollback."
+title: "CRITICAL: Regression in [Component Name]"
+labels: ["critical-regression", "bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **This form is for reporting critical, user-impacting regressions in production that require an immediate rollback.**
+        
+        Fill out the details below. Once submitted, an authorized repository member can trigger the rollback by commenting `/rollback ComponentName commit_hash` on this issue.
+
+  - type: input
+    id: component-name
+    attributes:
+      label: "Component Name"
+      description: "The exact, case-sensitive name of the component that is broken (e.g., `VitalityOrb`)."
+      placeholder: "VitalityOrb"
+    validations:
+      required: true
+
+  - type: input
+    id: last-good-commit
+    attributes:
+      label: "Last-Good Commit Hash"
+      description: "The 7-40 character commit hash of the last known working state for this component."
+      placeholder: "abc123f"
+    validations:
+      required: true
+
+  - type: textarea
+    id: impact-description
+    attributes:
+      label: "Impact Description"
+      description: "Briefly describe how this regression is affecting users."
+      placeholder: "The VitalityOrb is not animating, causing confusion about the vitality score."
+    validations:
+      required: true

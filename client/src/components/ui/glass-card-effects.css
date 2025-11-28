@@ -1,0 +1,20 @@
+.glass-card-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(132, 204, 22, 0.2), transparent);
+  background-size: 200% 100%;
+  animation: glass-card-shimmer 3s linear infinite;
+}
+
+@keyframes glass-card-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-card-shimmer {
+    animation: none;
+  }
+}

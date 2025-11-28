@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import { memo } from "react";
+import { memo, CSSProperties } from "react";
+import "./heatmap-effects.css";
 
 interface MindShieldDataPoint {
   day: string;
@@ -23,7 +24,7 @@ function MindShieldComponent({ data = [] }: MindShieldProps) {
   };
 
   return (
-    <div className="h-full w-full flex flex-col justify-center">
+    <div className="h-full w-full flex flex-col justify-center mind-shield-animated">
       <div className="grid grid-cols-7 gap-2 w-full">
         {heatmapData.map((item, i) => (
           <div 
@@ -32,9 +33,10 @@ function MindShieldComponent({ data = [] }: MindShieldProps) {
           >
             <div 
               className={cn(
-                "w-full h-full transition-all duration-300 group-hover:scale-110 group-focus-within:scale-110",
+                "w-full h-full transition-all duration-300 group-hover:scale-110 group-focus-within:scale-110 mind-shield-cell",
                 getColor(item.value)
-              )} 
+              )}
+              style={{ "--cell-index": i } as CSSProperties}
             />
             <div className="absolute inset-0 flex items-center justify-center opacity-60 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
                <span className="text-[10px] font-bold text-white drop-shadow-lg">{item.value}</span>

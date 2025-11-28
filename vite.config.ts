@@ -39,6 +39,17 @@ const matchVendorChunk = (id: string) => {
 };
 
 const enableRuntimeOverlay = process.env.VITE_DISABLE_OVERLAY !== "true";
+const explicitHmrHost = process.env.VITE_HMR_HOST;
+const explicitHmrPort = process.env.VITE_HMR_PORT ? Number(process.env.VITE_HMR_PORT) : 443;
+const replitHost =
+  process.env.REPL_SLUG && process.env.REPL_OWNER
+    ? `${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`
+    : undefined;
+const remoteHmrConfig = explicitHmrHost
+  ? { protocol: "wss", host: explicitHmrHost, clientPort: explicitHmrPort }
+  : process.env.REPL_ID && replitHost
+    ? { protocol: "wss", host: replitHost, clientPort: 443 }
+    : undefined;
 
 export default defineConfig({
   plugins: [
@@ -64,6 +75,7 @@ export default defineConfig({
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
     },
+    dedupe: ["react", "react-dom"],
   },
   css: {
     postcss: {
@@ -77,12 +89,23 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => matchVendorChunk(id) ?? undefined,
+        assetFileNames: (assetInfo) => {
+          const name = assetInfo.name ?? "";
+          if (name.includes("chart-effects")) {
+            return "assets/charts-[hash][extname]";
+          }
+          if (name.endsWith(".css")) {
+            return "assets/styles/[name]-[hash][extname]";
+          }
+          return "assets/[name]-[hash][extname]";
+        },
       },
     },
   },
   server: {
     host: "0.0.0.0",
     allowedHosts: true,
+    hmr: remoteHmrConfig,
     fs: {
       strict: true,
       deny: ["**/.*"],

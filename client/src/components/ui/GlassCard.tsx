@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import { ReactNode, CSSProperties } from "react";
 import { motion, type MotionProps } from "framer-motion";
 import { tokens } from "@/design";
+import "./glass-card-effects.css";
 
 type MotionOverrides = Pick<MotionProps, "variants" | "initial" | "animate" | "exit" | "transition" | "whileInView" | "viewport">;
 
@@ -103,13 +104,8 @@ export function GlassCard({ children, className, title, subtitle, delay = 0, dis
       
       {/* Animated Glow Border on Hover - iPad friendly */}
       <div
-        className="absolute inset-0 opacity-20 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-        style={{
-          borderRadius: cardRadius,
-          background: "linear-gradient(90deg, transparent, rgba(132,204,22,0.2), transparent)",
-          backgroundSize: "200% 100%",
-          animation: "shimmer 3s linear infinite",
-        }}
+        className="absolute inset-0 opacity-20 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none glass-card-shimmer"
+        style={{ borderRadius: cardRadius }}
       />
       
       {/* Top Highlight Line - iPad friendly */}

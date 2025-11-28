@@ -38,6 +38,21 @@ export async function setupVite(app: Express, server: Server) {
   app.use(vite.middlewares);
   app.use("*", async (req, res, next) => {
     const url = req.originalUrl;
+    const acceptsHtml = req.headers.accept?.includes("text/html") ?? false;
+    const isApiRequest = url.startsWith("/api") || url.startsWith("/auth");
+    const isAssetRequest = Boolean(path.extname(url)) && !url.endsWith(".html");
+    const shouldHandleHtml = acceptsHtml || url === "/" || url.endsWith(".html");
+
+    if (
+      req.method !== "GET" ||
+      isApiRequest ||
+      isAssetRequest ||
+      !shouldHandleHtml
+    ) {
+      return next();
+    }
+
+    viteLogger.info(`[dev-html] transform ${url}`);
 
     try {
       const clientTemplate = path.resolve(

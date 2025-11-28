@@ -4,7 +4,7 @@
   "type": "module",
   "license": "MIT",
   "scripts": {
-    "dev:client": "vite dev --port 5000",
+    "dev:client": "vite dev",
     "dev": "cross-env NODE_ENV=development tsx server/index-dev.ts --host 0.0.0.0",
     "build": "vite build && esbuild server/index-prod.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/index.js",
     "start": "cross-env NODE_ENV=production node dist/index.js",
@@ -14,8 +14,19 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:visual": "playwright test e2e/visual-regression.spec.ts --project=chromium",
+    "test:visual:update": "playwright test e2e/visual-regression.spec.ts --update-snapshots --project=chromium",
+    "bundle:check": "npm run analyze:ci && node scripts/check-bundle-size.mjs",
+    "ci:baseline": "npm run test:visual && npm run bundle:check",
+    "ai:analyze": "npx tsx scripts/ai-regression-detector.ts",
+    "ai:pr-impact": "bash ./scripts/analyze-pr-impact.sh",
+    "smart:test": "npx tsx scripts/smart-test-runner.ts",
+    "ci:smart-test": "npm run smart:test",
     "test:e2e:ui": "playwright test --ui",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "rollback:analyze": "npx tsx scripts/component-rollback.ts",
+    "rollback:quick": "bash ./scripts/quick-recover.sh",
+    "rollback:help": "npx tsx scripts/component-rollback.ts --help"
   },
   "notes": "removed framer motion dependency",
   "dependencies": {
@@ -96,6 +107,7 @@
     "@replit/vite-plugin-dev-banner": "^0.1.1",
     "@replit/vite-plugin-runtime-error-modal": "^0.0.3",
     "@squoosh/cli": "^0.7.1",
+    "@tailwindcss/cli": "^4.1.17",
     "@tailwindcss/postcss": "^4.1.17",
     "@tailwindcss/vite": "^4.1.14",
     "@testing-library/jest-dom": "^6.6.3",

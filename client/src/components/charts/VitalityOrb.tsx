@@ -1,5 +1,6 @@
 import { motion, MotionConfig } from "framer-motion";
 import { ChartSurface } from "@/components/ui/ChartSurface";
+import "./chart-effects.css";
 
 interface VitalityOrbProps {
   score?: number;
@@ -33,12 +34,8 @@ export function VitalityOrb({ score = 0, hrv = 0, sleep = 0 }: VitalityOrbProps)
         
         <div className="relative z-10 w-full h-[200px] flex items-center justify-center">
           <div
-            className="w-full h-full"
+            className="w-full h-full vitality-orb-animated"
             data-testid="vitality-orb-rotator"
-            style={{
-              animation: "vitality-orb-spin 18s linear infinite",
-              transformOrigin: "center center",
-            }}
           >
             <svg
               viewBox="0 0 200 200"

@@ -28,6 +28,12 @@
 - [ ] **Telemetry Hooks** (6h) - Web Vitals + custom logs
 - **Progress:** 0/4 ✅ **Score:** 8/10 → Target: 9/10
 
+### Phase 2 CSS Optimization Plan
+- [x] Tailwind content configuration + safelist for purge-ready builds
+- [ ] Extract chart-specific animations into lazy-loaded CSS entry
+- [ ] Split dashboard vs auth utility layers (critical vs async)
+- [ ] Revisit inline critical CSS after module splits to keep <10KB gzipped
+
 ## Week 5-6: Delight Features (Target: 7.5→9/10 overall)
 - [ ] **Auto Sync Scheduling** (8h)
 - [ ] **Privacy Dashboard** (10h)

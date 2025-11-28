@@ -38,3 +38,18 @@ Accepted types: `feat`, `fix`, `perf`, `build`, `test`, `docs`, `refactor`,
 Document bundle sizes, LCP/regression notes, and notable perf wins in the
 GitHub Release notes so stakeholders see the impact without digging through
 the commit history.
+
+## Critical Script Modifications
+
+Automation scripts in the `scripts/` directory (for example
+`scripts/component-rollback.ts`, `scripts/baseline-analyzer.ts`, CI helpers)
+enforce safety guarantees across the regression-prevention system. Any change
+to these files **must** include corresponding test updates in
+`scripts/__tests__/`.
+
+Pull requests touching these scripts are expected to:
+- Update or add Vitest coverage demonstrating the new behavior
+- Explain the safety impact in the PR description
+- Keep dry-run defaults intact unless a reviewer signs off on a change
+
+This policy prevents regressions in the rollback, baseline, and AI workflows.
