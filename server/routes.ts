@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { createHmac } from "crypto";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./googleAuth";
 import { fetchGoogleFitData, transformGoogleFitData } from "./googleFit";
@@ -140,6 +141,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user?.id;
       const { startDate, endDate } = req.body;
 
+      // Early validation: check if user has a valid Google Fit token
+      const tokenData = await storage.getGoogleFitToken(userId);
+      if (!tokenData?.refreshToken) {
+        return res.status(400).json({
+          success: false,
+          message: 'Google Fit: refresh token missing',
+          errorType: 'MissingRefreshToken',
+        });
+      }
+
       // Default to last 30 days if not specified
       const end = endDate || new Date().toISOString().split('T')[0];
       const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -255,6 +266,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       console.error("Error marking insight as read:", error);
       res.status(500).json({ message: error.message });
+    }
+  });
+
+  // ============== CSRF TOKEN ROUTE ==============
+  app.get('/api/csrf/token', (req: any, res) => {
+    try {
+      // Generate a simple CSRF token using session ID and timestamp
+      const sessionId = req.sessionID || 'anonymous';
+      const timestamp = Date.now();
+      const secret = process.env.CSRF_SECRET || process.env.SESSION_SECRET;
+      
+      if (!secret) {
+        console.error('[CSRF] No CSRF_SECRET or SESSION_SECRET configured');
+        return res.status(500).json({ error: 'Failed to generate CSRF token' });
+      }
+      
+      // Create a simple hash-based token
+      const token = createHmac('sha256', secret)
+        .update(`${sessionId}-${timestamp}`)
+        .digest('hex');
+      
+      res.status(200).json({ token });
+    } catch (err: any) {
+      console.error('[CSRF] token generation failed:', err?.message ?? err);
+      res.status(500).json({ error: 'Failed to generate CSRF token' });
     }
   });
 
