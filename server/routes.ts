@@ -1,5 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import { createHmac } from "crypto";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./googleAuth";
 import { fetchGoogleFitData, transformGoogleFitData } from "./googleFit";
@@ -274,12 +275,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate a simple CSRF token using session ID and timestamp
       const sessionId = req.sessionID || 'anonymous';
       const timestamp = Date.now();
-      const secret = process.env.CSRF_SECRET || process.env.SESSION_SECRET || 'default-csrf-secret';
+      const secret = process.env.CSRF_SECRET || process.env.SESSION_SECRET;
+      
+      if (!secret) {
+        console.error('[CSRF] No CSRF_SECRET or SESSION_SECRET configured');
+        return res.status(500).json({ error: 'Failed to generate CSRF token' });
+      }
       
       // Create a simple hash-based token
-      const crypto = require('crypto');
-      const token = crypto
-        .createHmac('sha256', secret)
+      const token = createHmac('sha256', secret)
         .update(`${sessionId}-${timestamp}`)
         .digest('hex');
       
